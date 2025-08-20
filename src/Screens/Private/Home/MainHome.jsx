@@ -1,0 +1,380 @@
+import React, {useRef, useEffect} from 'react';
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  TouchableOpacity,
+  ScrollView,
+  FlatList,
+  Dimensions,
+  Animated,
+} from 'react-native';
+import {COLOR} from '../../../Constants/Colors';
+import {windowWidth} from '../../../Constants/Dimensions';
+import HomeHeader from '../../../Components/HomeHeader';
+
+const {width} = Dimensions.get('window');
+
+const MainHome = ({navigation}) => {
+  const categories = [
+    {
+      title: 'Salons',
+      icon: 'https://cdn-icons-png.flaticon.com/128/1057/1057317.png',
+    },
+    {
+      title: 'Healthcare',
+      icon: 'https://cdn-icons-png.flaticon.com/128/2382/2382461.png',
+    },
+    {
+      title: 'Spa',
+      icon: 'https://cdn-icons-png.flaticon.com/128/5732/5732044.png',
+    },
+    {
+      title: 'Pet Clinic',
+      icon: 'https://cdn-icons-png.flaticon.com/128/616/616408.png',
+    },
+    {
+      title: 'Automotive Car',
+      icon: 'https://cdn-icons-png.flaticon.com/128/741/741407.png',
+    },
+    {
+      title: 'Retail/Designer',
+      icon: 'https://cdn-icons-png.flaticon.com/128/18302/18302431.png',
+    },
+    {
+      title: 'Tattoo &v Piercing',
+      icon: 'https://cdn-icons-png.flaticon.com/128/2678/2678993.png',
+    },
+  ];
+
+  const bookings = [
+    {
+      id: '1',
+      vendor: 'Glamour Salon',
+      services: 'Haircut, Facial',
+      price: '₹1200',
+      date: '20 Aug 2025, 3:00 PM',
+      address: '123 Street, Jaipur',
+      phone: '+91 9876543210',
+    },
+    {
+      id: '2',
+      vendor: 'HealthCare Plus',
+      services: 'General Checkup',
+      price: '₹500',
+      date: '22 Aug 2025, 10:30 AM',
+      address: '45 Mall Road, Delhi',
+      phone: '+91 9123456789',
+    },
+  ];
+
+  const banners = [
+    'https://images.pexels.com/photos/3997985/pexels-photo-3997985.jpeg',
+    'https://images.pexels.com/photos/853427/pexels-photo-853427.jpeg',
+    'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg',
+  ];
+
+  // Auto-scroll logic
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const scrollRef = useRef(null);
+  useEffect(() => {
+    let index = 0;
+    const interval = setInterval(() => {
+      index = (index + 1) % banners.length;
+      scrollRef.current?.scrollTo({x: index * width, animated: true});
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 1.15,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    pulse.start();
+  }, []);
+  return (
+    <View style={styles.container}>
+      {/* Header */}
+      <HomeHeader
+        title="QuickMySlot"
+        leftIcon="https://cdn-icons-png.flaticon.com/128/535/535239.png"
+        rightIcon="https://cdn-icons-png.flaticon.com/128/17446/17446833.png"
+        leftTint={COLOR.primary}
+      />
+      <Animated.View style={[styles.fab, {transform: [{scale: scaleAnim}]}]}>
+        <TouchableOpacity onPress={() => navigation.navigate('Offers')}>
+          <Image
+            source={{
+              uri: 'https://cdn-icons-png.flaticon.com/128/8829/8829209.png',
+            }}
+            style={styles.fabIcon}
+          />
+        </TouchableOpacity>
+      </Animated.View>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Search Bar */}
+        <View style={styles.searchBar}>
+          <Image
+            source={{
+              uri: 'https://cdn-icons-png.flaticon.com/128/2811/2811806.png',
+            }}
+            style={styles.searchIcon}
+          />
+          <TextInput
+            placeholderTextColor={COLOR.lightGrey}
+            placeholder="Search for services..."
+            style={styles.searchInput}
+          />
+        </View>
+
+        <Text style={styles.sectionTitle}>My Bookings</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {bookings.map(item => (
+            <View key={item.id} style={styles.bookingCard}>
+              <Text style={styles.bookingVendor}>{item.vendor}</Text>
+              <Text style={styles.bookingText}>
+                Services:{' '}
+                <Text style={styles.bookingHighlight}>{item.services}</Text>
+              </Text>
+              <Text style={styles.bookingText}>
+                Price: <Text style={styles.bookingHighlight}>{item.price}</Text>
+              </Text>
+              <Text style={styles.bookingText}>
+                Date: <Text style={styles.bookingHighlight}>{item.date}</Text>
+              </Text>
+              <Text style={styles.bookingText}>Address: {item.address}</Text>
+              <Text style={styles.bookingText}>
+                Phone: <Text style={styles.bookingHighlight}>{item.phone}</Text>
+              </Text>
+            </View>
+          ))}
+        </ScrollView>
+
+        {/* Auto-scroll Banner */}
+        <View style={{marginVertical: 20}}>
+          <ScrollView
+            ref={scrollRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onScroll={Animated.event(
+              [{nativeEvent: {contentOffset: {x: scrollX}}}],
+              {useNativeDriver: false},
+            )}
+            scrollEventThrottle={16}>
+            {banners.map((img, index) => (
+              <Image
+                key={index}
+                source={{uri: img}}
+                style={styles.bannerImage}
+              />
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Service Categories */}
+        <Text style={styles.sectionTitle}>Service Categories</Text>
+        <View style={styles.categories}>
+          {categories.map((item, index) => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('SearchServices')}
+              key={index}
+              style={styles.categoryCard}>
+              <Image source={{uri: item.icon}} style={styles.categoryIcon} />
+              <Text style={styles.categoryText}>{item.title}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        <View style={{marginVertical: 20}}>
+          <ScrollView
+            ref={scrollRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onScroll={Animated.event(
+              [{nativeEvent: {contentOffset: {x: scrollX}}}],
+              {useNativeDriver: false},
+            )}
+            scrollEventThrottle={16}>
+            {banners.map((img, index) => (
+              <Image
+                key={index}
+                source={{uri: img}}
+                style={styles.bannerImage}
+              />
+            ))}
+          </ScrollView>
+        </View>
+      </ScrollView>
+    </View>
+  );
+};
+
+export default MainHome;
+
+const styles = StyleSheet.create({
+  container: {flex: 1, backgroundColor: COLOR.white, paddingHorizontal: 15},
+
+  // Search
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLOR.white,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginBottom: 15,
+    marginTop: 15,
+    borderWidth: 1,
+    borderColor: '#EBEBEA',
+  },
+  searchIcon: {width: 20, height: 20, marginRight: 8},
+  searchInput: {flex: 1},
+
+  // My Bookings
+  bookingCard: {
+    width: width * 0.7,
+    backgroundColor: '#f0ebf8',
+    borderRadius: 10,
+    padding: 15,
+    marginRight: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  bookingVendor: {fontSize: 16, fontWeight: 'bold', marginBottom: 5},
+  bookingText: {fontSize: 13, marginBottom: 2, color: '#333'},
+
+  // Banner
+  bannerImage: {
+    width: width - 30,
+    height: 150,
+    borderRadius: 10,
+    marginRight: 10,
+  },
+
+  // Categories
+  sectionTitle: {fontSize: 16, fontWeight: '600', marginVertical: 10},
+  categories: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 40,
+  },
+  categoryCard: {
+    width: '48%',
+    backgroundColor: '#f7f5fa',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  categoryIcon: {width: 40, height: 40},
+  categoryText: {marginTop: 5},
+
+  // My Bookings
+  bookingCard: {
+    width: width * 0.75,
+    borderRadius: 15,
+    padding: 15,
+    marginRight: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
+    backgroundColor: '#fff',
+    borderLeftWidth: 6,
+    borderWidth: 1,
+    borderColor: COLOR.primary,
+    borderLeftColor: '#7b4ce0', // accent stripe
+  },
+  bookingVendor: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#222',
+    marginBottom: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: COLOR.primary,
+  },
+  bookingText: {
+    fontSize: 13,
+    marginBottom: 4,
+    color: '#444',
+  },
+  bookingHighlight: {
+    fontWeight: '600',
+    color: '#7b4ce0',
+  },
+
+  // Banner
+  bannerWrapper: {
+    marginVertical: 20,
+    borderRadius: 15,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  bannerImage: {
+    width: width - 30,
+    height: 160,
+    borderRadius: 15,
+  },
+  bannerOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 12,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  bannerText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  bannerSub: {
+    color: '#f5d742',
+    fontSize: 14,
+    marginTop: 2,
+  },
+  fab: {
+    position: 'absolute',
+    right: 30,
+    bottom: 30,
+    backgroundColor: COLOR.primary,
+    borderRadius: 20,
+    width: 65,
+    height: 65,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
+    zIndex: 1000,
+  },
+  fabIcon: {
+    width: 40,
+    height: 35,
+    // tintColor: '#fff',
+  },
+});

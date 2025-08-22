@@ -34,12 +34,12 @@ import {COLOR} from '../../../Constants/Colors';
 import CustomButton from '../../../Components/CustomButton';
 import {AuthContext} from '../../../Backend/AuthContent';
 import HomeHeader from '../../../Components/HomeHeader';
+import ImageModal from '../../../Components/UI/ImageModal';
 
 const Account = ({navigation}) => {
   const {setUser} = useContext(AuthContext);
-
-  const profileImage =
-    'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'; // default profile icon
+  const [showModal, setShowModal] = React.useState(false);
+  const [profileImage, setProfileImage] = React.useState({ uri :'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'});
 
   const arrowIcon = 'https://cdn-icons-png.flaticon.com/512/271/271228.png'; // right arrow icon
 
@@ -58,7 +58,7 @@ const Account = ({navigation}) => {
     },
     {
       id: 7,
-      title: 'QucikMySlot Wallet',
+      title: 'QuickMySlot Wallet',
       icon: 'https://cdn-icons-png.flaticon.com/128/3258/3258446.png',
       navigate: 'Wallet',
     },
@@ -111,6 +111,21 @@ const Account = ({navigation}) => {
 
   return (
     <View style={styles.container}>
+      <ImageModal
+        showModal={showModal}
+        close={() => {
+          setShowModal(false);
+        }}
+        selected={(image) => {
+          console.log('Selected image:', image);
+          let img = {
+            uri: image.path,
+            type: image.mime || 'image/jpeg',
+            name: image.filename || 'profile.jpg',
+          }
+          setProfileImage(img);
+        }}
+      />
       <HomeHeader
         title="Profile"
         leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
@@ -118,7 +133,32 @@ const Account = ({navigation}) => {
       />
       {/* Profile Section */}
       <View style={styles.profileSection}>
-        <Image source={{uri: profileImage}} style={styles.profileImage} />
+        <View>
+          <Image source={{uri: profileImage?.uri}} style={styles.profileImage} />
+          <TouchableOpacity
+            style={{
+              position: 'absolute',
+              resizeMode: 'contain',
+              bottom: 5,
+              right: 0,
+              backgroundColor: COLOR.white,
+              padding: 9,
+              elevation: 5,
+              borderRadius: 20,
+            }}
+            activeOpacity={0.7}
+            onPress={() => {
+              setShowModal(true);
+            }}>
+            <Image
+              source={require('../../../assets/Images/edit.png')}
+              style={{
+                height: 20,
+                width: 20,
+              }}
+            />
+          </TouchableOpacity>
+        </View>
         <Text style={styles.profileName}>John Doe</Text>
         <Text style={styles.profileEmail}>john@example.com</Text>
       </View>

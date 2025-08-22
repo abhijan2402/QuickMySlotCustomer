@@ -78,10 +78,10 @@ const BookingScreen = ({navigation}) => {
     selectedServices.length > 0
       ? services.filter(s => selectedServices.includes(s.id))
       : [services[0]]; // default demo service
-
+  const platformFee = 2; // fixed platform fee
   const subtotal = selectedItems.reduce((sum, s) => sum + s.price, 0);
-  const tax = subtotal * 0.1; // 10% tax example
-  const total = subtotal + tax;
+  const tax = subtotal * 0.1;
+  const total = subtotal + tax + platformFee;
 
   return (
     <View style={styles.container}>
@@ -175,16 +175,37 @@ const BookingScreen = ({navigation}) => {
           </TouchableOpacity>
 
           {/* Price Breakdown */}
+
           <View style={styles.billContainer}>
             <Text style={styles.billTitle}>Bill Details</Text>
+
+            {/* Show each selected service */}
+            {selectedItems.map(item => (
+              <View key={item.id} style={styles.billRow}>
+                <Text style={styles.billLabel}>{item.name}</Text>
+                <Text style={styles.billValue}>${item.price.toFixed(2)}</Text>
+              </View>
+            ))}
+
+            {/* Subtotal */}
             <View style={styles.billRow}>
               <Text style={styles.billLabel}>Subtotal</Text>
               <Text style={styles.billValue}>${subtotal.toFixed(2)}</Text>
             </View>
+
+            {/* Tax */}
             <View style={styles.billRow}>
               <Text style={styles.billLabel}>Taxes (10%)</Text>
               <Text style={styles.billValue}>${tax.toFixed(2)}</Text>
             </View>
+
+            {/* Platform Fee */}
+            <View style={styles.billRow}>
+              <Text style={styles.billLabel}>Platform Fee</Text>
+              <Text style={styles.billValue}>${platformFee.toFixed(2)}</Text>
+            </View>
+
+            {/* Total */}
             <View style={styles.billRow}>
               <Text style={styles.totalLabel}>Total</Text>
               <Text style={styles.totalValue}>${total.toFixed(2)}</Text>

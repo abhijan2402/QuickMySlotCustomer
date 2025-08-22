@@ -1,13 +1,12 @@
 import { StyleSheet, Text as RNText } from 'react-native';
 import React from 'react';
-import colors from '../../Constants/colors';
-import fonts from '../../Constants/fonts';
+import { COLOR } from '../../Constants/Colors';
 
 export const Typography = ({
   size = 14,
   children,
-  font = fonts?.regular,
-  color = colors?.black,
+  font = '',
+  color = COLOR?.black,
   textAlign = undefined,
   style = {},
   numberOfLines,
@@ -31,7 +30,7 @@ export const Typography = ({
           textAlign,
           fontWeight: fontWeight,
           lineHeight: lineHeight,
-          fontFamily: font,
+          // fontFamily: font,
           letterSpacing: letterSpacing
         },
         style,

@@ -11,12 +11,15 @@ import {
 import {COLOR} from '../Constants/Colors'; // adjust path if needed
 import {useNavigation} from '@react-navigation/native';
 
-const HomeHeader = ({title, leftIcon, rightIcon, leftTint, rightTint}) => {
+const HomeHeader = ({title, leftIcon, rightIcon, leftTint, rightTint,rightIconTwo,onPressRightIconTwo,rightIconTwoStyle}) => {
   const navigation = useNavigation(); // Assuming you're using react-navigation
   return (
     <View style={styles.header}>
       {/* Left Icon */}
       <TouchableOpacity
+      style={{
+        width:"20%"
+      }}
         onPress={() => {
           navigation.goBack();
         }}>
@@ -27,13 +30,28 @@ const HomeHeader = ({title, leftIcon, rightIcon, leftTint, rightTint}) => {
       </TouchableOpacity>
 
       {/* Title */}
+      <View style={{
+        flex:1,
+        alignItems:'center'
+      }}>
       <Text style={styles.title}>{title}</Text>
+      </View>
 
       {/* Right Icon */}
-      <Image
-        source={{uri: rightIcon}}
-        style={[styles.icon, rightTint && {tintColor: rightTint}]}
-      />
+      <View style={{flexDirection:'row',justifyContent:'flex-end',width:"20%"}}>
+        {rightIconTwo && (
+          <TouchableOpacity onPress={onPressRightIconTwo}>
+          <Image
+            source={{uri: rightIconTwo}}
+            style={[styles.icon,  {marginRight:5} , rightIconTwoStyle]}
+          />
+          </TouchableOpacity>
+        )}
+        <Image
+          source={{uri: rightIcon}}
+          style={[styles.icon, rightTint , {tintColor: rightTint,}]}
+        />
+      </View>
     </View>
   );
 };
@@ -46,7 +64,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 10,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 5 : 0,
+    // paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 5 : 0,
+    paddingTop: Platform.OS === 'android' ?  10 : 0,
   },
   icon: {
     width: 30,

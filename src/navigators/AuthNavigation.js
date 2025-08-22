@@ -18,6 +18,7 @@ import Checkout from '../Screens/Private/Home/Checkout';
 import BookingConfirmation from '../Screens/Private/Home/BookingConfirmation';
 import AppointmentDetail from '../Screens/Private/AppointmentSection/AppointmentDetail';
 import ServiceList from '../Screens/Private/Home/ServiceList';
+import NotificationsScreen from '../Screens/Private/Home/Notification';
 const Stack = createNativeStackNavigator();
 
 const AuthStack = () => {
@@ -45,6 +46,7 @@ const AuthStack = () => {
       <Stack.Screen name="Checkout" component={Checkout} />
       <Stack.Screen name="AppointmentDetail" component={AppointmentDetail} />
       <Stack.Screen name="ServiceList" component={ServiceList} />
+       <Stack.Screen name="NotificationsScreen" component={NotificationsScreen} />
 
       <Stack.Screen name="BookingConfirmation" component={BookingConfirmation} />
 

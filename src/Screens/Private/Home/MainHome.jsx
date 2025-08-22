@@ -115,6 +115,11 @@ const MainHome = ({navigation}) => {
         leftIcon="https://cdn-icons-png.flaticon.com/128/535/535239.png"
         rightIcon="https://cdn-icons-png.flaticon.com/128/17446/17446833.png"
         leftTint={COLOR.primary}
+        onPressRightIconTwo={()=>{
+          navigation.navigate('NotificationsScreen')
+        }}
+        rightIconTwoStyle={{tintColor:COLOR.primary}}
+        rightIconTwo='https://cdn-icons-png.flaticon.com/128/2529/2529521.png'
       />
       <Animated.View style={[styles.fab, {transform: [{scale: scaleAnim}]}]}>
         <TouchableOpacity onPress={() => navigation.navigate('Offers')}>
@@ -245,7 +250,7 @@ const styles = StyleSheet.create({
     borderColor: '#EBEBEA',
   },
   searchIcon: {width: 20, height: 20, marginRight: 8},
-  searchInput: {flex: 1},
+  searchInput: {flex: 1,color:'black'},
 
   // My Bookings
   bookingCard: {

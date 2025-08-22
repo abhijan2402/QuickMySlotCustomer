@@ -12,13 +12,14 @@ import Support from '../Screens/Private/Account/Support';
 import Invite from '../Screens/Private/Account/Invite';
 import MyAnalytics from '../Screens/Private/Home/Analytics';
 import SearchServices from '../Screens/Private/Home/SearchServices';
-import ProviderDetails from '../Screens/Private/Home/ServiceDetailPage';
+// import ProviderDetails from '../Screens/Private/Service/ServiceDetailPage';
 import BookingScreen from '../Screens/Private/Home/BookingScreen';
 import Checkout from '../Screens/Private/Home/Checkout';
 import BookingConfirmation from '../Screens/Private/Home/BookingConfirmation';
 import AppointmentDetail from '../Screens/Private/AppointmentSection/AppointmentDetail';
 import ServiceList from '../Screens/Private/Home/ServiceList';
 import NotificationsScreen from '../Screens/Private/Home/Notification';
+import ProviderDetails from '../Screens/Private/Service/ServiceDetailPage';
 const Stack = createNativeStackNavigator();
 
 const AuthStack = () => {

@@ -6,14 +6,26 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  Dimensions,
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
 import CustomButton from '../../../Components/CustomButton';
+import ImageSwiper from './ServiceImageSwiper';
+import CouponCarousel from './CouponCarousel';
+import {FlatList} from 'react-native';
 
 const ProviderDetails = ({navigation}) => {
   const [activeTab, setActiveTab] = useState('Services');
+  const {width} = Dimensions.get('window');
 
+  const amenities = [
+    {id: '1', name: 'Air Conditioned'},
+    {id: '2', name: 'Wi-Fi'},
+    {id: '3', name: 'Parking'},
+    {id: '4', name: 'Swimming Pool'},
+    // Add more as needed
+  ];
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -25,14 +37,7 @@ const ProviderDetails = ({navigation}) => {
       />
 
       <ScrollView contentContainerStyle={{paddingBottom: 80}}>
-        {/* Image */}
-        <Image
-          source={{
-            uri: 'https://images.pexels.com/photos/3738341/pexels-photo-3738341.jpeg',
-          }}
-          style={styles.mainImage}
-        />
-
+        <ImageSwiper />
         {/* Provider Info */}
         <View style={styles.infoContainer}>
           <Text style={styles.title}>Glamour Touch Salon</Text>
@@ -40,7 +45,6 @@ const ProviderDetails = ({navigation}) => {
           <Text style={styles.detail}>8 Years of Experience</Text>
           <Text style={styles.detail}>Available Mon-Sat, 9 AM - 4 PM</Text>
         </View>
-
         {/* About */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>About</Text>
@@ -50,8 +54,29 @@ const ProviderDetails = ({navigation}) => {
             refreshed every time you visit.
           </Text>
         </View>
-
+        <CouponCarousel />
         {/* Tabs */}
+        <View style={{paddingHorizontal: 20}}>
+          <Text style={styles.title}>Amenities</Text>
+          <View style={styles.amenityGrid}>
+            {amenities.map(item => (
+              <View
+                key={item.id}
+                style={[
+                  styles.amenityItem,
+                  {
+                    width: width * 0.5 - 30, // 2 per row with spacing
+                  },
+                ]}>
+                <Image
+                  source={require('../../../assets/Images/checked.png')}
+                  style={styles.icon}
+                />
+                <Text style={styles.amenityText}>{item.name}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
         <View style={styles.tabContainer}>
           {['Services', 'Photos', 'About', 'Reviews'].map(tab => (
             <TouchableOpacity
@@ -194,6 +219,10 @@ const styles = StyleSheet.create({
     padding: 15,
     backgroundColor: COLOR.white,
   },
+   amenityGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -291,5 +320,27 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#555',
     marginTop: 4,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 15,
+    color: '#000',
+  },
+  amenityItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  icon: {
+    height: 17,
+    width: 17,
+    marginRight: 10,
+    resizeMode: 'contain',
+  },
+  amenityText: {
+    fontSize: 16,
+    color: '#333',
+    flexShrink: 1,
   },
 });

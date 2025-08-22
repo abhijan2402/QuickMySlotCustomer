@@ -28,7 +28,6 @@ const HomeHeader = ({title, leftIcon, rightIcon, leftTint, rightTint,rightIconTw
           style={[styles.icon, leftTint && {tintColor: leftTint}]}
         />
       </TouchableOpacity>
-
       {/* Title */}
       <View style={{
         flex:1,
@@ -36,7 +35,6 @@ const HomeHeader = ({title, leftIcon, rightIcon, leftTint, rightTint,rightIconTw
       }}>
       <Text style={styles.title}>{title}</Text>
       </View>
-
       {/* Right Icon */}
       <View style={{flexDirection:'row',justifyContent:'flex-end',width:"20%"}}>
         {rightIconTwo && (

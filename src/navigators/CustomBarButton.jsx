@@ -1,16 +1,32 @@
-import React, {useRef, useMemo} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View, Image} from 'react-native';
+import React, {useRef, useMemo, useState} from 'react';
+import {StyleSheet, Text, TouchableOpacity, View, Image, Modal, ScrollView} from 'react-native';
 import {COLOR} from '../Constants/Colors';
 
 const CustomBarButton = () => {
-  const bottomSheetRef = useRef(null);
-  const snapPoints = useMemo(() => ['25%', '50%'], []);
-  const handleOpenSheet = () => {
-    bottomSheetRef.current?.expand();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const bookingData = {
+    bookingId: 'BK123456',
+    amountDue: '$150.00',
+    dueDate: '2023-12-15',
+    service: 'Hotel Booking',
+    room: 'Deluxe Suite',
+    nights: 3,
+    checkIn: '2023-12-10',
+    checkOut: '2023-12-13'
   };
-  const handleCloseSheet = () => {
-    bottomSheetRef.current?.close();
+
+  const handlePayBillPress = () => {
+    setIsModalVisible(true);
+    // If using BottomSheet component instead of Modal:
+    // bottomSheetRef.current?.expand();
   };
+
+  const handleClose = () => {
+    setIsModalVisible(false);
+    // If using BottomSheet component instead of Modal:
+    // bottomSheetRef.current?.close();
+  };
+
   return (
     <>
       <TouchableOpacity
@@ -21,7 +37,7 @@ const CustomBarButton = () => {
           alignItems: 'center',
           ...styles.shadow,
         }}
-        onPress={handleOpenSheet}>
+        onPress={handlePayBillPress}>
         <View
           style={{
             width: 60,
@@ -42,8 +58,93 @@ const CustomBarButton = () => {
         </View>
       </TouchableOpacity>
       
-      {/* Bottom Sheet */}
-     
+      {/* Modal for showing booking details */}
+      <Modal
+        visible={isModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={handleClose}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.sheetTitle}>Payment Details</Text>
+            
+            <ScrollView style={styles.scrollView}>
+              <View style={styles.bookingInfo}>
+                <Text style={styles.bookingLabel}>Booking ID:</Text>
+                <Text style={styles.bookingValue}>{bookingData.bookingId}</Text>
+              </View>
+              
+              <View style={styles.bookingInfo}>
+                <Text style={styles.bookingLabel}>Service:</Text>
+                <Text style={styles.bookingValue}>{bookingData.service}</Text>
+              </View>
+              
+              <View style={styles.bookingInfo}>
+                <Text style={styles.bookingLabel}>Room Type:</Text>
+                <Text style={styles.bookingValue}>{bookingData.room}</Text>
+              </View>
+              
+              <View style={styles.bookingInfo}>
+                <Text style={styles.bookingLabel}>Nights:</Text>
+                <Text style={styles.bookingValue}>{bookingData.nights}</Text>
+              </View>
+              
+              <View style={styles.bookingInfo}>
+                <Text style={styles.bookingLabel}>Check-in:</Text>
+                <Text style={styles.bookingValue}>{bookingData.checkIn}</Text>
+              </View>
+              
+              <View style={styles.bookingInfo}>
+                <Text style={styles.bookingLabel}>Check-out:</Text>
+                <Text style={styles.bookingValue}>{bookingData.checkOut}</Text>
+              </View>
+              
+              <View style={styles.amountDueContainer}>
+                <Text style={styles.amountLabel}>Amount Due:</Text>
+                <Text style={styles.amountValue}>{bookingData.amountDue}</Text>
+              </View>
+              
+              <View style={styles.dueDateContainer}>
+                <Text style={styles.dueDateLabel}>Due Date:</Text>
+                <Text style={styles.dueDateValue}>{bookingData.dueDate}</Text>
+              </View>
+            </ScrollView>
+            
+            <TouchableOpacity 
+              style={styles.payButton}
+              onPress={() => {
+                // Handle payment logic here
+                console.log('Payment initiated');
+                handleClose();
+              }}
+            >
+              <Text style={styles.payButtonText}>Pay Now</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.cancelButton}
+              onPress={handleClose}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      
+      {/* Alternative using Bottom Sheet component (if you prefer) */}
+      {/* 
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={-1}
+        snapPoints={snapPoints}
+        enablePanDownToClose={true}
+      >
+        <View style={styles.bottomSheetContent}>
+          // Same content as the modal
+        </View>
+      </BottomSheet>
+      */}
     </>
   );
 };
@@ -61,16 +162,28 @@ const styles = StyleSheet.create({
     shadowRadius: 3.5,
     elevation: 5,
   },
-  bottomSheetContent: {
+  modalContainer: {
     flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     padding: 20,
-    alignItems: 'center',
+    minHeight: '50%',
+    maxHeight: '80%',
+  },
+  scrollView: {
+    marginVertical: 10,
   },
   sheetTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 20,
     color: COLOR.primary,
+    textAlign: 'center',
   },
   bookingInfo: {
     flexDirection: 'row',
@@ -91,9 +204,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
     marginBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    paddingBottom: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    paddingTop: 15,
+    marginTop: 10,
   },
   amountLabel: {
     fontSize: 18,

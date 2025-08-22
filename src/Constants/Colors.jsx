@@ -11,4 +11,5 @@ export const COLOR = {
   HomeBtnBg: '#8880CA91',
   iconBg: '#796FC31A',
   red: '#da2727ff',
+  lightBlue:'#F7F7F7FF'
 };

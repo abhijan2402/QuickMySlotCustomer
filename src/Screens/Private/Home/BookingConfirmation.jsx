@@ -65,9 +65,7 @@ const BookingConfirmation = ({navigation}) => {
               </Text>
               <View style={styles.salonRow}>
                 <Image
-                  source={{
-                    uri: 'https://seeklogo.com/images/T/toni-guy-logo-9F8F2A2FAF-seeklogo.com.png',
-                  }}
+                  source={require('../../../assets/Images/logo.png')}
                   style={styles.salonLogo}
                 />
                 <Text style={styles.salonAddress}>
@@ -106,7 +104,7 @@ const BookingConfirmation = ({navigation}) => {
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.payBtn}>
-                <Text style={styles.payText}>Pay bill</Text>
+                <Text style={styles.payText}>Pay Now</Text>
               </TouchableOpacity>
             </View>
 
@@ -124,7 +122,7 @@ const BookingConfirmation = ({navigation}) => {
               <View style={styles.serviceRow}>
                 <Image
                   source={{
-                    uri: 'https://cdn-icons-png.flaticon.com/128/3004/3004613.png',
+                    uri: 'https://cdn-icons-png.flaticon.com/128/3004/3004613.png'
                   }}
                   style={styles.serviceIcon}
                 />
@@ -175,7 +173,7 @@ const styles = StyleSheet.create({
   listItem: {fontSize: 14, color: '#444', marginVertical: 2},
   salonName: {fontSize: 15, fontWeight: '600', marginBottom: 10},
   salonRow: {flexDirection: 'row', alignItems: 'center'},
-  salonLogo: {width: 80, height: 40, marginRight: 10, resizeMode: 'contain'},
+  salonLogo: {width: 80, height: '100%', marginRight: 10, resizeMode: 'contain',backgroundColor:'white',borderRadius:10},
   salonAddress: {flex: 1, fontSize: 13, color: '#555'},
   actionRow: {
     flexDirection: 'row',

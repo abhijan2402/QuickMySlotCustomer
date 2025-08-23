@@ -1,9 +1,36 @@
 import React, {useRef, useMemo, useState} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View, Image, Modal, ScrollView} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Image,
+  Modal,
+  ScrollView,
+} from 'react-native';
 import {COLOR} from '../Constants/Colors';
 
 const CustomBarButton = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const [selectedServices, setSelectedServices] = useState([]);
+  const services = [
+    {
+      id: 1,
+      name: 'Haircut & Styling',
+      price: 45,
+    },
+    {
+      id: 2,
+      name: 'Hair Spa',
+      price: 60,
+    },
+    {
+      id: 3,
+      name: 'Hair Coloring',
+      price: 120,
+    },
+  ];
   const bookingData = {
     bookingId: 'BK123456',
     amountDue: '$150.00',
@@ -12,7 +39,7 @@ const CustomBarButton = () => {
     room: 'Deluxe Suite',
     nights: 3,
     checkIn: '2023-12-10',
-    checkOut: '2023-12-13'
+    checkOut: '2023-12-13',
   };
 
   const handlePayBillPress = () => {
@@ -26,6 +53,14 @@ const CustomBarButton = () => {
     // If using BottomSheet component instead of Modal:
     // bottomSheetRef.current?.close();
   };
+  const selectedItems =
+    selectedServices.length > 0
+      ? services.filter(s => selectedServices.includes(s.id))
+      : [services[0]]; // default demo service
+  const platformFee = 2; // fixed platform fee
+  const subtotal = selectedItems.reduce((sum, s) => sum + s.price, 0);
+  const tax = subtotal * 0.1;
+  const total = subtotal + tax + platformFee;
 
   return (
     <>
@@ -57,81 +92,71 @@ const CustomBarButton = () => {
           </Text>
         </View>
       </TouchableOpacity>
-      
       {/* Modal for showing booking details */}
       <Modal
         visible={isModalVisible}
         animationType="slide"
         transparent={true}
-        onRequestClose={handleClose}
-      >
-        <View style={styles.modalContainer}>
+        onRequestClose={handleClose}>
+        <TouchableOpacity activeOpacity={0.99}style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.sheetTitle}>Payment Details</Text>
-            
             <ScrollView style={styles.scrollView}>
               <View style={styles.bookingInfo}>
                 <Text style={styles.bookingLabel}>Booking ID:</Text>
                 <Text style={styles.bookingValue}>{bookingData.bookingId}</Text>
               </View>
-              
-              <View style={styles.bookingInfo}>
-                <Text style={styles.bookingLabel}>Service:</Text>
-                <Text style={styles.bookingValue}>{bookingData.service}</Text>
+              <View style={styles.billContainer}>
+                {selectedItems.map(item => (
+                  <View key={item.id} style={styles.billRow}>
+                    <Text style={styles.billLabel}>{item.name}</Text>
+                    <Text style={styles.billValue}>
+                      ${item.price.toFixed(2)}
+                    </Text>
+                  </View>
+                ))}
+                <View style={styles.billRow}>
+                  <Text style={styles.billLabel}>Subtotal</Text>
+                  <Text style={styles.billValue}>${subtotal.toFixed(2)}</Text>
+                </View>
+                <View style={styles.billRow}>
+                  <Text style={styles.billLabel}>Taxes (10%)</Text>
+                  <Text style={styles.billValue}>${tax.toFixed(2)}</Text>
+                </View>
+                {/* Platform Fee */}
+                <View style={styles.billRow}>
+                  <Text style={styles.billLabel}>Platform Fee</Text>
+                  <Text style={styles.billValue}>
+                    ${platformFee.toFixed(2)}
+                  </Text>
+                </View>
               </View>
-              
-              <View style={styles.bookingInfo}>
-                <Text style={styles.bookingLabel}>Room Type:</Text>
-                <Text style={styles.bookingValue}>{bookingData.room}</Text>
-              </View>
-              
-              <View style={styles.bookingInfo}>
-                <Text style={styles.bookingLabel}>Nights:</Text>
-                <Text style={styles.bookingValue}>{bookingData.nights}</Text>
-              </View>
-              
-              <View style={styles.bookingInfo}>
-                <Text style={styles.bookingLabel}>Check-in:</Text>
-                <Text style={styles.bookingValue}>{bookingData.checkIn}</Text>
-              </View>
-              
-              <View style={styles.bookingInfo}>
-                <Text style={styles.bookingLabel}>Check-out:</Text>
-                <Text style={styles.bookingValue}>{bookingData.checkOut}</Text>
-              </View>
-              
               <View style={styles.amountDueContainer}>
                 <Text style={styles.amountLabel}>Amount Due:</Text>
-                <Text style={styles.amountValue}>{bookingData.amountDue}</Text>
+                <Text style={styles.amountValue}>{total.toFixed(2)}</Text>
               </View>
-              
               <View style={styles.dueDateContainer}>
                 <Text style={styles.dueDateLabel}>Due Date:</Text>
                 <Text style={styles.dueDateValue}>{bookingData.dueDate}</Text>
               </View>
             </ScrollView>
-            
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.payButton}
               onPress={() => {
                 // Handle payment logic here
                 console.log('Payment initiated');
                 handleClose();
-              }}
-            >
+              }}>
               <Text style={styles.payButtonText}>Pay Now</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.cancelButton}
-              onPress={handleClose}
-            >
+
+            <TouchableOpacity style={styles.cancelButton} onPress={handleClose}>
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </TouchableOpacity>
       </Modal>
-      
+
       {/* Alternative using Bottom Sheet component (if you prefer) */}
       {/* 
       <BottomSheet
@@ -257,4 +282,13 @@ const styles = StyleSheet.create({
     color: 'gray',
     fontSize: 16,
   },
+  billRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  billLabel: {fontSize: 14, color: '#555'},
+  billValue: {fontSize: 14, fontWeight: '600'},
+  totalLabel: {fontSize: 15, fontWeight: '700'},
+  totalValue: {fontSize: 15, fontWeight: '700', color: COLOR.primary},
 });

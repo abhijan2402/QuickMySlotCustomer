@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -7,105 +7,97 @@ import {
   StyleSheet,
   Alert,
   Platform,
-  PermissionsAndroid
+  PermissionsAndroid,
 } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
-import { useIsFocused, useNavigation } from '@react-navigation/native';
-import { COLOR } from '../../../Constants/Colors';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {COLOR} from '../../../Constants/Colors';
 
 const MainHomeHeader = () => {
   const navigation = useNavigation();
   const [location, setLocation] = useState('Getting location...');
-  const [hasLocationPermission, setHasLocationPermission] = useState(false);
-const isFocus = useIsFocused()
-  // Request location permission
-  const requestLocationPermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const isFocus = useIsFocused();
+  const getCurrentLocation = async () => {
+    const requestPermissions = async () => {
+      if (Platform.OS === 'android') {
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
           {
-            title: 'Location Permission',
-            message: 'QuickMySlot needs access to your location to show nearby services',
+            title: 'Location Permission Required',
+            message:
+              'This app needs access to your location to provide better services.',
             buttonNeutral: 'Ask Me Later',
             buttonNegative: 'Cancel',
             buttonPositive: 'OK',
-          }
+          },
         );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          setHasLocationPermission(true);
-          getCurrentLocation();
-        } else {
-          setLocation('Location access denied');
+        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          throw new Error('Location permission denied');
         }
-      } catch (err) {
-        console.warn(err);
       }
-    } else {
-      // For iOS, we'll use the built-in Geolocation API which shows its own permission dialog
-      getCurrentLocation();
+    };
+    try {
+      await requestPermissions();
+      return new Promise((resolve, reject) => {
+        Geolocation.getCurrentPosition(
+          position => resolve(position?.coords),
+          error => reject(new Error(error.message || 'Error getting location')),
+        );
+      });
+    } catch (error) {
+      throw new Error(error.message || 'Error checking location permissions');
     }
   };
-
-  // Get current location
-  const getCurrentLocation = () => {
-    Geolocation.getCurrentPosition(
-      position => {
-        // In a real app, you would reverse geocode the coordinates to get an address
-        // For this example, we'll use a static address
-        setLocation('Flat No P, Plot No.2, Govindam-3, Ganesh Nagar...');
-        setHasLocationPermission(true);
-      },
-      error => {
-        console.log(error.code, error.message);
-        setLocation('Unable to get location');
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-    );
-  };
-
-  // Handle location icon press
-  const handleLocationPress = () => {
-    if (hasLocationPermission) {
-      getCurrentLocation();
-    } else {
-      requestLocationPermission();
+  const fetchLocation = async () => {
+    try {
+      const location = await getCurrentLocation();
+      setCurrentLocation(location);
+    } catch (error) {
+      alert ('dddd' + JSON.stringify(error));
+      // ToastMsg(error?.message);
     }
   };
-
-  // Request permission on component mount
   useEffect(() => {
-    if(isFocus){
-        requestLocationPermission();
-    }
+    fetchLocation();
   }, [isFocus]);
 
   return (
     <View style={styles.header}>
       <TouchableOpacity
         style={styles.locationContainer}
-        onPress={handleLocationPress}
-      >
+        onPress={fetchLocation}>
         <Image
-          source={{ uri: 'https://cdn-icons-png.flaticon.com/128/684/684908.png' }}
-          style={[styles.icon, { tintColor: COLOR.primary }]}
+          source={{
+            uri: 'https://cdn-icons-png.flaticon.com/128/684/684908.png',
+          }}
+          style={[styles.icon, {tintColor: COLOR.primary}]}
         />
         <View style={styles.locationTextContainer}>
-          <Text style={styles.locationTitle} numberOfLines={1}>Your Location</Text>
-          <Text style={styles.locationAddress} numberOfLines={1}>{location}</Text>
+          <Text style={styles.locationTitle} numberOfLines={1}>
+            Your Location
+          </Text>
+          <Text style={styles.locationAddress} numberOfLines={1}>
+            {location}
+          </Text>
         </View>
       </TouchableOpacity>
       <View style={styles.iconsContainer}>
-        <TouchableOpacity onPress={() => {
-          navigation.navigate('NotificationsScreen');
-        }}>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('NotificationsScreen');
+          }}>
           <Image
-            source={{ uri: 'https://cdn-icons-png.flaticon.com/128/2529/2529521.png' }}
-            style={[styles.icon, { marginRight: 15, tintColor: COLOR.primary }]}
+            source={{
+              uri: 'https://cdn-icons-png.flaticon.com/128/2529/2529521.png',
+            }}
+            style={[styles.icon, {marginRight: 15, tintColor: COLOR.primary}]}
           />
         </TouchableOpacity>
         <Image
-          source={{ uri: 'https://cdn-icons-png.flaticon.com/128/17446/17446833.png' }}
+          source={{
+            uri: 'https://cdn-icons-png.flaticon.com/128/17446/17446833.png',
+          }}
           style={styles.icon}
         />
       </View>
@@ -122,7 +114,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     // elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.2,
     shadowRadius: 1.5,
   },

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
+  Linking,
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
@@ -18,6 +19,7 @@ import {FlatList} from 'react-native';
 const ProviderDetails = ({navigation}) => {
   const [activeTab, setActiveTab] = useState('Services');
   const {width} = Dimensions.get('window');
+  const [like, setLike] = useState(false);
 
   const amenities = [
     {id: '1', name: 'Air Conditioned'},
@@ -26,6 +28,26 @@ const ProviderDetails = ({navigation}) => {
     {id: '4', name: 'Swimming Pool'},
     // Add more as needed
   ];
+  const handleOpenMap = () => {
+    const address = '1600 Amphitheatre Parkway, Mountain View, CA';
+    const encodedAddress = encodeURIComponent(address);
+
+    const url =
+      Platform.OS === 'ios'
+        ? `http://maps.apple.com/?q=${encodedAddress}`
+        : `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+
+    Linking.openURL(url).catch(err => console.error('Error opening map', err));
+  };
+
+  const handleCall = () => {
+    const phoneNumber = '1234567890';
+    const url = `tel:${phoneNumber}`;
+
+    Linking.openURL(url).catch(err =>
+      console.error('Failed to open dialer:', err),
+    );
+  };
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -40,13 +62,149 @@ const ProviderDetails = ({navigation}) => {
         <ImageSwiper />
         {/* Provider Info */}
         <View style={styles.infoContainer}>
-          <Text style={styles.title}>Glamour Touch Salon</Text>
-          <Text style={styles.detail}>123 Beauty Blvd, Anytown, CA 90210</Text>
-          <Text style={styles.detail}>8 Years of Experience</Text>
-          <Text style={styles.detail}>Available Mon-Sat, 9 AM - 4 PM</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
+            <Text style={[styles.title, {marginTop: 10, width: '70%'}]}>
+              Glamour Touch Salon,Gurugram, Punjab
+            </Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <TouchableOpacity onPress={() => setLike(!like)}>
+                <Image
+                  source={
+                    like
+                      ? require('../../../assets/Images/heart.png')
+                      : require('../../../assets/Images/like.png')
+                  }
+                  style={{height: 24, width: 24, marginRight: 20}}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity>
+                <Image
+                  source={require('../../../assets/Images/share.png')}
+                  style={{height: 24, width: 24}}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View style={{flexDirection: 'row', alignItems: 'center',marginTop:-10}}>
+            <Text style={[{fontSize: 16, marginBottom: 2}]}>Unisex</Text>
+            <View
+              style={{
+                width: 1.5,
+                height: 15,
+                marginHorizontal: 10,
+                backgroundColor: 'black',
+              }}
+            />
+            <Text style={[{fontSize: 16}]}>₹₹</Text>
+          </View>
+          <TouchableOpacity
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: 10,
+              backgroundColor: COLOR.lightBlue,
+              paddingVertical: 6,
+              paddingHorizontal: 10,
+              borderRadius: 6,
+              // width: '75%',
+              alignSelf: 'flex-start',
+            }}>
+            <Image
+              source={require('../../../assets/Images/close.png')}
+              style={{height: 16, width: 16}}
+            />
+            <Text style={{fontSize: 14, marginLeft: 5, marginBottom: 2}}>
+              Closed Now
+            </Text>
+            <View
+              style={{
+                width: 1.5,
+                height: 15,
+                marginHorizontal: 5,
+                backgroundColor: 'black',
+              }}
+            />
+            <Text style={{fontSize: 14, marginRight: 5, marginBottom: 2}}>
+              Opens Today at 10:00 Am
+            </Text>
+            <Image
+              source={require('../../../assets/Images/rightarrow.png')}
+              style={{height: 18, width: 10}}
+            />
+          </TouchableOpacity>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              marginTop: 10,
+            }}>
+            <TouchableOpacity
+              onPress={() => handleOpenMap()}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginTop: 10,
+                backgroundColor:  COLOR.lightBlue,
+                paddingVertical: 6,
+                paddingHorizontal: 10,
+                borderRadius: 6,
+                marginRight: 10,
+                alignSelf: 'flex-start',
+              }}>
+              <Image
+                source={require('../../../assets/Images/direction.png')}
+                style={{height: 16, width: 16}}
+              />
+              <Text style={{fontSize: 14, marginLeft: 5, marginBottom: 2}}>
+                Get Directions
+              </Text>
+              <View
+                style={{
+                  width: 1.5,
+                  height: 15,
+                  marginHorizontal: 5,
+                  backgroundColor: 'black',
+                }}
+              />
+              <Text style={{fontSize: 14, marginRight: 5, marginBottom: 2}}>
+                194.04 Kms
+              </Text>
+              <Image
+                source={require('../../../assets/Images/rightarrow.png')}
+                style={{height: 18, width: 10}}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => handleCall()}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginTop: 10,
+                backgroundColor: COLOR.lightBlue ,
+                paddingVertical: 6,
+                paddingHorizontal: 10,
+                borderRadius: 6,
+                alignSelf: 'flex-start',
+              }}>
+              <Image
+                source={require('../../../assets/Images/call.png')}
+                style={{height: 16, width: 16}}
+              />
+              <Text style={{fontSize: 14, marginLeft: 5, marginBottom: 2}}>
+                Contact
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
         {/* About */}
-        <View style={styles.section}>
+        <View style={[styles.section,{marginTop:-10}]}>
           <Text style={styles.sectionTitle}>About</Text>
           <Text style={styles.sectionText}>
             Glamour Touch Salon is a premium beauty destination offering top
@@ -148,16 +306,24 @@ const ProviderDetails = ({navigation}) => {
 
         {activeTab === 'Photos' && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Gallery</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {[
+            <Text style={[styles.sectionTitle, {marginBottom: 0}]}>
+              Gallery
+            </Text>
+            <FlatList
+              data={[
                 'https://images.pexels.com/photos/4154062/pexels-photo-4154062.jpeg',
                 'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg',
                 'https://images.pexels.com/photos/3738341/pexels-photo-3738341.jpeg',
-              ].map((img, index) => (
-                <Image key={index} source={{uri: img}} style={styles.photo} />
-              ))}
-            </ScrollView>
+                'https://images.pexels.com/photos/4154062/pexels-photo-4154062.jpeg',
+                'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg',
+              ]}
+              keyExtractor={(item, index) => index.toString()}
+              numColumns={3}
+              showsHorizontalScrollIndicator={false}
+              renderItem={({item}) => (
+                <Image source={{uri: item}} style={styles.photo} />
+              )}
+            />
           </View>
         )}
 
@@ -219,7 +385,7 @@ const styles = StyleSheet.create({
     padding: 15,
     backgroundColor: COLOR.white,
   },
-   amenityGrid: {
+  amenityGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
@@ -234,7 +400,8 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
   section: {
-    padding: 15,
+    paddingBottom: 15,
+    paddingHorizontal: 15,
     backgroundColor: COLOR.white,
     marginTop: 8,
   },
@@ -300,10 +467,11 @@ const styles = StyleSheet.create({
     color: COLOR.black,
   },
   photo: {
-    width: 140,
+    width: 124,
     height: 100,
     borderRadius: 8,
     marginRight: 10,
+    marginTop: 10,
   },
   reviewCard: {
     backgroundColor: '#f9f9f9',

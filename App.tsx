@@ -3,6 +3,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {SafeAreaView, StatusBar, StyleSheet, Text} from 'react-native';
 import MainNavigation from './src/navigators/MainNavigation';
 import {AuthProvider} from './src/Backend/AuthContent';
+import NoInternetAlert from './src/Components/UI/NoInternetAlert';
 // import {LanguageProvider} from './src/localization/LanguageContext';
 
 const App = () => {
@@ -13,6 +14,7 @@ const App = () => {
         <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
         <NavigationContainer>
           <MainNavigation />
+          <NoInternetAlert/>
         </NavigationContainer>
       </SafeAreaView>
     </AuthProvider>

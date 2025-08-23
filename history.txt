@@ -1,0 +1,3 @@
+history
+Get-History
+doskey /history > history.txt

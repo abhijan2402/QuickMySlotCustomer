@@ -4,8 +4,13 @@ import LinearGradient from 'react-native-linear-gradient';
 import {windowHeight, windowWidth} from '../../Constants/Dimensions';
 import {COLOR} from '../../Constants/Colors';
 import CustomButton from '../../Components/CustomButton';
+import GoogleAuthButton from '../../Components/UI/GoogleAuthButton';
 
 const Login = ({navigation}) => {
+   const handleLoginSuccess = (user) => {
+    console.log('Logged in user:', user.displayName);
+    // Navigate or store user info here
+  };
   return (
     <LinearGradient
       colors={[COLOR.white, COLOR.white]}
@@ -50,15 +55,7 @@ const Login = ({navigation}) => {
       </View>
 
       {/* Google Login Button */}
-      <View style={styles.googleLoginContainer}>
-        <Image
-          source={{
-            uri: 'https://cdn-icons-png.flaticon.com/128/281/281764.png',
-          }}
-          style={styles.googleIcon}
-        />
-        <Text style={styles.googleText}>Login Using Google</Text>
-      </View>
+            <GoogleAuthButton onLoginSuccess={handleLoginSuccess} />
     </LinearGradient>
   );
 };
@@ -118,31 +115,5 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     color: '#888',
     fontSize: 14,
-  },
-  googleLoginContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: windowWidth - 40,
-    backgroundColor: COLOR.white,
-    justifyContent: 'center',
-    paddingVertical: 15,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  googleIcon: {
-    width: 25,
-    height: 25,
-    marginRight: 8,
-  },
-  googleText: {
-    color: COLOR.black,
-    fontSize: 16,
-    fontWeight: '500',
   },
 });

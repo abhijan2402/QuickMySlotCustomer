@@ -86,7 +86,7 @@ const MainHomeHeader = () => {
       
       setLocation(address);
     } catch (error) {
-      Alert.alert('Location Error', error.message);
+      // Alert.alert('Location Error', error.message);
       setLocation('Location unavailable');
     } finally {
       setIsLoading(false);

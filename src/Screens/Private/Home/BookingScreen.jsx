@@ -12,13 +12,55 @@ import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
 import CustomButton from '../../../Components/CustomButton';
 import {windowHeight, windowWidth} from '../../../Constants/Dimensions';
+import ScheduleCard from '../../../Components/UI/ScheduleCard';
+import moment from 'moment';
 
 const BookingScreen = ({navigation}) => {
   const [selectedServices, setSelectedServices] = useState([]);
   const [selectedDate, setSelectedDate] = useState(27);
   const [selectedTime, setSelectedTime] = useState(null);
   const [note, setNote] = useState('');
+  const [selectTime, setSelectTime] = useState(null);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
+  const [dateStart, setDateStart] = useState(null);
+  const [location_id, setLocation_id] = useState(mockLocation);
 
+
+  // Mock location data with provider availability
+  const mockLocation = {
+    id: 'location-1',
+    name: 'Test Location',
+    provider_availability: [
+      {
+        date: moment().utc().format('YYYY-MM-DD'), // Today
+        time_slot: [
+          { start_time: '09:00:00', end_time: '10:00:00' },
+          { start_time: '10:00:00', end_time: '11:00:00' },
+          { start_time: '11:00:00', end_time: '12:00:00' },
+          { start_time: '14:00:00', end_time: '15:00:00' },
+          { start_time: '15:00:00', end_time: '16:00:00' },
+        ]
+      },
+      {
+        date: moment().add(1, 'days').utc().format('YYYY-MM-DD'), // Tomorrow
+        time_slot: [
+          { start_time: '09:00:00', end_time: '10:00:00' },
+          { start_time: '10:30:00', end_time: '11:30:00' },
+          { start_time: '13:00:00', end_time: '14:00:00' },
+        ]
+      },
+      {
+        date: moment().add(2, 'days').utc().format('YYYY-MM-DD'),
+        time_slot: [
+          { start_time: '08:00:00', end_time: '09:00:00' },
+          { start_time: '11:00:00', end_time: '12:00:00' },
+          { start_time: '15:00:00', end_time: '16:00:00' },
+        ]
+      },
+      // Add more dates as needed
+    ]
+  };
+  
   // Demo services (not displayed but used for price calc if selected)
   const services = [
     {
@@ -83,6 +125,16 @@ const BookingScreen = ({navigation}) => {
   const tax = subtotal * 0.1;
   const total = subtotal + tax + platformFee;
 
+
+  // Mock function to convert time slots (replace with your actual implementation)
+  const convertTimeSlots = (slots, date) => {
+    return slots.map(slot => ({
+      ...slot,
+      formatted: `${moment(slot.start_time, 'HH:mm:ss').format('h:mm A')} - ${moment(slot.end_time, 'HH:mm:ss').format('h:mm A')}`,
+      date: date
+    }));
+  };
+
   return (
     <View style={styles.container}>
       <HomeHeader
@@ -104,8 +156,50 @@ const BookingScreen = ({navigation}) => {
           </View>
 
           {/* Date Selector */}
-          <Text style={styles.sectionTitle}>Choose Date & Time</Text>
-          <ScrollView
+
+          <ScheduleCard
+            selected_date={
+              selectTime?.date || moment()?.utc()?.format('YYYY-MM-DD')
+            }
+            locationId={location_id?.id}
+            onChangeDateVal={(val, month) => {
+              let selected_date = `${month?.year}-${String(
+                month?.month + 1,
+              ).padStart(2, '0')}-${String(val?.date).padStart(2, '0')}`;
+
+              setDateStart(selected_date);
+              const temp = location_id?.provider_availability?.find(
+                v => v?.date == selected_date,
+              );
+              const now = new Date();
+              const todayStr = now.toISOString().split('T')[0]; // "YYYY-MM-DD"
+
+              let upcomingSlots = [];
+
+              if (temp?.date === todayStr) {
+                upcomingSlots = temp?.time_slot.filter(slot => {
+                  const slotStart = new Date(
+                    `${temp?.date}T${slot?.start_time}`,
+                  );
+                  return slotStart > now;
+                });
+              } else {
+                upcomingSlots = temp?.time_slot;
+              }
+
+              setAvailableTimeSlots(
+                convertTimeSlots(
+                  upcomingSlots || temp?.time_slot || [],
+                  selected_date,
+                ),
+              );
+            }}
+          />
+
+          {/*  */}
+
+          {/* <Text style={styles.sectionTitle}>Choose Date & Time</Text> */}
+          {/* <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             style={styles.dateRow}>
@@ -133,7 +227,7 @@ const BookingScreen = ({navigation}) => {
                 </Text>
               </TouchableOpacity>
             ))}
-          </ScrollView>
+          </ScrollView> */}
 
           {/* Time Selector */}
           <Text style={styles.sectionTitle}>Choose Time</Text>
@@ -158,7 +252,9 @@ const BookingScreen = ({navigation}) => {
           </View>
 
           {/* Choose Offer Button */}
-          <TouchableOpacity style={styles.offerBtn}>
+          <TouchableOpacity onPress={()=>{
+            navigation.navigate('OffersScreen')
+          }} style={styles.offerBtn}>
             <Image
               source={{
                 uri: 'https://cdn-icons-png.flaticon.com/128/726/726476.png',
@@ -257,7 +353,7 @@ const styles = StyleSheet.create({
   salonSubtitle: {color: '#eee', fontSize: 14},
 
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
     marginHorizontal: 15,
     marginTop: 15,
@@ -282,6 +378,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     paddingHorizontal: 15,
     marginBottom: 20,
+    marginTop:5
   },
   timeBox: {
     backgroundColor: COLOR.white,

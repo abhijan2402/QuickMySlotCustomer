@@ -18,7 +18,7 @@ const CouponCarousel = () => {
   const coupons = [
     {
       id: 1,
-      title: 'Get 20% OFF via LUZO',
+      title: 'Get 20% OFF',
       description: '10% Discount + 10% Cashback',
       // icon: require('./assets/discount-icon.png'), // Add your local icon here
     },

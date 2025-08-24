@@ -19,7 +19,7 @@ export default CustomButton;
 
 const styles = StyleSheet.create({
     button: {
-        backgroundColor: COLOR.royalBlue,
+        backgroundColor: COLOR.buttonColor,
         paddingVertical: 13,
         paddingHorizontal: 40,
         borderRadius: 6,

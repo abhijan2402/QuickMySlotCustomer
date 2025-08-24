@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import HomeHeader from '../../../Components/HomeHeader';
 import {COLOR} from '../../../Constants/Colors';
+import { handleCall, handleOpenMap } from '../../../Constants/Utils';
 
 const AppointmentDetail = ({route, navigation}) => {
   // Dummy Data (Replace with route.params or API)
@@ -49,8 +50,12 @@ const AppointmentDetail = ({route, navigation}) => {
           <Text style={styles.sectionTitle}>Shop Details</Text>
           <Image source={{uri: appointment.shopImage}} style={styles.shopImg} />
           <Text style={styles.shopName}>{appointment.shopName}</Text>
-          <Text style={styles.text}>{appointment.shopAddress}</Text>
-          <Text style={styles.text}>📞 {appointment.shopContact}</Text>
+          <TouchableOpacity onPress={() => handleOpenMap('')}>
+            <Text style={styles.text}>{appointment.shopAddress}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleCall('9876567898')}>
+            <Text style={styles.text}>📞 {appointment.shopContact}</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.chatBtn}>
             <Text style={styles.chatBtnText}>💬 Chat</Text>
           </TouchableOpacity>
@@ -60,8 +65,14 @@ const AppointmentDetail = ({route, navigation}) => {
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Customer Details</Text>
           <Text style={styles.text}>👤 {appointment.customerName}</Text>
+          <TouchableOpacity>
+
           <Text style={styles.text}>📞 {appointment.customerPhone}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleOpenMap('')}>
+
           <Text style={styles.text}>📍 {appointment.customerAddress}</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Service Date/Time */}

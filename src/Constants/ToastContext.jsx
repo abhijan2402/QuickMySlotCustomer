@@ -41,7 +41,7 @@ export const ToastProvider = ({children}) => {
   const getBackgroundColor = () => {
     switch (toast.type) {
       case 'success':
-        return COLOR.royalBlue;
+        return COLOR.buttonColor;
       case 'error':
         return '#FF3B30';
       case 'info':

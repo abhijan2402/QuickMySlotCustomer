@@ -210,14 +210,15 @@ const styles = StyleSheet.create({
     color: '#1E3A8A',
   },
   cancelBtn: {
-    backgroundColor: '#E53935',
     paddingVertical: 12,
     borderRadius: 8,
     marginTop: 20,
     marginBottom: 20,
+    borderWidth:1,
+    borderColor:"red"
   },
   cancelBtnText: {
-    color: COLOR.white,
+    color: COLOR.red,
     textAlign: 'center',
     fontWeight: '600',
     fontSize: 15,

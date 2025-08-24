@@ -75,6 +75,19 @@ const Appointment = ({navigation}) => {
     }
   };
 
+  const getBackgroundStatusColor = status => {
+    switch (status) {
+      case 'Pending':
+        return '#FFD700';
+      case 'Completed':
+        return '#4CAF50';
+      case 'Declined':
+        return '#E53935';
+      default:
+        return '#555';
+    }
+  };
+
   const renderAppointment = ({item}) => {
     return (
       <TouchableOpacity
@@ -87,7 +100,14 @@ const Appointment = ({navigation}) => {
           <Image source={{uri: item.image}} style={styles.serviceImage} />
           <View style={{flex: 1, marginLeft: 10}}>
             <Text style={styles.title}>{item.title}</Text>
-            <Text style={[styles.status, {color: getStatusColor(item.status)}]}>
+            <Text
+              style={[
+                styles.status,
+                {
+                  color: getStatusColor(item.status),
+                  backgroundColor: getBackgroundStatusColor(item.status) + '20',
+                },
+              ]}>
               {item.status}
             </Text>
             <Text style={styles.dateText}>{item.date}</Text>
@@ -208,6 +228,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     marginTop: 2,
+    alignSelf:"flex-start",
+    padding:3,
+    borderRadius:50,
+    paddingHorizontal:10
   },
   dateText: {
     fontSize: 12,

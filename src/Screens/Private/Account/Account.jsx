@@ -190,13 +190,13 @@ const Account = ({navigation}) => {
           }}
         />
         <CustomButton
-          textStyle={{color: COLOR.primary}}
+          textStyle={{color: COLOR.red}}
           title={'Delete Account'}
           style={{
             marginTop: '5%',
             backgroundColor: COLOR.white,
             borderWidth: 1,
-            borderColor: COLOR.primary,
+            borderColor: COLOR.red,
           }}
           onPress={() => {
             setUser('ABCC');

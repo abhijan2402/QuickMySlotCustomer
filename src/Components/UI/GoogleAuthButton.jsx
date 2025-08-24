@@ -1,39 +1,32 @@
 // GoogleAuthButton.js
 
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
 import {
-  Button,
-  Alert,
   TouchableOpacity,
   StyleSheet,
   Image,
   Text,
+  Alert,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {COLOR} from '../../Constants/Colors';
-import {windowWidth} from '../../Constants/Dimensions';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { COLOR } from '../../Constants/Colors';
+import { windowWidth } from '../../Constants/Dimensions';
 
-const GoogleAuthButton = ({onLoginSuccess}) => {
-  useEffect(() => {
-    GoogleSignin.configure({
-      webClientId:
-        '218547319777-4dbc8eridimnd6c8d3m78oqu66m297vj.apps.googleusercontent.com',
-    });
-  }, []);
+const GoogleAuthButton = ({ onLoginSuccess }) => {
 
   const handleGoogleLogin = async () => {
     try {
-      // Step 1: Sign out first
-      const isSignedIn = await GoogleSignin.isSignedIn();
-      if (isSignedIn) {
+      // Check if user is already signed in and sign out first
+      const currentUser = await GoogleSignin.getCurrentUser();
+      if (currentUser) {
         await GoogleSignin.signOut();
         await auth().signOut();
         console.log('Signed out from previous Google session.');
       }
 
-      // Step 2: Start new Google Sign-In
-      const {idToken} = await GoogleSignin.signIn();
+      // Start new Google Sign-In
+      const { idToken } = await GoogleSignin.signIn();
 
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
 
@@ -79,7 +72,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 3,

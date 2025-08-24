@@ -8,18 +8,37 @@ import {
   ScrollView,
   Dimensions,
   Linking,
+  Share,
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
-import CustomButton from '../../../Components/CustomButton';
 import ImageSwiper from './ServiceImageSwiper';
 import CouponCarousel from './CouponCarousel';
 import {FlatList} from 'react-native';
+import {
+  handleCall,
+  handleOpenMap,
+  onShare,
+  openMapWithDirections,
+} from '../../../Constants/Utils';
+import SimpleModal from '../../../Components/UI/SimpleModal';
 
 const ProviderDetails = ({navigation}) => {
   const [activeTab, setActiveTab] = useState('Services');
   const {width} = Dimensions.get('window');
   const [like, setLike] = useState(false);
+  const [isModalVisible, setModalVisible] = useState(false);
+  const daysData = [
+    {day: 'Monday', time: '10:30 AM - 09:00 PM'},
+    {day: 'Tuesday', time: '10:30 AM - 09:00 PM'},
+    {day: 'Wednesday', time: '10:30 AM - 09:00 PM'},
+    {day: 'Thursday', time: '10:30 AM - 09:00 PM'},
+    {day: 'Friday', time: '10:30 AM - 09:00 PM'},
+    {day: 'Saturday', time: '10:30 AM - 09:00 PM'},
+    {day: 'Sunday', time: '10:30 AM - 09:00 PM'},
+  ];
+  const currentDayIndex = new Date().getDay();
+  const adjustedDayIndex = (currentDayIndex + 6) % 7;
 
   const amenities = [
     {id: '1', name: 'Air Conditioned'},
@@ -28,26 +47,7 @@ const ProviderDetails = ({navigation}) => {
     {id: '4', name: 'Swimming Pool'},
     // Add more as needed
   ];
-  const handleOpenMap = () => {
-    const address = '1600 Amphitheatre Parkway, Mountain View, CA';
-    const encodedAddress = encodeURIComponent(address);
 
-    const url =
-      Platform.OS === 'ios'
-        ? `http://maps.apple.com/?q=${encodedAddress}`
-        : `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
-
-    Linking.openURL(url).catch(err => console.error('Error opening map', err));
-  };
-
-  const handleCall = () => {
-    const phoneNumber = '1234567890';
-    const url = `tel:${phoneNumber}`;
-
-    Linking.openURL(url).catch(err =>
-      console.error('Failed to open dialer:', err),
-    );
-  };
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -57,7 +57,6 @@ const ProviderDetails = ({navigation}) => {
         leftTint={COLOR.primary}
         onLeftPress={() => navigation.goBack()}
       />
-
       <ScrollView contentContainerStyle={{paddingBottom: 80}}>
         <ImageSwiper />
         {/* Provider Info */}
@@ -67,8 +66,9 @@ const ProviderDetails = ({navigation}) => {
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'space-between',
+              marginTop: 10,
             }}>
-            <Text style={[styles.title, {marginTop: 10, width: '70%'}]}>
+            <Text style={[styles.title, {width: '70%'}]}>
               Glamour Touch Salon,Gurugram, Punjab
             </Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -79,10 +79,11 @@ const ProviderDetails = ({navigation}) => {
                       ? require('../../../assets/Images/heart.png')
                       : require('../../../assets/Images/like.png')
                   }
-                  style={{height: 24, width: 24, marginRight: 20}}
+                  style={{height: 24, width: 26, marginRight: 20}}
                 />
               </TouchableOpacity>
-              <TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => onShare('Glamour Touch Salon,Gurugram, Punjab')}>
                 <Image
                   source={require('../../../assets/Images/share.png')}
                   style={{height: 24, width: 24}}
@@ -90,7 +91,12 @@ const ProviderDetails = ({navigation}) => {
               </TouchableOpacity>
             </View>
           </View>
-          <View style={{flexDirection: 'row', alignItems: 'center',marginTop:-10}}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: -10,
+            }}>
             <Text style={[{fontSize: 16, marginBottom: 2}]}>Unisex</Text>
             <View
               style={{
@@ -103,6 +109,7 @@ const ProviderDetails = ({navigation}) => {
             <Text style={[{fontSize: 16}]}>₹₹</Text>
           </View>
           <TouchableOpacity
+            onPress={() => setModalVisible(true)}
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -111,7 +118,6 @@ const ProviderDetails = ({navigation}) => {
               paddingVertical: 6,
               paddingHorizontal: 10,
               borderRadius: 6,
-              // width: '75%',
               alignSelf: 'flex-start',
             }}>
             <Image
@@ -130,10 +136,10 @@ const ProviderDetails = ({navigation}) => {
               }}
             />
             <Text style={{fontSize: 14, marginRight: 5, marginBottom: 2}}>
-              Opens Today at 10:00 Am
+              Opens Today at 10:00 AM
             </Text>
             <Image
-              source={require('../../../assets/Images/rightarrow.png')}
+              source={require('../../../assets/Images/down-arrow.png')}
               style={{height: 18, width: 10}}
             />
           </TouchableOpacity>
@@ -145,12 +151,14 @@ const ProviderDetails = ({navigation}) => {
               marginTop: 10,
             }}>
             <TouchableOpacity
-              onPress={() => handleOpenMap()}
+              onPress={() =>
+                handleOpenMap('1600 Amphitheatre Parkway, Mountain View, CA')
+              }
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
                 marginTop: 10,
-                backgroundColor:  COLOR.lightBlue,
+                backgroundColor: COLOR.lightBlue,
                 paddingVertical: 6,
                 paddingHorizontal: 10,
                 borderRadius: 6,
@@ -182,12 +190,12 @@ const ProviderDetails = ({navigation}) => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => handleCall()}
+              onPress={() => handleCall('1234567890')}
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
                 marginTop: 10,
-                backgroundColor: COLOR.lightBlue ,
+                backgroundColor: COLOR.lightBlue,
                 paddingVertical: 6,
                 paddingHorizontal: 10,
                 borderRadius: 6,
@@ -203,8 +211,38 @@ const ProviderDetails = ({navigation}) => {
             </TouchableOpacity>
           </View>
         </View>
+        <View style={[styles.section, {marginTop: -10}]}>
+          <Text style={styles.sectionTitle}>Address</Text>
+          <Text style={styles.sectionText}>
+            Shop no.36, Ground Floor, AIPL JOY STREET, Badshahpur, Sector
+            66,Gurugram, Haryana 122018
+          </Text>
+          <TouchableOpacity
+            style={{flexDirection: 'row', alignItems: 'center', marginTop: 5}}
+            onPress={() =>
+              openMapWithDirections(
+                'Shop no.36, Ground Floor, AIPL JOY STREET, Badshahpur, Sector 66, Gurugram, Haryana 122018',
+              )
+            }>
+            <Image
+              source={require('../../../assets/Images/location.png')}
+              style={{height: 16, width: 16, tintColor: 'blue'}}
+            />
+            <Text
+              style={[
+                styles.sectionText,
+                {
+                  marginLeft: 10,
+                  color: 'blue',
+                  textDecorationLine: 'underline',
+                },
+              ]}>
+              Get Directions
+            </Text>
+          </TouchableOpacity>
+        </View>
         {/* About */}
-        <View style={[styles.section,{marginTop:-10}]}>
+        <View style={[styles.section, {marginTop: -5}]}>
           <Text style={styles.sectionTitle}>About</Text>
           <Text style={styles.sectionText}>
             Glamour Touch Salon is a premium beauty destination offering top
@@ -341,19 +379,53 @@ const ProviderDetails = ({navigation}) => {
         {activeTab === 'Reviews' && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Customer Reviews</Text>
-            <View style={styles.reviewCard}>
-              <Text style={styles.reviewUser}>Priya Sharma</Text>
-              <Text style={styles.reviewText}>
-                Amazing service and very friendly staff! Highly recommend this
-                salon.
-              </Text>
-            </View>
-            <View style={styles.reviewCard}>
-              <Text style={styles.reviewUser}>Rahul Mehta</Text>
-              <Text style={styles.reviewText}>
-                Best haircut I’ve had in years. Definitely coming back.
-              </Text>
-            </View>
+            <FlatList
+              data={[1, 2]}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={() => (
+                <View style={styles.reviewCard}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <Image
+                        source={require('../../../assets/Images/userprofile.png')}
+                        style={{height: 14, width: 14}}
+                      />
+                      <Text style={[styles.reviewUser, {marginLeft: 5}]}>
+                        Priya Sharma
+                      </Text>
+                    </View>
+                    <View>
+                      <Text style={[styles.sectionText]}>17th Sep, 2025</Text>
+                    </View>
+                  </View>
+                  <FlatList
+                    data={[1, 2, 3, 4, 5]}
+                    keyExtractor={(item, index) => index.toString()}
+                    horizontal
+                    renderItem={() => (
+                      <Image
+                        source={require('../../../assets/Images/star.png')}
+                        style={{
+                          height: 14,
+                          width: 14,
+                          marginTop: 5,
+                          marginRight: 5,
+                        }}
+                      />
+                    )}
+                  />
+                  <Text style={styles.reviewText}>
+                    Amazing service and very friendly staff! Highly recommend
+                    this salon.
+                  </Text>
+                </View>
+              )}
+            />
           </View>
         )}
 
@@ -366,6 +438,57 @@ const ProviderDetails = ({navigation}) => {
           style={{margin: 15}}
         /> */}
       </ScrollView>
+      <SimpleModal
+        visible={isModalVisible}
+        modalContainer={{padding: 0}}
+        onClose={() => setModalVisible(false)}>
+        <View>
+          <View
+            style={{
+              backgroundColor: '#72B5EC',
+              borderTopRightRadius: 16,
+              borderTopLeftRadius: 16,
+              padding: 20,
+            }}>
+            {/* <TouchableOpacity
+              style={{position: 'absolute', right: 10, top: 10}}
+              onPress={() => setModalVisible(false)}>
+              <Image
+                source={require('../../../assets/Images/cross.png')}
+                style={{height: 24, width: 24}}
+              />
+            </TouchableOpacity> */}
+            <View style={{alignItems: 'center'}}>
+              <Text style={{fontSize: 16, fontWeight: '500'}}>Timings</Text>
+              <Text style={{fontSize: 16, marginTop: 5, color: COLOR.white}}>
+                All Timings Are In IST
+              </Text>
+            </View>
+          </View>
+          <View style={{padding: 10}}>
+            <FlatList
+              data={daysData}
+              keyExtractor={item => item.day}
+              renderItem={({item, index}) => (
+                <View style={[styles.row]}>
+                  <Text
+                    style={
+                      index === adjustedDayIndex && styles.highlightedText
+                    }>
+                    {item.day}
+                  </Text>
+                  <Text
+                    style={
+                      index === adjustedDayIndex && styles.highlightedText
+                    }>
+                    {item.time}
+                  </Text>
+                </View>
+              )}
+            />
+          </View>
+        </View>
+      </SimpleModal>
     </View>
   );
 };
@@ -382,7 +505,8 @@ const styles = StyleSheet.create({
     height: 220,
   },
   infoContainer: {
-    padding: 15,
+    paddingBottom: 15,
+    paddingHorizontal: 15,
     backgroundColor: COLOR.white,
   },
   amenityGrid: {
@@ -447,7 +571,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   categoryCard: {
-    width: '21%',
+    width: '22.5%',
     backgroundColor: '#f9f9f9',
     padding: 8,
     paddingHorizontal: 5,
@@ -467,7 +591,7 @@ const styles = StyleSheet.create({
     color: COLOR.black,
   },
   photo: {
-    width: 124,
+    width: '31.5%',
     height: 100,
     borderRadius: 8,
     marginRight: 10,
@@ -510,5 +634,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     flexShrink: 1,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+  },
+
+  highlightedText: {
+    color: '#72B5EC',
+    fontWeight: 'bold',
   },
 });

@@ -7,9 +7,7 @@ import CustomButton from '../../Components/CustomButton';
 import GoogleAuthButton from '../../Components/UI/GoogleAuthButton';
 
 const Login = ({navigation}) => {
-   const handleLoginSuccess = (user) => {
-    console.log('Logged in user:', user.displayName);
-    // Navigate or store user info here
+  const handleLoginSuccess = user => {
   };
   return (
     <LinearGradient
@@ -53,9 +51,8 @@ const Login = ({navigation}) => {
         <Text style={styles.dividerText}>Or</Text>
         <View style={styles.divider} />
       </View>
-
       {/* Google Login Button */}
-            <GoogleAuthButton onLoginSuccess={handleLoginSuccess} />
+      <GoogleAuthButton onLoginSuccess={handleLoginSuccess} />
     </LinearGradient>
   );
 };

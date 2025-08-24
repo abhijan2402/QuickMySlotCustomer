@@ -17,7 +17,7 @@ const Button = ({
   containerStyle = {},
   disabled = false,
   loading = false,
-  titleSize = 20,
+  titleSize = 15,
   titleColor,
   titleType = 'semiBold',
   activeOpacity = 0.9,
@@ -62,7 +62,7 @@ const Button = ({
           )}
           <Typography
             size={titleSize}
-            color={titleColor ?? COLOR.primary}
+            color={titleColor ?? COLOR.white}
             font={titleType}
             style={{
               marginLeft: leftIcon ? 5 : 0,
@@ -81,7 +81,7 @@ export default Button;
 const createStyles = (theme  ) =>
   StyleSheet.create({
     buttons: {
-      backgroundColor: theme?.blue,
+      backgroundColor: theme?.buttonColor,
       borderRadius: 7,
       height: 55,
       width: '100%',
@@ -107,6 +107,5 @@ const createStyles = (theme  ) =>
       alignItems: 'center',
       justifyContent: 'center',
       flexDirection: 'row',
-      paddingTop: 8,
     },
   });

@@ -1,23 +1,28 @@
-// GoogleAuthButton.js
-
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 import {
+  Alert,
   TouchableOpacity,
   StyleSheet,
   Image,
   Text,
-  Alert,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { COLOR } from '../../Constants/Colors';
-import { windowWidth } from '../../Constants/Dimensions';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import {COLOR} from '../../Constants/Colors';
+import {windowWidth} from '../../Constants/Dimensions';
 
-const GoogleAuthButton = ({ onLoginSuccess }) => {
+const GoogleAuthButton = ({onLoginSuccess}) => {
+  // ✅ Configure Google Sign-In once
+  useEffect(() => {
+     GoogleSignin.configure({
+       webClientId:
+         '218547319777-4dbc8eridimnd6c8d3m78oqu66m297vj.apps.googleusercontent.com',
+     });
+   }, []);
 
   const handleGoogleLogin = async () => {
     try {
-      // Check if user is already signed in and sign out first
+      // ✅ Check if user already signed in
       const currentUser = await GoogleSignin.getCurrentUser();
       if (currentUser) {
         await GoogleSignin.signOut();
@@ -25,21 +30,19 @@ const GoogleAuthButton = ({ onLoginSuccess }) => {
         console.log('Signed out from previous Google session.');
       }
 
-      // Start new Google Sign-In
-      const { idToken } = await GoogleSignin.signIn();
-
+      // ✅ Start Google Sign-In flow
+      const {idToken} = await GoogleSignin.signIn();
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-
       const userSignIn = await auth().signInWithCredential(googleCredential);
 
-      console.log('User signed in: ', userSignIn.user);
+      console.log('User signed in:', userSignIn.user);
 
       if (onLoginSuccess) {
         onLoginSuccess(userSignIn.user);
       }
     } catch (error) {
       console.error('Google Sign-In Error:', error);
-      Alert.alert('Login Failed', error.message);
+      // Alert.alert('Login Failed', error.message);
     }
   };
 
@@ -72,7 +75,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 3,

@@ -4,6 +4,7 @@ import {AuthContext} from '../Backend/AuthContent'; // 👈 confirm this path!
 import RootNavigation from './RootNavigation';
 import AuthStack from './AuthNavigation';
 import {ToastProvider, useToast} from '../Constants/ToastContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const MainNavigation = () => {
   const auth = useContext(AuthContext);
@@ -24,9 +25,9 @@ const MainNavigation = () => {
   }
 
   return (
-    <View style={{flex: 1}}>
+    <SafeAreaView style={{flex: 1}}>
       <ToastProvider>{user ? <RootNavigation /> : <AuthStack />}</ToastProvider>
-    </View>
+    </SafeAreaView>
   );
 };
 

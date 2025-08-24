@@ -7,7 +7,7 @@ import {COLOR} from '../Constants/Colors';
 import MainHome from '../Screens/Private/Home/MainHome';
 import Appointment from '../Screens/Private/AppointmentSection/Appointment';
 import MyAnalytics from '../Screens/Private/Home/Analytics';
-import CustomBarButton from './CustomBarButton';
+import {useNavigation} from '@react-navigation/native';
 
 const Tab = createBottomTabNavigator();
 
@@ -15,12 +15,46 @@ const CustomTabBarButton = ({children, onPress}) => <CustomBarButton />;
 
 const BottomNavigation = () => {
   const insets = useSafeAreaInsets();
-
+  const navigation = useNavigation();
   const icons = {
     Dashboard: 'https://cdn-icons-png.flaticon.com/128/1828/1828765.png',
     Appointments: 'https://cdn-icons-png.flaticon.com/128/8302/8302424.png',
     Analytics: 'https://cdn-icons-png.flaticon.com/128/2041/2041637.png',
     Profile: 'https://cdn-icons-png.flaticon.com/128/9308/9308008.png',
+  };
+  const CustomBarButton = () => {
+    return (
+    <TouchableOpacity
+      activeOpacity={0.99}
+      style={{
+        top: -20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        ...styles.shadow,
+      }}
+      onPress={() => {
+        navigation.navigate('PayBill');
+      }}>
+      <View
+        style={{
+          width: 60,
+          height: 60,
+          borderRadius: 30,
+          backgroundColor: COLOR.primary,
+          justifyContent: 'center',
+          alignItems: 'center',
+          elevation: 5,
+        }}>
+        <Text
+          style={{
+            color: 'white',
+            fontSize: 12,
+          }}>
+          Pay Bill
+        </Text>
+      </View>
+    </TouchableOpacity>
+    );
   };
 
   return (
@@ -35,7 +69,7 @@ const BottomNavigation = () => {
         },
         tabBarStyle: {
           paddingVertical: 8,
-          height: 60 + insets.bottom,
+          height: 60,
           position: 'relative',
         },
         tabBarIcon: ({focused}) => {
@@ -57,14 +91,14 @@ const BottomNavigation = () => {
         },
         tabBarLabel: ({color}) => {
           if (route.name === 'PayBill') {
-            return null; // We'll handle this in the tabBarButton option
+            return null;
           }
           let label = route.name;
           return (
             <Text
               style={{
                 color,
-                fontSize: 12,
+                fontSize: 11,
                 marginTop: 4,
                 textAlign: 'center',
                 width: '100%',

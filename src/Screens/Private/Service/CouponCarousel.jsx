@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 
-const { width } = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 
 const CouponCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -55,18 +55,25 @@ const CouponCarousel = () => {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>Offers available for you</Text>
-
       <ScrollView
         ref={scrollViewRef}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        scrollEnabled={false}
-      >
+        scrollEnabled={true} // allow manual scrolling
+        onMomentumScrollEnd={event => {
+          const newIndex = Math.round(
+            event.nativeEvent.contentOffset.x / width,
+          );
+          setCurrentIndex(newIndex);
+        }}>
         {coupons.map((coupon, index) => (
           <View key={coupon.id} style={styles.card}>
             <View style={styles.contentRow}>
-              <Image source={require('../../../assets/Images/discount.png')} style={styles.icon} />
+              <Image
+                source={require('../../../assets/Images/discount.png')}
+                style={styles.icon}
+              />
               <View style={styles.textContainer}>
                 <Text style={styles.title}>{coupon.title}</Text>
                 <Text style={styles.description}>{coupon.description}</Text>
@@ -117,11 +124,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    marginBottom:10
+    marginBottom: 10,
   },
   contentRow: {
     flexDirection: 'row',

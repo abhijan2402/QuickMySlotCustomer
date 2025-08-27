@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   View,
-  Text,
   TouchableOpacity,
   StyleSheet,
   Dimensions,
@@ -9,6 +8,7 @@ import {
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
+import {Typography} from '../../../Components/UI/Typography';
 
 const {width} = Dimensions.get('window');
 
@@ -21,37 +21,39 @@ const MyAnalytics = ({navigation}) => {
         leftTint={COLOR.black}
       />
 
-      <ScrollView contentContainerStyle={{padding: 15}}>
+      <ScrollView contentContainerStyle={{paddingHorizontal: 10,paddingVertical:15}}>
         {/* Spending & Savings */}
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Spending & Savings</Text>
+          <Typography style={styles.sectionTitle}>
+            Spending & Savings
+          </Typography>
 
           <View style={styles.grid}>
             <View style={styles.box}>
-              <Text style={styles.amount}>$245.00</Text>
-              <Text style={styles.label}>Spent This Month</Text>
+              <Typography style={styles.amount}>$245.00</Typography>
+              <Typography style={styles.label}>Spent This Month</Typography>
             </View>
             <View style={styles.box}>
-              <Text style={styles.amount}>$45.00</Text>
-              <Text style={styles.label}>Saved This Month</Text>
+              <Typography style={styles.amount}>$45.00</Typography>
+              <Typography style={styles.label}>Saved This Month</Typography>
             </View>
             <View style={styles.box}>
-              <Text style={styles.amount}>5</Text>
-              <Text style={styles.label}>Total Bookings</Text>
+              <Typography style={styles.amount}>5</Typography>
+              <Typography style={styles.label}>Total Bookings</Typography>
             </View>
             <View style={styles.box}>
-              <Text style={styles.amount}>3</Text>
-              <Text style={styles.label}>Favorite Providers</Text>
+              <Typography style={styles.amount}>3</Typography>
+              <Typography style={styles.label}>Favorite Providers</Typography>
             </View>
           </View>
         </View>
 
         {/* Cashback Banner */}
         <View style={styles.cashbackCard}>
-          <Text style={styles.cashbackAmount}>$12.50</Text>
-          <Text style={styles.cashbackText}>
+          <Typography style={styles.cashbackAmount}>$12.50</Typography>
+          <Typography style={styles.cashbackText}>
             Cashback Earned This Month{'\n'}from wallet recharges and bookings!
-          </Text>
+          </Typography>
         </View>
       </ScrollView>
     </View>
@@ -64,12 +66,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLOR.white,
-    // marginHorizontal :15
+    paddingHorizontal:15
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    // padding: 15,
     backgroundColor: COLOR.white,
     justifyContent: 'space-between',
   },

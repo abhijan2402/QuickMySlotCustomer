@@ -131,6 +131,7 @@ const ImageSwiper = () => {
         keyExtractor={(item, index) => index.toString()}
         horizontal
         pagingEnabled
+        scrollEnabled={false} 
         showsHorizontalScrollIndicator={false}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { x: scrollX } } }],

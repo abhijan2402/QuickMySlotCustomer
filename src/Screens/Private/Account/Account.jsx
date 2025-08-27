@@ -1,45 +1,25 @@
-// import {StyleSheet, Text, View} from 'react-native';
-// import React from 'react';
-// import Header from '../../../Components/FeedHeader';
-// import HomeHeader from '../../../Components/HomeHeader';
-// import {COLOR} from '../../../Constants/Colors';
-
-// const Account = () => {
-//   return (
-//     <View>
-//       <HomeHeader
-//         title="Profile"
-//         leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
-//         leftTint={COLOR.black}
-//       />
-//     </View>
-//   );
-// };
-
-// export default Account;
-
-// const styles = StyleSheet.create({});
-
-import React, {useContext} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   StyleSheet,
-  Text,
   View,
   Image,
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import Header from '../../../Components/FeedHeader';
 import {COLOR} from '../../../Constants/Colors';
-import CustomButton from '../../../Components/CustomButton';
 import {AuthContext} from '../../../Backend/AuthContent';
 import HomeHeader from '../../../Components/HomeHeader';
-import ImageModal from '../../../Components/UI/ImageModal';
+import Button from '../../../Components/UI/Button';
+import ConfirmModal from '../../../Components/UI/ConfirmModel';
+import {Typography} from '../../../Components/UI/Typography';
 
 const Account = ({navigation}) => {
   const {setUser} = useContext(AuthContext);
-  const [showModal, setShowModal] = React.useState(false);
-  const [profileImage, setProfileImage] = React.useState({ uri :'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'});
+  const [profileImage, setProfileImage] = React.useState({
+    uri: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+  });
+  const [visible, setVisible] = useState(false);
+  const [deleteAccount, setDeleteAccount] = useState(false);
 
   const arrowIcon = 'https://cdn-icons-png.flaticon.com/512/271/271228.png'; // right arrow icon
 
@@ -72,7 +52,6 @@ const Account = ({navigation}) => {
         slug: 'terms-condition',
       },
     },
-
     {
       id: 4,
       title: 'About Us',
@@ -111,21 +90,6 @@ const Account = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <ImageModal
-        showModal={showModal}
-        close={() => {
-          setShowModal(false);
-        }}
-        selected={(image) => {
-          console.log('Selected image:', image);
-          let img = {
-            uri: image.path,
-            type: image.mime || 'image/jpeg',
-            name: image.filename || 'profile.jpg',
-          }
-          setProfileImage(img);
-        }}
-      />
       <HomeHeader
         title="Profile"
         leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
@@ -134,33 +98,17 @@ const Account = ({navigation}) => {
       {/* Profile Section */}
       <View style={styles.profileSection}>
         <View>
-          <Image source={{uri: profileImage?.uri}} style={styles.profileImage} />
-          <TouchableOpacity
-            style={{
-              position: 'absolute',
-              resizeMode: 'contain',
-              bottom: 5,
-              right: 0,
-              backgroundColor: COLOR.white,
-              padding: 9,
-              elevation: 5,
-              borderRadius: 20,
-            }}
-            activeOpacity={0.7}
-            onPress={() => {
-              setShowModal(true);
-            }}>
-            <Image
-              source={require('../../../assets/Images/edit.png')}
-              style={{
-                height: 20,
-                width: 20,
-              }}
-            />
-          </TouchableOpacity>
+          <Image
+            source={{uri: profileImage?.uri}}
+            style={styles.profileImage}
+          />
         </View>
-        <Text style={styles.profileName}>John Doe</Text>
-        <Text style={styles.profileEmail}>john@example.com</Text>
+        <Typography size={20} fontWeight="bold" color={COLOR.black}>
+          John Doe
+        </Typography>
+        <Typography size={14} color={COLOR.GRAY} style={{marginTop: 4}}>
+          john@example.com
+        </Typography>
       </View>
 
       <ScrollView
@@ -176,33 +124,52 @@ const Account = ({navigation}) => {
               onPress={() => navigation.navigate(item.navigate, item.params)}>
               <View style={styles.tabLeft}>
                 <Image source={{uri: item.icon}} style={styles.leftIcon} />
-                <Text style={styles.tabText}>{item.title}</Text>
+                <Typography size={16} color={COLOR.black}>
+                  {item.title}
+                </Typography>
               </View>
               <Image source={{uri: arrowIcon}} style={styles.arrowIcon} />
             </TouchableOpacity>
           ))}
         </View>
-        <CustomButton
+        <Button
           title={'Log Out'}
-          style={{marginTop: '10%'}}
-          onPress={() => {
-            setUser('ABCC');
-          }}
+          containerStyle={{marginTop: 15, marginBottom: 0}}
+          onPress={() => setVisible(true)}
         />
-        <CustomButton
-          textStyle={{color: COLOR.red}}
+        <Button
+          titleColor={COLOR.red}
           title={'Delete Account'}
-          style={{
-            marginTop: '5%',
+          containerStyle={{
+            marginTop: 20,
             backgroundColor: COLOR.white,
             borderWidth: 1,
             borderColor: COLOR.red,
+            marginBottom: 20,
           }}
-          onPress={() => {
-            setUser('ABCC');
-          }}
+          onPress={() => setDeleteAccount(true)}
         />
       </ScrollView>
+      <ConfirmModal
+        visible={visible}
+        close={() => setVisible(false)}
+        title="Logout"
+        description="Are you sure you want to logout?"
+        yesTitle="Yes"
+        noTitle="No"
+        onPressYes={() => {}}
+        onPressNo={() => setVisible(false)}
+      />
+      <ConfirmModal
+        visible={deleteAccount}
+        close={() => setDeleteAccount(false)}
+        title="Delete Account"
+        description="Are you sure you want to Delete Account?"
+        yesTitle="Yes"
+        noTitle="No"
+        onPressYes={() => {}}
+        onPressNo={() => setDeleteAccount(false)}
+      />
     </View>
   );
 };
@@ -227,16 +194,6 @@ const styles = StyleSheet.create({
     height: 90,
     borderRadius: 45,
     marginBottom: 10,
-  },
-  profileName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: COLOR.black,
-  },
-  profileEmail: {
-    fontSize: 14,
-    color: COLOR.GRAY,
-    marginTop: 4,
   },
   tabContainer: {
     marginTop: 20,
@@ -271,9 +228,5 @@ const styles = StyleSheet.create({
     height: 16,
     resizeMode: 'contain',
     tintColor: '#999',
-  },
-  tabText: {
-    fontSize: 16,
-    color: COLOR.black,
   },
 });

@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {
   StyleSheet,
-  Text,
   View,
   TouchableOpacity,
   Share,
@@ -13,6 +12,7 @@ import {
 import HomeHeader from '../../../Components/HomeHeader';
 import {COLOR} from '../../../Constants/Colors';
 import {windowWidth} from '../../../Constants/Dimensions';
+import {Typography} from '../../../Components/UI/Typography';
 
 const Invite = () => {
   const [inviteCode] = useState('QMS12345');
@@ -48,24 +48,26 @@ const Invite = () => {
       />
 
       <View style={styles.content}>
-        <Text style={styles.subText}>
+        <Typography style={styles.subText}>
           Share your referral link with friends and get rewards when they join.
-        </Text>
+        </Typography>
 
         <View style={styles.inviteBox}>
-          <Text style={styles.inviteCode}>{inviteCode}</Text>
+          <Typography style={styles.inviteCode}>{inviteCode}</Typography>
           <TouchableOpacity style={styles.copyBtn} onPress={handleCopy}>
-            <Text style={styles.copyBtnText}>Copy</Text>
+            <Typography style={styles.copyBtnText}>Copy</Typography>
           </TouchableOpacity>
         </View>
 
         <TouchableOpacity style={styles.shareBtn} onPress={handleShare}>
-          <Text style={styles.shareBtnText}>Share Invite Link</Text>
+          <Typography style={styles.shareBtnText}>
+            Share Invite Link
+          </Typography>
         </TouchableOpacity>
 
         {/* Follow Us Section in Card */}
         <View style={styles.card}>
-          <Text style={styles.followHeading}>Follow us on</Text>
+          <Typography style={styles.followHeading}>Follow us on</Typography>
           <View style={styles.socialContainer}>
             <TouchableOpacity onPress={() => openLink('https://facebook.com/')}>
               <Image
@@ -110,6 +112,7 @@ const styles = StyleSheet.create({
   content: {
     marginTop: 20,
     alignItems: 'center',
+    marginHorizontal:10
   },
   heading: {
     fontSize: 20,

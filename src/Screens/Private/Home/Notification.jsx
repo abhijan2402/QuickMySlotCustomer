@@ -1,14 +1,13 @@
 import React from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   Image,
-  TouchableOpacity,
   ScrollView,
 } from 'react-native';
 import HomeHeader from '../../../Components/HomeHeader';
 import {COLOR} from '../../../Constants/Colors';
+import { Typography } from '../../../Components/UI/Typography';
 
 const notifications = [
   {
@@ -62,7 +61,7 @@ const NotificationsScreen = () => {
       />
 
       {/* Notifications List */}
-      <ScrollView contentContainerStyle={{paddingVertical: 10}}>
+      <ScrollView contentContainerStyle={{paddingVertical: 10, paddingHorizontal: 10}}>
         {notifications.map(item => (
           <View key={item.id} style={styles.card}>
             <View style={styles.cardLeft}>
@@ -70,13 +69,19 @@ const NotificationsScreen = () => {
             </View>
             <View style={styles.cardRight}>
               <View style={styles.cardHeader}>
-                <Text style={styles.cardTitle}>{item.title}</Text>
-                <Text style={[styles.status, {color: item.statusColor}]}>
+                <Typography size={14} fontWeight="600" color={COLOR.black}>
+                  {item.title}
+                </Typography>
+                <Typography size={12} fontWeight="600" color={item.statusColor}>
                   {item.status}
-                </Text>
+                </Typography>
               </View>
-              <Text style={styles.cardMessage}>{item.message}</Text>
-              <Text style={styles.time}>{item.time}</Text>
+              <Typography size={12} color="#555" style={{marginVertical: 4}}>
+                {item.message}
+              </Typography>
+              <Typography size={11} color="#888">
+                {item.time}
+              </Typography>
             </View>
           </View>
         ))}
@@ -98,7 +103,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 15,
     paddingHorizontal: 10,
-    // marginHorizontal: 15,
     marginVertical: 6,
     borderRadius: 10,
     shadowColor: '#000',
@@ -128,22 +132,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  cardTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  status: {
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  cardMessage: {
-    fontSize: 12,
-    color: '#555',
-    marginVertical: 4,
-  },
-  time: {
-    fontSize: 11,
-    color: '#888',
   },
 });

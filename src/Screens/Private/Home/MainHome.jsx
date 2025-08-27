@@ -2,20 +2,16 @@ import React, {useRef, useEffect} from 'react';
 import {
   Image,
   StyleSheet,
-  Text,
   TextInput,
   View,
   TouchableOpacity,
   ScrollView,
-  FlatList,
   Dimensions,
   Animated,
   Platform,
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
-import {windowWidth} from '../../../Constants/Dimensions';
-import HomeHeader from '../../../Components/HomeHeader';
-import { useNavigation } from '@react-navigation/native';
+import {Typography} from '../../../Components/UI/Typography';
 import MainHomeHeader from './MainHomeHeader';
 
 const {width} = Dimensions.get('window');
@@ -47,7 +43,7 @@ const MainHome = ({navigation}) => {
       icon: 'https://cdn-icons-png.flaticon.com/128/18302/18302431.png',
     },
     {
-      title: 'Tattoo &v Piercing',
+      title: 'Tattoo & Piercing',
       icon: 'https://cdn-icons-png.flaticon.com/128/2678/2678993.png',
     },
   ];
@@ -110,11 +106,13 @@ const MainHome = ({navigation}) => {
     );
     pulse.start();
   }, []);
+
   return (
     <View style={styles.container}>
       {/* Header */}
-      <MainHomeHeader
-      />
+      <MainHomeHeader />
+
+      {/* Floating Offers Button */}
       <Animated.View style={[styles.fab, {transform: [{scale: scaleAnim}]}]}>
         <TouchableOpacity onPress={() => navigation.navigate('Offers')}>
           <Image
@@ -142,25 +140,46 @@ const MainHome = ({navigation}) => {
           />
         </View>
 
-        <Text style={styles.sectionTitle}>My Bookings</Text>
+        {/* My Bookings */}
+        <Typography size={16} fontWeight="600" style={styles.sectionTitle}>
+          My Bookings
+        </Typography>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {bookings.map(item => (
             <View key={item.id} style={styles.bookingCard}>
-              <Text style={styles.bookingVendor}>{item.vendor}</Text>
-              <Text style={styles.bookingText}>
+              <Typography
+                size={17}
+                fontWeight="bold"
+                style={styles.bookingVendor}>
+                {item.vendor}
+              </Typography>
+              <Typography size={13} style={styles.bookingText}>
                 Services:{' '}
-                <Text style={styles.bookingHighlight}>{item.services}</Text>
-              </Text>
-              <Text style={styles.bookingText}>
-                Price: <Text style={styles.bookingHighlight}>{item.price}</Text>
-              </Text>
-              <Text style={styles.bookingText}>
-                Date: <Text style={styles.bookingHighlight}>{item.date}</Text>
-              </Text>
-              <Text style={styles.bookingText}>Address: {item.address}</Text>
-              <Text style={styles.bookingText}>
-                Phone: <Text style={styles.bookingHighlight}>{item.phone}</Text>
-              </Text>
+                <Typography fontWeight="600" color="#7b4ce0">
+                  {item.services}
+                </Typography>
+              </Typography>
+              <Typography size={13} style={styles.bookingText}>
+                Price:{' '}
+                <Typography fontWeight="600" color="#7b4ce0">
+                  {item.price}
+                </Typography>
+              </Typography>
+              <Typography size={13} style={styles.bookingText}>
+                Date:{' '}
+                <Typography fontWeight="600" color="#7b4ce0">
+                  {item.date}
+                </Typography>
+              </Typography>
+              <Typography size={13} style={styles.bookingText}>
+                Address: {item.address}
+              </Typography>
+              <Typography size={13} style={styles.bookingText}>
+                Phone:{' '}
+                <Typography fontWeight="600" color="#7b4ce0">
+                  {item.phone}
+                </Typography>
+              </Typography>
             </View>
           ))}
         </ScrollView>
@@ -188,7 +207,9 @@ const MainHome = ({navigation}) => {
         </View>
 
         {/* Service Categories */}
-        <Text style={styles.sectionTitle}>Service Categories</Text>
+        <Typography size={16} fontWeight="600" style={styles.sectionTitle}>
+          Service Categories
+        </Typography>
         <View style={styles.categories}>
           {categories.map((item, index) => (
             <TouchableOpacity
@@ -196,10 +217,14 @@ const MainHome = ({navigation}) => {
               key={index}
               style={styles.categoryCard}>
               <Image source={{uri: item.icon}} style={styles.categoryIcon} />
-              <Text style={styles.categoryText}>{item.title}</Text>
+              <Typography size={14} style={styles.categoryText}>
+                {item.title}
+              </Typography>
             </TouchableOpacity>
           ))}
         </View>
+
+        {/* Another Banner */}
         <View style={{marginVertical: 20}}>
           <ScrollView
             ref={scrollRef}
@@ -226,6 +251,7 @@ const MainHome = ({navigation}) => {
 };
 
 export default MainHome;
+
 // const MainHomeHeader = ()=>{
 //   const navigation = useNavigation()
 //   return(
@@ -282,7 +308,7 @@ const styles = StyleSheet.create({
     borderColor: '#EBEBEA',
   },
   searchIcon: {width: 20, height: 20, marginRight: 8},
-  searchInput: {flex: 1,color:'black'},
+  searchInput: {flex: 1, color: 'black'},
 
   // My Bookings
   bookingCard: {
@@ -414,13 +440,13 @@ const styles = StyleSheet.create({
     height: 35,
     // tintColor: '#fff',
   },
-   header: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 10,
     // paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 5 : 0,
-    paddingTop: Platform.OS === 'android' ?  10 : 0,
+    paddingTop: Platform.OS === 'android' ? 10 : 0,
   },
   icon: {
     width: 30,

@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {
   StyleSheet,
-  Text,
   View,
   FlatList,
   TouchableOpacity,
@@ -12,6 +11,8 @@ import {
 import HomeHeader from '../../../Components/HomeHeader';
 import {COLOR} from '../../../Constants/Colors';
 import CustomButton from '../../../Components/CustomButton';
+import { Typography } from '../../../Components/UI/Typography';
+import Button from '../../../Components/UI/Button';
 
 const Support = () => {
   const [tickets, setTickets] = useState([
@@ -59,8 +60,8 @@ const Support = () => {
   const renderTicket = ({item}) => (
     <View style={styles.ticketCard}>
       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-        <Text style={styles.ticketTitle}>{item.title}</Text>
-        <Text
+        <Typography style={styles.ticketTitle}>{item.title}</Typography>
+        <Typography
           style={[
             styles.status,
             item.status === 'Resolved'
@@ -68,12 +69,12 @@ const Support = () => {
               : styles.statusOpen,
           ]}>
           {item.status}
-        </Text>
+        </Typography>
       </View>
-      <Text style={styles.ticketDesc}>{item.description}</Text>
-      <Text style={styles.ticketDate}>
+      <Typography style={styles.ticketDesc}>{item.description}</Typography>
+      <Typography style={styles.ticketDate}>
         {item.date} • {item.time}
-      </Text>
+      </Typography>
     </View>
   );
 
@@ -89,14 +90,14 @@ const Support = () => {
         data={tickets}
         renderItem={renderTicket}
         keyExtractor={item => item.id}
-        contentContainerStyle={{paddingVertical: 10}}
+        contentContainerStyle={{paddingVertical: 10,paddingHorizontal:10}}
       />
 
-      <CustomButton
-        style={{marginBottom: 50}}
+      <Button
         title="Raise Ticket"
         onPress={() => setModalVisible(true)}
       />
+
       {/* Raise Ticket Modal */}
       <Modal
         visible={modalVisible}
@@ -106,7 +107,9 @@ const Support = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <ScrollView>
-              <Text style={styles.modalTitle}>Raise a Support Ticket</Text>
+              <Typography style={styles.modalTitle}>
+                Raise a Support Ticket
+              </Typography>
               <TextInput
                 style={styles.input}
                 placeholder="Enter Ticket Title"
@@ -128,7 +131,9 @@ const Support = () => {
               <TouchableOpacity
                 onPress={() => setModalVisible(false)}
                 style={styles.cancelBtn}>
-                <Text style={{color: COLOR.primary}}>Cancel</Text>
+                <Typography style={{color: COLOR.primary}}>
+                  Cancel
+                </Typography>
               </TouchableOpacity>
             </ScrollView>
           </View>

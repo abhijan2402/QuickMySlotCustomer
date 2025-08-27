@@ -66,6 +66,8 @@ const Button = ({
             font={titleType}
             style={{
               marginLeft: leftIcon ? 5 : 0,
+              fontSize:16,
+              fontWeight:"500"
             }}
             numberOfLines={1}>
             {title}
@@ -78,13 +80,13 @@ const Button = ({
 
 export default Button;
 
-const createStyles = (theme  ) =>
+const createStyles = (theme) =>
   StyleSheet.create({
     buttons: {
       backgroundColor: theme?.buttonColor,
       borderRadius: 7,
       height: 55,
-      width: '100%',
+      width: '95%',
       alignSelf: 'center',
       justifyContent: 'center',
       shadowColor: 'rgba(0, 0, 0, 0.25)',
@@ -95,6 +97,7 @@ const createStyles = (theme  ) =>
       shadowOpacity: Platform.OS === 'ios' ? 0.2 : 0.2,
       shadowRadius: 4,
       elevation: Platform.OS === 'ios' ? 0 : 5,
+      marginBottom:10
     },
     indicator: {
       justifyContent: 'center',

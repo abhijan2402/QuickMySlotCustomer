@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {
   StyleSheet,
-  Text,
   View,
   TouchableOpacity,
   ScrollView,
@@ -9,7 +8,7 @@ import {
 } from 'react-native';
 import HomeHeader from '../../../Components/HomeHeader';
 import {COLOR} from '../../../Constants/Colors';
-import {windowHeight} from '../../../Constants/Dimensions';
+import {Typography} from '../../../Components/UI/Typography'; // ✅ Import Typography
 
 const faqData = [
   {
@@ -63,7 +62,9 @@ const Faq = () => {
         {faqData.map((section, sectionIndex) => (
           <View key={sectionIndex}>
             {/* Section Title */}
-            <Text style={styles.sectionTitle}>{section.title}</Text>
+            <Typography size={16} fontWeight="700" style={styles.sectionTitle}>
+              {section.title}
+            </Typography>
 
             {/* Section Items */}
             {section.items.map((item, itemIndex) => {
@@ -75,7 +76,9 @@ const Faq = () => {
                   <TouchableOpacity
                     style={styles.faqHeader}
                     onPress={() => toggleExpand(indexKey)}>
-                    <Text style={styles.faqQuestion}>{item}</Text>
+                    <Typography size={14} style={styles.faqQuestion}>
+                      {item}
+                    </Typography>
                     <Image
                       source={{
                         uri: isExpanded
@@ -86,9 +89,9 @@ const Faq = () => {
                     />
                   </TouchableOpacity>
                   {isExpanded && (
-                    <Text style={styles.faqAnswer}>
+                    <Typography size={13} style={styles.faqAnswer}>
                       This is where the answer for "{item}" will go.
-                    </Text>
+                    </Typography>
                   )}
                 </View>
               );
@@ -96,7 +99,7 @@ const Faq = () => {
           </View>
         ))}
       </ScrollView>
-      <View style={{height: 50}}></View>
+      <View style={{height: 50}} />
     </View>
   );
 };
@@ -110,8 +113,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
     marginTop: 20,
     marginBottom: 8,
     color: COLOR.black,
@@ -131,7 +132,6 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   faqQuestion: {
-    fontSize: 14,
     color: COLOR.black,
     flex: 1,
     paddingRight: 10,
@@ -144,7 +144,6 @@ const styles = StyleSheet.create({
   faqAnswer: {
     paddingHorizontal: 12,
     paddingBottom: 12,
-    fontSize: 13,
     color: '#555',
     lineHeight: 18,
   },

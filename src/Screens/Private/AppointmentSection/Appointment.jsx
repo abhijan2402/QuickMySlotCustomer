@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {
   StyleSheet,
-  Text,
   View,
   TouchableOpacity,
   FlatList,
@@ -9,6 +8,7 @@ import {
 } from 'react-native';
 import HomeHeader from '../../../Components/HomeHeader';
 import {COLOR} from '../../../Constants/Colors';
+import {Typography} from '../../../Components/UI/Typography';
 
 const Appointment = ({navigation}) => {
   const [selectedFilter, setSelectedFilter] = useState('All');
@@ -99,8 +99,8 @@ const Appointment = ({navigation}) => {
         <View style={styles.row}>
           <Image source={{uri: item.image}} style={styles.serviceImage} />
           <View style={{flex: 1, marginLeft: 10}}>
-            <Text style={styles.title}>{item.title}</Text>
-            <Text
+            <Typography style={styles.title}>{item.title}</Typography>
+            <Typography
               style={[
                 styles.status,
                 {
@@ -109,8 +109,8 @@ const Appointment = ({navigation}) => {
                 },
               ]}>
               {item.status}
-            </Text>
-            <Text style={styles.dateText}>{item.date}</Text>
+            </Typography>
+            <Typography style={styles.dateText}>{item.date}</Typography>
           </View>
         </View>
 
@@ -118,11 +118,11 @@ const Appointment = ({navigation}) => {
 
         {/* Shop Details */}
         <View style={{marginTop: 5}}>
-          <Text style={styles.salonName}>{item.salon}</Text>
-          <Text style={styles.salonService}>{item.service}</Text>
-          <Text style={styles.details}>📍 {item.address}</Text>
-          <Text style={styles.details}>📞 {item.contact}</Text>
-          <Text style={styles.amount}>💰 {item.amount}</Text>
+          <Typography style={styles.salonName}>{item.salon}</Typography>
+          <Typography style={styles.salonService}>{item.service}</Typography>
+          <Typography style={styles.details}>📍 {item.address}</Typography>
+          <Typography style={styles.details}>📞 {item.contact}</Typography>
+          <Typography style={styles.amount}>💰 {item.amount}</Typography>
         </View>
       </TouchableOpacity>
     );
@@ -135,6 +135,9 @@ const Appointment = ({navigation}) => {
         leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
         leftTint={COLOR.black}
       />
+      <View>
+        
+      </View>
 
       {/* Filters */}
       <View style={styles.filterRow}>
@@ -151,13 +154,13 @@ const Appointment = ({navigation}) => {
                 },
               ]}
               onPress={() => setSelectedFilter(filter.label)}>
-              <Text
+              <Typography
                 style={[
                   styles.filterText,
                   {color: isSelected ? COLOR.white : COLOR.black},
                 ]}>
                 {filter.label}
-              </Text>
+              </Typography>
             </TouchableOpacity>
           );
         })}
@@ -209,6 +212,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 5,
     elevation: 2,
+    marginHorizontal:10
   },
   row: {
     flexDirection: 'row',
@@ -228,10 +232,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     marginTop: 2,
-    alignSelf:"flex-start",
-    padding:3,
-    borderRadius:50,
-    paddingHorizontal:10
+    alignSelf: 'flex-start',
+    padding: 3,
+    borderRadius: 50,
+    paddingHorizontal: 10,
   },
   dateText: {
     fontSize: 12,

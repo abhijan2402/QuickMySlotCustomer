@@ -1,59 +1,99 @@
 import React from 'react';
-import {Image, StyleSheet, Text, TextInput, View} from 'react-native';
+import {Image, StyleSheet, View} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {windowHeight, windowWidth} from '../../Constants/Dimensions';
 import {COLOR} from '../../Constants/Colors';
-import CustomButton from '../../Components/CustomButton';
+import {isValidForm} from '../../Backend/Utility';
+import Button from '../../Components/UI/Button';
 import GoogleAuthButton from '../../Components/UI/GoogleAuthButton';
+import {ScrollView} from 'react-native';
+import Input from '../../Components/Input';
+import {Typography} from '../../Components/UI/Typography';  
+import { validators } from '../../Backend/Validator';
 
 const Login = ({navigation}) => {
-  const handleLoginSuccess = user => {
+  const [error, setError] = React.useState({});
+  const [number, setNumber] = React.useState('');
+
+  const onSubmit = () => {
+    let error = {
+      mobile: validators.checkNumber('Mobile Number', number),
+    };
+    setError(error);
+    if (isValidForm(error)) {
+      navigation.navigate('OtpScreen');
+    }
   };
+
+  const handleLoginSuccess = user => {};
+
   return (
-    <LinearGradient
-      colors={[COLOR.white, COLOR.white]}
-      start={{x: 0, y: 0}}
-      end={{x: 0, y: 1}}
-      style={styles.container}>
-      {/* Logo */}
-      <Image
-        source={require('../../assets/Images/logo.png')}
-        style={styles.logo}
-      />
+    <View
+      style={{flex: 1, paddingHorizontal: 20, backgroundColor: COLOR.white}}>
+      <LinearGradient
+        colors={[COLOR.white, COLOR.white]}
+        start={{x: 0, y: 0}}
+        end={{x: 0, y: 1}}
+        style={styles.container}>
+        
+        {/* Logo */}
+        <Image
+          source={require('../../assets/Images/logo.png')}
+          style={styles.logo}
+        />
 
-      {/* Tagline */}
-      <Text style={styles.text}>
-        Book smarter, Live better Only with QuickSlot
-      </Text>
+        {/* Tagline */}
+        <Typography
+          size={18}
+          fontWeight="600"
+          color="#242524"
+          textAlign="center"
+          lineHeight={28}
+          style={{width: windowWidth / 1.2, marginTop: 10}}>
+          Get Bookings, Expand Business with QuickSlot
+        </Typography>
 
-      {/* Mobile Number Input */}
-      <View style={styles.inputContainer}>
-        <Text style={styles.countryCode}>+91 | </Text>
-        <TextInput
+        {/* Mobile Number Input */}
+        <Input
           keyboardType="numeric"
           placeholder="Enter Mobile Number"
-          placeholderTextColor={COLOR.black}
-          style={styles.input}
+          value={number}
+          onChangeText={text => setNumber(text)}
+          error={error.mobile}
         />
-      </View>
 
-      {/* Continue Button */}
-      <CustomButton
-        title={'Continue'}
-        onPress={() => {
-          navigation.navigate('OtpScreen');
-        }}
-      />
+        {/* Continue Button */}
+        <Button
+          containerStyle={{marginTop: 30, width: '100%'}}
+          title={'Continue'}
+          onPress={onSubmit}
+        />
 
-      {/* Divider with text */}
-      <View style={styles.dividerContainer}>
-        <View style={styles.divider} />
-        <Text style={styles.dividerText}>Or</Text>
-        <View style={styles.divider} />
-      </View>
-      {/* Google Login Button */}
-      <GoogleAuthButton onLoginSuccess={handleLoginSuccess} />
-    </LinearGradient>
+        {/* Divider with text */}
+        <View style={styles.dividerContainer}>
+          <View style={styles.divider} />
+          <Typography size={14} color="#888">Or</Typography>
+          <View style={styles.divider} />
+        </View>
+
+        {/* Google Login Button */}
+        <GoogleAuthButton onLoginSuccess={handleLoginSuccess} />
+
+        {/* Register Section (if needed) */}
+        {/* 
+        <View style={styles.registerContainer}>
+          <Typography size={14} color="#555">Don’t have an account? </Typography>
+          <Typography
+            size={14}
+            color={COLOR.primary}
+            fontWeight="600"
+            onPress={() => navigation.navigate('SignUp')}>
+            Register
+          </Typography>
+        </View> 
+        */}
+      </LinearGradient>
+    </View>
   );
 };
 
@@ -69,34 +109,6 @@ const styles = StyleSheet.create({
     height: 200,
     marginTop: windowHeight * 0.1,
   },
-  text: {
-    fontSize: 18,
-    color: '#242524FF',
-    fontWeight: '600',
-    width: windowWidth / 1.5,
-    textAlign: 'center',
-    lineHeight: 28,
-  },
-  inputContainer: {
-    borderWidth: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderColor: '#2196F3FF',
-    backgroundColor: COLOR.white,
-    borderRadius: 6,
-    width: windowWidth - 40,
-    padding: 5,
-    paddingHorizontal: 10,
-    marginTop: 30,
-    marginBottom: 30,
-  },
-  countryCode: {
-    color: COLOR.black,
-  },
-  input: {
-    flex: 1,
-    color: COLOR.black,
-  },
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -107,10 +119,5 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 1,
     backgroundColor: '#ccc',
-  },
-  dividerText: {
-    marginHorizontal: 10,
-    color: '#888',
-    fontSize: 14,
   },
 });

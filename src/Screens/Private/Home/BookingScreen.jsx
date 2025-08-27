@@ -25,7 +25,6 @@ const BookingScreen = ({navigation}) => {
   const [dateStart, setDateStart] = useState(null);
   const [location_id, setLocation_id] = useState(mockLocation);
 
-
   // Mock location data with provider availability
   const mockLocation = {
     id: 'location-1',
@@ -34,33 +33,33 @@ const BookingScreen = ({navigation}) => {
       {
         date: moment().utc().format('YYYY-MM-DD'), // Today
         time_slot: [
-          { start_time: '09:00:00', end_time: '10:00:00' },
-          { start_time: '10:00:00', end_time: '11:00:00' },
-          { start_time: '11:00:00', end_time: '12:00:00' },
-          { start_time: '14:00:00', end_time: '15:00:00' },
-          { start_time: '15:00:00', end_time: '16:00:00' },
-        ]
+          {start_time: '09:00:00', end_time: '10:00:00'},
+          {start_time: '10:00:00', end_time: '11:00:00'},
+          {start_time: '11:00:00', end_time: '12:00:00'},
+          {start_time: '14:00:00', end_time: '15:00:00'},
+          {start_time: '15:00:00', end_time: '16:00:00'},
+        ],
       },
       {
         date: moment().add(1, 'days').utc().format('YYYY-MM-DD'), // Tomorrow
         time_slot: [
-          { start_time: '09:00:00', end_time: '10:00:00' },
-          { start_time: '10:30:00', end_time: '11:30:00' },
-          { start_time: '13:00:00', end_time: '14:00:00' },
-        ]
+          {start_time: '09:00:00', end_time: '10:00:00'},
+          {start_time: '10:30:00', end_time: '11:30:00'},
+          {start_time: '13:00:00', end_time: '14:00:00'},
+        ],
       },
       {
         date: moment().add(2, 'days').utc().format('YYYY-MM-DD'),
         time_slot: [
-          { start_time: '08:00:00', end_time: '09:00:00' },
-          { start_time: '11:00:00', end_time: '12:00:00' },
-          { start_time: '15:00:00', end_time: '16:00:00' },
-        ]
+          {start_time: '08:00:00', end_time: '09:00:00'},
+          {start_time: '11:00:00', end_time: '12:00:00'},
+          {start_time: '15:00:00', end_time: '16:00:00'},
+        ],
       },
       // Add more dates as needed
-    ]
+    ],
   };
-  
+
   // Demo services (not displayed but used for price calc if selected)
   const services = [
     {
@@ -89,22 +88,22 @@ const BookingScreen = ({navigation}) => {
   ];
 
   const times = [
-    '08:00',
-    '08:30',
-    '09:00',
-    '09:30',
-    '10:00',
-    '10:30',
-    '11:00',
-    '11:30',
-    '13:00',
-    '13:30',
-    '14:00',
-    '14:30',
-    '15:00',
-    '15:30',
-    '16:00',
-    '16:30',
+    '08:00 AM',
+    '08:30 AM',
+    '09:00 AM',
+    '09:30 AM',
+    '10:00 AM',
+    '10:30 AM',
+    '11:00 AM',
+    '11:30 AM',
+    '13:00 PM',
+    '13:30 PM',
+    '14:00 PM',
+    '14:30 PM',
+    '15:00 PM',
+    '15:30 PM',
+    '16:00 PM',
+    '16:30 PM',
   ];
 
   const toggleService = id => {
@@ -125,13 +124,14 @@ const BookingScreen = ({navigation}) => {
   const tax = subtotal * 0.1;
   const total = subtotal + tax + platformFee;
 
-
   // Mock function to convert time slots (replace with your actual implementation)
   const convertTimeSlots = (slots, date) => {
     return slots.map(slot => ({
       ...slot,
-      formatted: `${moment(slot.start_time, 'HH:mm:ss').format('h:mm A')} - ${moment(slot.end_time, 'HH:mm:ss').format('h:mm A')}`,
-      date: date
+      formatted: `${moment(slot.start_time, 'HH:mm:ss').format(
+        'h:mm A',
+      )} - ${moment(slot.end_time, 'HH:mm:ss').format('h:mm A')}`,
+      date: date,
     }));
   };
 
@@ -146,9 +146,10 @@ const BookingScreen = ({navigation}) => {
 
       <View
         style={{
-          height: windowHeight / 1.2,
+          // height: windowHeight / 1.2,
+          flex: 1,
         }}>
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView showsVerticalScrollIndicator={false} style={{flex: 1}}>
           {/* Salon Card */}
           <View style={styles.salonCard}>
             <Text style={styles.salonName}>Glamour Touch Salon</Text>
@@ -252,21 +253,29 @@ const BookingScreen = ({navigation}) => {
           </View>
 
           {/* Choose Offer Button */}
-          <TouchableOpacity onPress={()=>{
-            navigation.navigate('OffersScreen')
-          }} style={styles.offerBtn}>
-            <Image
-              source={{
-                uri: 'https://cdn-icons-png.flaticon.com/128/726/726476.png',
-              }}
-              style={styles.offerIcon}
-            />
-            <Text style={styles.offerText}>Choose Offer</Text>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('OffersScreen');
+            }}
+            style={styles.offerBtn}>
+            <View style={{flexDirection:"row",alignItems:"center"}}>
+              <Image
+                source={{
+                  uri: 'https://cdn-icons-png.flaticon.com/128/726/726476.png',
+                }}
+                style={styles.offerIcon}
+              />
+              <Text style={styles.offerText}>Choose Offer</Text>
+            </View>
+
             <Image
               source={{
                 uri: 'https://cdn-icons-png.flaticon.com/128/2985/2985179.png',
               }}
-              style={styles.offerIcon}
+              style={[
+                styles.offerIcon,
+                {marginRight: 0},
+              ]}
             />
           </TouchableOpacity>
 
@@ -323,6 +332,7 @@ const BookingScreen = ({navigation}) => {
           {/* Book Now Button */}
           <CustomButton
             title="Book Now"
+            style={{width: '94%', marginBottom: 20}}
             onPress={() => {
               // Checkout
               navigation.navigate('BookingConfirmation', {
@@ -378,7 +388,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     paddingHorizontal: 15,
     marginBottom: 20,
-    marginTop:5
+    marginTop: 5,
   },
   timeBox: {
     backgroundColor: COLOR.white,
@@ -387,9 +397,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 8,
-    marginRight: 10,
+    marginHorizontal: 5,
     marginBottom: 10,
-    width: windowWidth * 0.2,
+    width: windowWidth / 4.82,
     alignItems: 'center',
   },
   selectedTimeBox: {backgroundColor: COLOR.primary},
@@ -405,13 +415,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 15,
     elevation: 2,
+    justifyContent: 'space-between',
   },
   offerIcon: {width: 24, height: 24, marginRight: 10},
   offerText: {
     fontSize: 15,
     fontWeight: '600',
     color: COLOR.primary,
-    width: windowWidth / 1.5,
+    // width: windowWidth / 1.2,
   },
 
   billContainer: {

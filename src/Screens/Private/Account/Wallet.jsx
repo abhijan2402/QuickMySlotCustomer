@@ -1,8 +1,9 @@
 import React, {useState} from 'react';
-import {StyleSheet, Text, View, FlatList, Image} from 'react-native';
+import {StyleSheet, View, FlatList} from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
 import CustomButton from '../../../Components/CustomButton';
+import {Typography} from '../../../Components/UI/Typography'; // ✅ Import Typography
 
 const Wallet = () => {
   const [balance, setBalance] = useState(1250.75); // Example balance
@@ -49,17 +50,20 @@ const Wallet = () => {
   const renderTransaction = ({item}) => (
     <View style={styles.transactionItem}>
       <View>
-        <Text style={styles.transactionId}>Transaction ID: {item.id}</Text>
-        {/* <Text style={styles.transactionType}>{item.type}</Text> */}
-        <Text style={styles.transactionDate}>{formatDate(item.date)}</Text>
+        <Typography size={14} color={COLOR.black}>
+          Transaction ID: {item.id}
+        </Typography>
+        {/* <Typography size={13} color="#777">{item.type}</Typography> */}
+        <Typography size={12} color="#999" style={{marginTop: 1}}>
+          {formatDate(item.date)}
+        </Typography>
       </View>
-      <Text
-        style={[
-          styles.transactionAmount,
-          {color: item.type === 'Credit' ? 'green' : 'red'},
-        ]}>
+      <Typography
+        size={16}
+        fontWeight="600"
+        color={item.type === 'Credit' ? 'green' : 'red'}>
         {item.type === 'Credit' ? '+' : '-'}₹{item.amount}
-      </Text>
+      </Typography>
     </View>
   );
 
@@ -71,27 +75,35 @@ const Wallet = () => {
         leftTint={COLOR.black}
       />
 
-      {/* Balance Card */}
-      <View style={styles.balanceCard}>
-        <Text style={styles.balanceLabel}>Current Balance</Text>
-        <Text style={styles.balanceAmount}>₹{balance.toFixed(2)}</Text>
+      <View style={{paddingHorizontal: 10}}>
+        {/* Balance Card */}
+        <View style={styles.balanceCard}>
+          <Typography size={14} color="#555">
+            Current Balance
+          </Typography>
+          <Typography size={28} fontWeight="700" color={COLOR.black} style={{marginTop: 5}}>
+            ₹{balance.toFixed(2)}
+          </Typography>
+        </View>
+
+        {/* Add Amount Button */}
+        <CustomButton
+          title="Add Amount"
+          onPress={() => console.log('Add Amount Pressed')}
+          style={{marginVertical: 15}}
+        />
+
+        {/* Transaction History */}
+        <Typography size={16} fontWeight="700" color={COLOR.black} style={{marginTop: 10, marginBottom: 8}}>
+          Transaction History
+        </Typography>
+        <FlatList
+          data={transactions}
+          keyExtractor={item => item.id}
+          renderItem={renderTransaction}
+          contentContainerStyle={{paddingBottom: 20}}
+        />
       </View>
-
-      {/* Add Amount Button */}
-      <CustomButton
-        title="Add Amount"
-        onPress={() => console.log('Add Amount Pressed')}
-        style={{marginVertical: 15}}
-      />
-
-      {/* Transaction History */}
-      <Text style={styles.historyTitle}>Transaction History</Text>
-      <FlatList
-        data={transactions}
-        keyExtractor={item => item.id}
-        renderItem={renderTransaction}
-        contentContainerStyle={{paddingBottom: 20}}
-      />
     </View>
   );
 };
@@ -111,23 +123,6 @@ const styles = StyleSheet.create({
     marginTop: 15,
     alignItems: 'center',
   },
-  balanceLabel: {
-    fontSize: 14,
-    color: '#555',
-  },
-  balanceAmount: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: COLOR.black,
-    marginTop: 5,
-  },
-  historyTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    marginTop: 10,
-    marginBottom: 8,
-    color: COLOR.black,
-  },
   transactionItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -137,23 +132,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e0e0e0',
     marginBottom: 8,
-  },
-  transactionId: {
-    fontSize: 14,
-    color: COLOR.black,
-  },
-  transactionType: {
-    fontSize: 13,
-    color: '#777',
-    marginTop: 2,
-  },
-  transactionDate: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 1,
-  },
-  transactionAmount: {
-    fontSize: 16,
-    fontWeight: '600',
   },
 });

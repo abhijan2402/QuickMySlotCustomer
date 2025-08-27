@@ -115,7 +115,10 @@ const MainHomeHeader = () => {
             Your Location
           </Text>
           {isLoading ? (
-            <ActivityIndicator size="small" color={COLOR.primary} />
+            // <ActivityIndicator size="small" color={COLOR.primary} />
+            <Text style={styles.locationAddress} numberOfLines={1}>
+              ...Loading
+            </Text>
           ) : (
             <Text style={styles.locationAddress} numberOfLines={1}>
               {location}

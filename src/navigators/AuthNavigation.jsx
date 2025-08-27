@@ -22,6 +22,7 @@ import NotificationsScreen from '../Screens/Private/Home/Notification';
 import ProviderDetails from '../Screens/Private/Service/ServiceDetailPage';
 import PayBill from '../Screens/Private/Payments/PayBill';
 import OffersScreen from '../Screens/Private/AppointmentSection/OffersScreen';
+import EditProfile from '../Screens/Private/Account/EditProfile';
 const Stack = createNativeStackNavigator();
 
 const AuthStack = () => {
@@ -53,6 +54,7 @@ const AuthStack = () => {
       <Stack.Screen name="BookingConfirmation" component={BookingConfirmation} />
       <Stack.Screen name="PayBill" component={PayBill} />
       <Stack.Screen name="OffersScreen" component={OffersScreen} />
+      <Stack.Screen name="EditProfile" component={EditProfile} />
 
 
       {/* <Stack.Screen name="SignUp" component={SignUp} /> */}

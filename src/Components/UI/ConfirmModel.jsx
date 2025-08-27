@@ -1,61 +1,49 @@
-import {StyleSheet, View, Modal, Platform, Image} from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Modal,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
 import React from 'react';
-import {Typography} from '../HOC/Typography';
-import Button from '../HOC/Button';
-import {fonts} from '../../constant/fonts';
-import {useAppSelector} from '../../hooks/hooks';
-import {ThemeColors} from '../../theme/colors';
-import images from '../../constant/images';
+import {images} from './images';
+import {Typography} from './Typography';
+import {COLOR} from '../../Constants/Colors';
 
-interface ConfirmModalProps {
-  visible?: boolean;
-  close?: () => void;
-  title?: string;
-  description?: string;
-  onPress_Yes?: () => void;
-  btnTitle?: string;
-  loading?: boolean;
-}
-
-const ConfirmModal: React.FC<ConfirmModalProps> = ({
-  visible,
+const ConfirmModal = ({
+  visible = false,
   close = () => {},
   title,
   description,
-  onPress_Yes = () => {},
-  btnTitle,
+  onPressYes = () => {},
+  onPressNo = () => {},
+  yesTitle = 'Yes',
+  noTitle = 'No',
   loading,
 }) => {
-  const theme = useAppSelector(state => state.theme.theme);
-  const styles = createStyles(theme);
   return (
     <Modal
       statusBarTranslucent
       onRequestClose={() => close()}
       animationType="fade"
       transparent={true}
-      visible={visible}
-      style={{
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}>
-      <View style={[styles.overlay]}>
+      visible={visible}>
+      <View style={styles.overlay}>
         <View style={styles.modalView}>
-          <Image
-            source={images.tick}
-            style={{height: 42, width: 42, alignSelf: 'center'}}
-          />
-          <Typography
-            size={24}
-            lineHeight={27}
-            font={fonts.BOLD}
-            textAlign="center"
-            style={{marginTop: 20}}>
+          {/* Cross Icon */}
+          <TouchableOpacity style={styles.crossBtn} onPress={close}>
+            <Image source={images.cross} style={{height: 18, width: 18}} />
+          </TouchableOpacity>
+
+          {/* Title */}
+          <Typography size={20} textAlign="center" fontWeight={'500'}>
             {title}
           </Typography>
+
+          {/* Description */}
           {description && (
             <Typography
-              style={{marginTop: 10}}
+              style={{marginTop: 15}}
               textAlign="center"
               size={16}
               lineHeight={20}
@@ -64,15 +52,27 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
             </Typography>
           )}
 
-          <Button
-            loading={loading}
-            title={btnTitle}
-            containerStyle={{
-              marginTop: 26,
-              borderRadius: 5,
-            }}
-            onPress={onPress_Yes}
-          />
+          {/* Buttons Row */}
+          <View style={styles.btnRow}>
+            {/* No Button */}
+            <TouchableOpacity
+              style={[styles.btn, styles.noBtn]}
+              onPress={onPressNo || close}>
+              <Typography size={16} fontWeight={'500'} color={COLOR.primary}>
+                {noTitle}
+              </Typography>
+            </TouchableOpacity>
+
+            {/* Yes Button */}
+            <TouchableOpacity
+              style={[styles.btn, styles.yesBtn]}
+              onPress={onPressYes}
+              disabled={loading}>
+              <Typography size={16} fontWeight={'500'} color={'#fff'}>
+                {loading ? '...' : yesTitle}
+              </Typography>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </Modal>
@@ -81,26 +81,50 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
 export default ConfirmModal;
 
-const createStyles = (theme: ThemeColors) =>
-  StyleSheet.create({
-    overlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.4)',
-      justifyContent: 'center',
-      paddingHorizontal: 22,
-    },
-    modalView: {
-      backgroundColor: theme?.primary,
-      borderRadius: 7,
-      padding: 24,
-      paddingTop: 30,
-      shadowColor: 'rgba(0, 0, 0, 0.15)',
-      shadowOffset: {
-        width: 0,
-        height: 4,
-      },
-      shadowOpacity: Platform.OS === 'ios' ? 0.2 : 0.2,
-      shadowRadius: 4,
-      elevation: Platform.OS === 'ios' ? 0 : 5,
-    },
-  });
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  modalView: {
+    width: '95%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 24,
+    paddingTop: 30,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  crossBtn: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    padding: 6,
+  },
+  btnRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 26,
+  },
+  btn: {
+    flex: 1,
+    borderRadius: 6,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  noBtn: {
+    borderWidth: 1,
+    borderColor: COLOR.primary,
+    marginRight: 10,
+    backgroundColor: 'transparent',
+  },
+  yesBtn: {
+    backgroundColor: COLOR.primary,
+  },
+});

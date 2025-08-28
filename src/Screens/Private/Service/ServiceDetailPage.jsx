@@ -51,13 +51,16 @@ const ProviderDetails = ({navigation}) => {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <HomeHeader
-        title="Provider Details"
-        leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
-        leftTint={COLOR.primary}
-        onLeftPress={() => navigation.goBack()}
-      />
-      <ScrollView contentContainerStyle={{paddingBottom: 80}}>
+      <View style={{paddingHorizontal: 15}}>
+        <HomeHeader
+          title="Provider Details"
+          leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
+          leftTint={COLOR.primary}
+          onLeftPress={() => navigation.goBack()}
+        />
+      </View>
+
+      <ScrollView contentContainerStyle={{paddingBottom: 10}}>
         <ImageSwiper />
         {/* Provider Info */}
         <View style={styles.infoContainer}>
@@ -211,7 +214,7 @@ const ProviderDetails = ({navigation}) => {
             </TouchableOpacity>
           </View>
         </View>
-        <View style={[styles.section, {marginTop: -10}]}>
+        <View style={[styles.section, {marginTop: 0}]}>
           <Text style={styles.sectionTitle}>Address</Text>
           <Text style={styles.sectionText}>
             Shop no.36, Ground Floor, AIPL JOY STREET, Badshahpur, Sector
@@ -242,7 +245,7 @@ const ProviderDetails = ({navigation}) => {
           </TouchableOpacity>
         </View>
         {/* About */}
-        <View style={[styles.section, {marginTop: -5}]}>
+        <View style={[styles.section, {marginTop: 0}]}>
           <Text style={styles.sectionTitle}>About</Text>
           <Text style={styles.sectionText}>
             Glamour Touch Salon is a premium beauty destination offering top
@@ -505,8 +508,8 @@ const styles = StyleSheet.create({
     height: 220,
   },
   infoContainer: {
-    paddingBottom: 15,
-    paddingHorizontal: 15,
+    paddingBottom: 5,
+    paddingHorizontal: 18,
     backgroundColor: COLOR.white,
   },
   amenityGrid: {
@@ -525,7 +528,7 @@ const styles = StyleSheet.create({
   },
   section: {
     paddingBottom: 15,
-    paddingHorizontal: 15,
+    paddingHorizontal: 18,
     backgroundColor: COLOR.white,
     marginTop: 8,
   },
@@ -546,7 +549,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f4f4f4',
     marginTop: 10,
     borderRadius: 8,
-    marginHorizontal: 10,
+    marginHorizontal: 15,
   },
   tab: {
     flex: 1,

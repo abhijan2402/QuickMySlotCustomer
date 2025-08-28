@@ -109,12 +109,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     // paddingTop: 20,
+    marginBottom:5
   },
   header: {
     fontSize: 18,
     fontWeight: '600',
     marginHorizontal: 20,
-    marginBottom: 15,
+    marginBottom: 5,
     color: '#000',
   },
   card: {

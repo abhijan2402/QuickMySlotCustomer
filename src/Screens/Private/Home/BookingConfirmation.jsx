@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   Image,
@@ -9,6 +8,7 @@ import {
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
+import {Typography} from '../../../Components/UI/Typography';
 
 const BookingConfirmation = ({navigation}) => {
   return (
@@ -28,50 +28,54 @@ const BookingConfirmation = ({navigation}) => {
                 }}
                 style={styles.noticeIcon}
               />
-              <Text style={styles.noticeText}>
+              <Typography style={styles.noticeText}>
                 The salon is currently closed. They will confirm your
                 appointment as soon as they open.
-              </Text>
+              </Typography>
             </View>
 
             {/* What To Do Next */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>What To Do Next</Text>
-              <Text style={styles.listItem}>
+              <Typography style={styles.sectionTitle}>
+                What To Do Next
+              </Typography>
+              <Typography style={styles.listItem}>
                 • Visit the location after receiving a confirmation
-              </Text>
-              <Text style={styles.listItem}>
+              </Typography>
+              <Typography style={styles.listItem}>
                 • Pay your bill on QuickSlot with any online payment to avail
                 the offer
-              </Text>
+              </Typography>
             </View>
 
             {/* Things To Remember */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Things To Remember</Text>
-              <Text style={styles.listItem}>
+              <Typography style={styles.sectionTitle}>
+                Things To Remember
+              </Typography>
+              <Typography style={styles.listItem}>
                 • You can change or add new services at the location
-              </Text>
-              <Text style={styles.listItem}>
+              </Typography>
+              <Typography style={styles.listItem}>
                 • Cash payments are not accepted
-              </Text>
+              </Typography>
             </View>
 
             {/* Salon Details */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Salon Details</Text>
-              <Text style={styles.salonName}>
+              <Typography style={styles.sectionTitle}>Salon Details</Typography>
+              <Typography style={styles.salonName}>
                 Abc Hairdressing, Sector 5 Vidhyadhar nagar, Jaipur
-              </Text>
+              </Typography>
               <View style={styles.salonRow}>
                 <Image
                   source={require('../../../assets/Images/logo.png')}
                   style={styles.salonLogo}
                 />
-                <Text style={styles.salonAddress}>
+                <Typography style={styles.salonAddress}>
                   Shop No 112, 113 & 105, 1st floor, Good Earth City Center,
                   Sohna Rd, Sector 50, Gurugram, Haryana 122018
-                </Text>
+                </Typography>
               </View>
 
               {/* Call & Directions */}
@@ -83,7 +87,7 @@ const BookingConfirmation = ({navigation}) => {
                     }}
                     style={styles.actionIcon}
                   />
-                  <Text style={styles.actionText}>Timings</Text>
+                  <Typography style={styles.actionText}>Timings</Typography>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.actionBtn}>
                   <Image
@@ -92,45 +96,57 @@ const BookingConfirmation = ({navigation}) => {
                     }}
                     style={styles.actionIcon}
                   />
-                  <Text style={styles.actionText}>Get Directions</Text>
+                  <Typography style={styles.actionText}>
+                    Get Directions
+                  </Typography>
                 </TouchableOpacity>
               </View>
 
               <TouchableOpacity style={styles.callBtn}>
-                <Text style={styles.callText}>ABC Hairdressing</Text>
-                <Text style={styles.callSubText}>
+                <Typography style={styles.callText}>
+                  ABC Hairdressing
+                </Typography>
+                <Typography style={styles.callSubText}>
                   For queries or instant confirmation
-                </Text>
+                </Typography>
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.payBtn}>
-                <Text style={styles.payText}>Pay Now</Text>
+                <Typography style={styles.payText}>Pay Now</Typography>
               </TouchableOpacity>
             </View>
 
             {/* Appointment Details */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Appointment Details</Text>
-              <Text style={styles.detailText}>Appointment Id: 293037</Text>
-              <Text style={styles.detailText}>Date: 12th July, 2025</Text>
-              <Text style={styles.detailText}>Time: 12:30 PM</Text>
+              <Typography style={styles.sectionTitle}>
+                Appointment Details
+              </Typography>
+              <Typography style={styles.detailText}>
+                Appointment Id: 293037
+              </Typography>
+              <Typography style={styles.detailText}>
+                Date: 12th July, 2025
+              </Typography>
+              <Typography style={styles.detailText}>Time: 12:30 PM</Typography>
             </View>
 
             {/* Services Booked */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Services Booked</Text>
+              <Typography style={styles.sectionTitle}>
+                Services Booked
+              </Typography>
               <View style={styles.serviceRow}>
                 <Image
                   source={{
-                    uri: 'https://cdn-icons-png.flaticon.com/128/3004/3004613.png'
+                    uri: 'https://cdn-icons-png.flaticon.com/128/3004/3004613.png',
                   }}
                   style={styles.serviceIcon}
                 />
                 <View>
-                  <Text style={styles.serviceName}>Haircut</Text>
-                  <Text style={styles.serviceSubText}>
+                  <Typography style={styles.serviceName}>Haircut</Typography>
+                  <Typography style={styles.serviceSubText}>
                     Includes wash and blast dry
-                  </Text>
+                  </Typography>
                 </View>
               </View>
             </View>
@@ -138,10 +154,12 @@ const BookingConfirmation = ({navigation}) => {
             {/* Cancel & Reschedule */}
             <View style={styles.footerRow}>
               <TouchableOpacity style={styles.cancelBtn}>
-                <Text style={styles.cancelText}>✖ Cancel</Text>
+                <Typography style={styles.cancelText}>✖ Cancel</Typography>
               </TouchableOpacity>
               <TouchableOpacity style={styles.rescheduleBtn}>
-                <Text style={styles.rescheduleText}>⏰ Reschedule</Text>
+                <Typography style={styles.rescheduleText}>
+                  ⏰ Reschedule
+                </Typography>
               </TouchableOpacity>
             </View>
           </>
@@ -157,14 +175,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingHorizontal: 15,
   },
   noticeContainer: {
     flexDirection: 'row',
     backgroundColor: '#fef6e4',
     padding: 12,
-    margin: 15,
+    marginVertical: 5,
     borderRadius: 8,
     alignItems: 'center',
+    marginHorizontal: 5,
   },
   noticeIcon: {width: 28, height: 28, marginRight: 8},
   noticeText: {flex: 1, color: '#d98c00', fontSize: 14},
@@ -173,7 +193,14 @@ const styles = StyleSheet.create({
   listItem: {fontSize: 14, color: '#444', marginVertical: 2},
   salonName: {fontSize: 15, fontWeight: '600', marginBottom: 10},
   salonRow: {flexDirection: 'row', alignItems: 'center'},
-  salonLogo: {width: 80, height: '100%', marginRight: 10, resizeMode: 'contain',backgroundColor:'white',borderRadius:10},
+  salonLogo: {
+    width: 80,
+    height: '100%',
+    marginRight: 10,
+    resizeMode: 'contain',
+    backgroundColor: 'white',
+    borderRadius: 10,
+  },
   salonAddress: {flex: 1, fontSize: 13, color: '#555'},
   actionRow: {
     flexDirection: 'row',

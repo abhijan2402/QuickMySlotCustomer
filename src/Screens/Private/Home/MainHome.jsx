@@ -141,10 +141,10 @@ const MainHome = ({navigation}) => {
         </View>
 
         {/* My Bookings */}
-        <Typography size={16} fontWeight="600" style={styles.sectionTitle}>
+        <Typography size={16} fontWeight="600" style={[styles.sectionTitle,{marginLeft:5}]}>
           My Bookings
         </Typography>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{marginHorizontal:5}}>
           {bookings.map(item => (
             <View key={item.id} style={styles.bookingCard}>
               <Typography
@@ -207,7 +207,7 @@ const MainHome = ({navigation}) => {
         </View>
 
         {/* Service Categories */}
-        <Typography size={16} fontWeight="600" style={styles.sectionTitle}>
+        <Typography size={16} fontWeight="600" style={[styles.sectionTitle,{marginLeft:5}]}>
           Service Categories
         </Typography>
         <View style={styles.categories}>
@@ -252,45 +252,6 @@ const MainHome = ({navigation}) => {
 
 export default MainHome;
 
-// const MainHomeHeader = ()=>{
-//   const navigation = useNavigation()
-//   return(
-//       <View style={styles.header}>
-//           <TouchableOpacity
-//           style={{
-//             width:"20%"
-//           }}
-//             onPress={() => {
-//               navigation.goBack();
-//             }}>
-//             <Image
-//               source={{uri: 'https://cdn-icons-png.flaticon.com/128/535/535239.png'}}
-//               style={[styles.icon, {tintColor: COLOR.primary}]}
-//             />
-//           </TouchableOpacity>
-//           <View style={{
-//             flex:1,
-//             alignItems:'center'
-//           }}>
-//           <Text style={styles.title}>{'QuickMySlot'}</Text>
-//           </View>
-//           <View style={{flexDirection:'row',justifyContent:'flex-end',width:"20%",alignItems:'center'}}>
-//               <TouchableOpacity onPress={()=>{
-//               navigation.navigate('NotificationsScreen')
-//               }}>
-//               <Image
-//                 source={{uri: 'https://cdn-icons-png.flaticon.com/128/2529/2529521.png'}}
-//                 style={[styles.icon,  {marginRight:5,tintColor:COLOR.primary} ]}
-//               />
-//               </TouchableOpacity>
-//             <Image
-//               source={{uri: 'https://cdn-icons-png.flaticon.com/128/17446/17446833.png'}}
-//               style={[styles.icon]}
-//             />
-//           </View>
-//         </View>
-//   )
-// }
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: COLOR.white, paddingHorizontal: 15},
 
@@ -306,6 +267,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     borderWidth: 1,
     borderColor: '#EBEBEA',
+    marginHorizontal:5
   },
   searchIcon: {width: 20, height: 20, marginRight: 8},
   searchInput: {flex: 1, color: 'black'},
@@ -339,7 +301,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: 40,
+    marginHorizontal:5
   },
   categoryCard: {
     width: '48%',

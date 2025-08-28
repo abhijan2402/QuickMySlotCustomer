@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TextInput,
   Image,
@@ -10,6 +9,7 @@ import {
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
+import {Typography} from '../../../Components/UI/Typography';
 
 const SearchServices = ({navigation}) => {
   const services = [
@@ -50,6 +50,8 @@ const SearchServices = ({navigation}) => {
         rightIcon="https://cdn-icons-png.flaticon.com/128/17446/17446833.png"
         leftTint={COLOR.primary}
       />
+      <View style={{paddingHorizontal:5}}>
+         {/* Search Box */}
       <View style={styles.searchBox}>
         <TextInput
           placeholder="Search for services..."
@@ -57,12 +59,11 @@ const SearchServices = ({navigation}) => {
           style={styles.input}
         />
       </View>
+
+      {/* List of Services */}
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{paddingBottom: 70}}>
-        {/* Search Box */}
-
-        {/* Render Multiple Services */}
+        contentContainerStyle={{paddingBottom: 70,marginTop:10}}>
         {services.map(service => (
           <TouchableOpacity
             onPress={() => navigation.navigate('ProviderDetails')}
@@ -70,14 +71,28 @@ const SearchServices = ({navigation}) => {
             style={styles.card}>
             <Image source={{uri: service.image}} style={styles.cardImage} />
             <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>{service.name}</Text>
-              <Text style={styles.cardText}>{service.address}</Text>
-              <Text style={styles.cardText}>{service.experience}</Text>
-              <Text style={styles.cardText}>{service.availability}</Text>
+              <Typography
+                size={14}
+                fontWeight="bold"
+                color={COLOR.black}
+                style={{marginBottom: 3}}>
+                {service.name}
+              </Typography>
+              <Typography size={12} color="#555" style={{marginBottom:3}}>
+                {service.address}
+              </Typography>
+              <Typography size={12} color="#555" style={{marginBottom:3}}>
+                {service.experience}
+              </Typography>
+              <Typography size={12} color="#555">
+                {service.availability}
+              </Typography>
             </View>
           </TouchableOpacity>
         ))}
       </ScrollView>
+      </View>
+     
     </View>
   );
 };
@@ -105,12 +120,13 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: COLOR.white,
     borderRadius: 10,
-    marginVertical: 15,
+    marginVertical: 10,
     overflow: 'hidden',
     elevation: 2,
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    margin:1
   },
   cardImage: {
     width: '100%',
@@ -118,15 +134,5 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     padding: 10,
-  },
-  cardTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: COLOR.black,
-    marginBottom: 3,
-  },
-  cardText: {
-    fontSize: 12,
-    color: '#555',
   },
 });

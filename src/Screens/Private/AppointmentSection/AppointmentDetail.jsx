@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   StyleSheet,
-  Text,
   View,
   TouchableOpacity,
   ScrollView,
@@ -10,14 +9,14 @@ import {
 import HomeHeader from '../../../Components/HomeHeader';
 import {COLOR} from '../../../Constants/Colors';
 import { handleCall, handleOpenMap } from '../../../Constants/Utils';
+import { Typography } from '../../../Components/UI/Typography';
 
 const AppointmentDetail = ({route, navigation}) => {
-  // Dummy Data (Replace with route.params or API)
   const appointment = route?.params?.appointment || {
     id: '1',
     shopName: 'Glamour Touch Salon',
     shopImage:
-      'https://www.theparkhotels.com/images/site-specific/indore/aura-spa/spa-1.jpg', // shop banner
+      'https://www.theparkhotels.com/images/site-specific/indore/aura-spa/spa-1.jpg',
     shopAddress: '123 Main Street, New Delhi',
     shopContact: '+91 9876543210',
     customerName: 'Abhishek Sharma',
@@ -44,86 +43,85 @@ const AppointmentDetail = ({route, navigation}) => {
         leftTint={COLOR.black}
       />
       <ScrollView
-        contentContainerStyle={{paddingHorizontal: 15, paddingBottom: 30}}>
+        contentContainerStyle={{paddingHorizontal: 5, paddingBottom: 10}}>
+        
         {/* Shop Info */}
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Shop Details</Text>
+          <Typography style={styles.sectionTitle}>Shop Details</Typography>
           <Image source={{uri: appointment.shopImage}} style={styles.shopImg} />
-          <Text style={styles.shopName}>{appointment.shopName}</Text>
+          <Typography style={styles.shopName}>{appointment.shopName}</Typography>
           <TouchableOpacity onPress={() => handleOpenMap('')}>
-            <Text style={styles.text}>{appointment.shopAddress}</Text>
+            <Typography style={styles.text}>{appointment.shopAddress}</Typography>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handleCall('9876567898')}>
-            <Text style={styles.text}>📞 {appointment.shopContact}</Text>
+            <Typography style={styles.text}>📞 {appointment.shopContact}</Typography>
           </TouchableOpacity>
           <TouchableOpacity style={styles.chatBtn}>
-            <Text style={styles.chatBtnText}>💬 Chat</Text>
+            <Typography style={styles.chatBtnText}>💬 Chat</Typography>
           </TouchableOpacity>
         </View>
 
         {/* Customer Info */}
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Customer Details</Text>
-          <Text style={styles.text}>👤 {appointment.customerName}</Text>
+          <Typography style={styles.sectionTitle}>Customer Details</Typography>
+          <Typography style={styles.text}>👤 {appointment.customerName}</Typography>
           <TouchableOpacity>
-
-          <Text style={styles.text}>📞 {appointment.customerPhone}</Text>
+            <Typography style={styles.text}>📞 {appointment.customerPhone}</Typography>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handleOpenMap('')}>
-
-          <Text style={styles.text}>📍 {appointment.customerAddress}</Text>
+            <Typography style={styles.text}>📍 {appointment.customerAddress}</Typography>
           </TouchableOpacity>
         </View>
 
         {/* Service Date/Time */}
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Service Schedule</Text>
-          <Text style={styles.text}>📅 {appointment.date}</Text>
-          <Text style={styles.text}>⏰ {appointment.time}</Text>
+          <Typography style={styles.sectionTitle}>Service Schedule</Typography>
+          <Typography style={styles.text}>📅 {appointment.date}</Typography>
+          <Typography style={styles.text}>⏰ {appointment.time}</Typography>
         </View>
 
         {/* Services Breakdown */}
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Services</Text>
+          <Typography style={styles.sectionTitle}>Services</Typography>
           {appointment.services.map((service, index) => (
             <View key={index} style={styles.serviceRow}>
-              <Text style={styles.text}>{service.name}</Text>
-              <Text style={styles.text}>₹{service.price}</Text>
+              <Typography style={styles.text}>{service.name}</Typography>
+              <Typography style={styles.text}>₹{service.price}</Typography>
             </View>
           ))}
         </View>
 
         {/* Price Details */}
         <View style={styles.priceCard}>
-          <Text style={styles.priceTitle}>Price Details</Text>
+          <Typography style={styles.priceTitle}>Price Details</Typography>
           <View style={styles.serviceRow}>
-            <Text style={styles.text}>Sub Total</Text>
-            <Text style={styles.text}>₹{appointment.subTotal}</Text>
+            <Typography style={styles.text}>Sub Total</Typography>
+            <Typography style={styles.text}>₹{appointment.subTotal}</Typography>
           </View>
           <View style={styles.serviceRow}>
-            <Text style={styles.text}>Taxes (GST)</Text>
-            <Text style={styles.text}>₹{appointment.tax}</Text>
+            <Typography style={styles.text}>Taxes (GST)</Typography>
+            <Typography style={styles.text}>₹{appointment.tax}</Typography>
           </View>
           <View style={styles.serviceRow}>
-            <Text style={styles.text}>Discount</Text>
-            <Text style={styles.text}>-₹{appointment.discount}</Text>
+            <Typography style={styles.text}>Discount</Typography>
+            <Typography style={styles.text}>-₹{appointment.discount}</Typography>
           </View>
           <View style={styles.divider} />
           <View style={styles.serviceRow}>
-            <Text style={styles.grandTotal}>Grand Total</Text>
-            <Text style={styles.grandTotal}>₹{appointment.total}</Text>
+            <Typography style={styles.grandTotal}>Grand Total</Typography>
+            <Typography style={styles.grandTotal}>₹{appointment.total}</Typography>
           </View>
         </View>
 
         {/* Payment Method */}
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Payment Method</Text>
-          <Text style={styles.text}>💳 {appointment.paymentMethod}</Text>
+          <Typography style={styles.sectionTitle}>Payment Method</Typography>
+          <Typography style={styles.text}>💳 {appointment.paymentMethod}</Typography>
         </View>
 
         {/* Cancel Button */}
         <TouchableOpacity style={styles.cancelBtn}>
-          <Text style={styles.cancelBtnText}>Cancel Appointment</Text>
+          <Typography style={styles.cancelBtnText}>Cancel Appointment</Typography>
         </TouchableOpacity>
       </ScrollView>
     </View>
@@ -136,12 +134,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLOR.white,
+    paddingHorizontal: 15,
   },
   card: {
     backgroundColor: COLOR.white,
     borderRadius: 10,
     padding: 15,
-    marginVertical: 8,
+    marginTop: 8,
     borderWidth: 1,
     borderColor: '#E0E0E0',
     shadowColor: '#000',
@@ -224,9 +223,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     marginTop: 20,
-    marginBottom: 20,
-    borderWidth:1,
-    borderColor:"red"
+    borderWidth: 1,
+    borderColor: 'red',
   },
   cancelBtnText: {
     color: COLOR.red,

@@ -279,12 +279,10 @@ const ScheduleCard = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 10,
   },
   listContainer: {
     alignItems: 'center',
     marginTop: 10,
-    marginHorizontal: 10,
   },
   dateContainer: {
     width: 60,
@@ -315,8 +313,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderRadius: 14,
-    marginTop: 20,
-    marginHorizontal: 15,
+    marginTop: 15,
   },
   monthSelector: {
     flexDirection: 'row',

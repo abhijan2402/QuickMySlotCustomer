@@ -1,13 +1,8 @@
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  Image,
-  ScrollView,
-} from 'react-native';
+import {View, StyleSheet, Image, ScrollView} from 'react-native';
 import HomeHeader from '../../../Components/HomeHeader';
 import {COLOR} from '../../../Constants/Colors';
-import { Typography } from '../../../Components/UI/Typography';
+import {Typography} from '../../../Components/UI/Typography';
 
 const notifications = [
   {
@@ -61,7 +56,8 @@ const NotificationsScreen = () => {
       />
 
       {/* Notifications List */}
-      <ScrollView contentContainerStyle={{paddingVertical: 10, paddingHorizontal: 10}}>
+      <ScrollView
+        contentContainerStyle={{paddingVertical: 10, paddingHorizontal: 5}}>
         {notifications.map(item => (
           <View key={item.id} style={styles.card}>
             <View style={styles.cardLeft}>
@@ -72,9 +68,9 @@ const NotificationsScreen = () => {
                 <Typography size={14} fontWeight="600" color={COLOR.black}>
                   {item.title}
                 </Typography>
-                <Typography size={12} fontWeight="600" color={item.statusColor}>
+                {/* <Typography size={12} fontWeight="600" color={item.statusColor}>
                   {item.status}
-                </Typography>
+                </Typography> */}
               </View>
               <Typography size={12} color="#555" style={{marginVertical: 4}}>
                 {item.message}

@@ -8,18 +8,19 @@ import {
   Alert,
   Platform,
   PermissionsAndroid,
-  ActivityIndicator
+  ActivityIndicator,
 } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {COLOR} from '../../../Constants/Colors';
+import {images} from '../../../Components/UI/images';
 
 const MainHomeHeader = () => {
   const navigation = useNavigation();
   const [location, setLocation] = useState('Getting location...');
   const [currentLocation, setCurrentLocation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const isFocus = useIsFocused();
 
   const getCurrentLocation = async () => {
@@ -29,7 +30,8 @@ const MainHomeHeader = () => {
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
           {
             title: 'Location Permission Required',
-            message: 'This app needs access to your location to provide better services.',
+            message:
+              'This app needs access to your location to provide better services.',
             buttonNeutral: 'Ask Me Later',
             buttonNegative: 'Cancel',
             buttonPositive: 'OK',
@@ -40,14 +42,14 @@ const MainHomeHeader = () => {
         }
       }
     };
-    
+
     try {
       await requestPermissions();
       return new Promise((resolve, reject) => {
         Geolocation.getCurrentPosition(
           position => resolve(position),
           error => reject(new Error(error.message || 'Error getting location')),
-          {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000}
+          {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
         );
       });
     } catch (error) {
@@ -58,10 +60,10 @@ const MainHomeHeader = () => {
   const getAddressFromCoordinates = async (lat, lng) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=YOUR_GOOGLE_MAPS_API_KEY`
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=YOUR_GOOGLE_MAPS_API_KEY`,
       );
       const data = await response.json();
-      
+
       if (data.results && data.results.length > 0) {
         return data.results[0].formatted_address;
       }
@@ -77,13 +79,13 @@ const MainHomeHeader = () => {
       setIsLoading(true);
       const locationData = await getCurrentLocation();
       setCurrentLocation(locationData);
-      
+
       // Get address from coordinates
       const address = await getAddressFromCoordinates(
         locationData.coords.latitude,
-        locationData.coords.longitude
+        locationData.coords.longitude,
       );
-      
+
       setLocation(address);
     } catch (error) {
       // Alert.alert('Location Error', error.message);
@@ -102,12 +104,9 @@ const MainHomeHeader = () => {
       <TouchableOpacity
         style={styles.locationContainer}
         onPress={fetchLocation}
-        disabled={isLoading}
-      >
+        disabled={isLoading}>
         <Image
-          source={{
-            uri: 'https://cdn-icons-png.flaticon.com/128/684/684908.png',
-          }}
+          source={images.mark}
           style={[styles.icon, {tintColor: COLOR.primary}]}
         />
         <View style={styles.locationTextContainer}>
@@ -130,24 +129,21 @@ const MainHomeHeader = () => {
         <TouchableOpacity
           onPress={() => {
             navigation.navigate('NotificationsScreen');
-          }}
-        >
+          }}>
           <Image
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/2529/2529521.png',
             }}
-            style={[styles.icon, {marginRight: 15, tintColor: COLOR.primary}]}
+            style={[styles.icon, {marginRight: 10, tintColor: COLOR.primary}]}
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('EditProfile')}>
- <Image
-          source={{
-            uri: 'https://cdn-icons-png.flaticon.com/128/17446/17446833.png',
-          }}
-          style={styles.icon}
-        />
+          <Image
+            source={images.profile}
+            style={styles.icon}
+            tintColor={COLOR.primary}
+          />
         </TouchableOpacity>
-       
       </View>
     </View>
   );

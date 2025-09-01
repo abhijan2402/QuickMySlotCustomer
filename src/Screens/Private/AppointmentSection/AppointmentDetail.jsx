@@ -174,7 +174,7 @@ const AppointmentDetail = ({route, navigation}) => {
         visible={cancelAppointment}
         close={() => setCancelAppointment(false)}
         title="Cancel Appointment"
-        description="Are you sure you want to Cancel A?"
+        description="Are you sure you want to Cancel Appointment?"
         yesTitle="Yes"
         noTitle="No"
         onPressYes={() => {}}

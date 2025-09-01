@@ -35,6 +35,7 @@ const BookingScreen = ({navigation}) => {
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [dateStart, setDateStart] = useState(null);
     const {isKeyboardVisible} = useKeyboard();
+    const [showServices, setShowServices] =useState(false)
   
 
   // Mock location data with provider availability
@@ -112,9 +113,7 @@ const BookingScreen = ({navigation}) => {
     } else {
       if (selectedTimes.length < 3) {
         setSelectedTimes([...selectedTimes, time]);
-      } else {
-        alert('You can select up to 3 time slots only');
-      }
+      } 
     }
   };
 
@@ -283,7 +282,7 @@ const BookingScreen = ({navigation}) => {
             />
           </TouchableOpacity>
           <View style={styles.offerApplied}>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{flexDirection: 'row'}}>
               <Image source={images.offer} style={{height: 24, width: 24}} />
               <View style={{marginLeft: 10}}>
                 <Typography size={14} fontWeight={'500'}>
@@ -310,11 +309,12 @@ const BookingScreen = ({navigation}) => {
                 marginVertical: 5,
               }}>
               <TouchableOpacity
-                style={{flexDirection: 'row', alignItems: 'center'}}>
+                style={{flexDirection: 'row', alignItems: 'center'}}  onPress={() => setShowServices(!showServices)}>
                 <Typography size={14} fontWeight={'500'}>
                   Your Services
                 </Typography>
                 <TouchableOpacity
+                onPress={() => setShowServices(!showServices)}
                   style={{
                     marginLeft: 5,
                     backgroundColor: COLOR.lightGrey,
@@ -331,10 +331,11 @@ const BookingScreen = ({navigation}) => {
                   />
                 </TouchableOpacity>
               </TouchableOpacity>
-              <Typography>₹ 944</Typography>
+              <Typography size={14} fontWeight={'500'}>₹ 944</Typography>
             </View>
 
             {/* Services List */}
+            { showServices && <View>
             <View
               style={{
                 flexDirection: 'row',
@@ -422,6 +423,7 @@ const BookingScreen = ({navigation}) => {
                 </View>
               </View>
             </View>
+            </View>}
 
             {/* Offer Applied */}
             <View style={styles.offerAppliedRow}>

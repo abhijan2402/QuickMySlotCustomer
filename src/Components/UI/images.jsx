@@ -18,7 +18,9 @@ export const images = {
   userprofile: require('../../assets/Images/userprofile.png'),
   logo: require('../../assets/Images/logo.png'),
   call: require('../../assets/Images/call.png'),
-    calendar: require('../../assets/Images/calendar.png'),
-    mark: require('../../assets/Images/mark.png'),
-
+  calendar: require('../../assets/Images/calendar.png'),
+  mark: require('../../assets/Images/mark.png'),
+  nodata: require('../../assets/Images/nodata.png'),
+  search: require('../../assets/Images/search.png'),
+  profile: require('../../assets/Images/profile.png'),
 };

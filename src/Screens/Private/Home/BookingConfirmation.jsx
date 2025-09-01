@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -9,8 +9,14 @@ import {
 import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
 import {Typography} from '../../../Components/UI/Typography';
+import Button from '../../../Components/UI/Button';
+import {images} from '../../../Components/UI/images';
+import ConfirmModal from '../../../Components/UI/ConfirmModel';
+import {handleCall, openMapWithDirections} from '../../../Constants/Utils';
 
 const BookingConfirmation = ({navigation}) => {
+  const [cancelBooking, setCancelBooking] = useState(false);
+
   return (
     <View style={styles.container}>
       <>
@@ -19,7 +25,7 @@ const BookingConfirmation = ({navigation}) => {
           leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
           leftTint={COLOR.black}
         />
-        <ScrollView>
+        <ScrollView style={{marginHorizontal: 5}}>
           <>
             <View style={styles.noticeContainer}>
               <Image
@@ -68,10 +74,7 @@ const BookingConfirmation = ({navigation}) => {
                 Abc Hairdressing, Sector 5 Vidhyadhar nagar, Jaipur
               </Typography>
               <View style={styles.salonRow}>
-                <Image
-                  source={require('../../../assets/Images/logo.png')}
-                  style={styles.salonLogo}
-                />
+                <Image source={images.logo} style={styles.salonLogo} />
                 <Typography style={styles.salonAddress}>
                   Shop No 112, 113 & 105, 1st floor, Good Earth City Center,
                   Sohna Rd, Sector 50, Gurugram, Haryana 122018
@@ -80,22 +83,20 @@ const BookingConfirmation = ({navigation}) => {
 
               {/* Call & Directions */}
               <View style={styles.actionRow}>
-                <TouchableOpacity style={styles.actionBtn}>
-                  <Image
-                    source={{
-                      uri: 'https://cdn-icons-png.flaticon.com/128/597/597177.png',
-                    }}
-                    style={styles.actionIcon}
-                  />
+                <TouchableOpacity
+                  style={styles.actionBtn}
+                  onPress={() => handleCall('1234567890')}>
+                  <Image source={images.call} style={styles.actionIcon} />
                   <Typography style={styles.actionText}>Timings</Typography>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.actionBtn}>
-                  <Image
-                    source={{
-                      uri: 'https://cdn-icons-png.flaticon.com/128/684/684908.png',
-                    }}
-                    style={styles.actionIcon}
-                  />
+                <TouchableOpacity
+                  style={styles.actionBtn}
+                  onPress={() =>
+                    openMapWithDirections(
+                      'Shop no.36, Ground Floor, AIPL JOY STREET, Badshahpur, Sector 66, Gurugram, Haryana 122018',
+                    )
+                  }>
+                  <Image source={images.mark} style={styles.actionIcon} />
                   <Typography style={styles.actionText}>
                     Get Directions
                   </Typography>
@@ -110,10 +111,10 @@ const BookingConfirmation = ({navigation}) => {
                   For queries or instant confirmation
                 </Typography>
               </TouchableOpacity>
-
-              <TouchableOpacity style={styles.payBtn}>
-                <Typography style={styles.payText}>Pay Now</Typography>
-              </TouchableOpacity>
+              <Button
+                title={'Pay Now'}
+                containerStyle={{marginTop: 15, marginBottom: 5}}
+              />
             </View>
 
             {/* Appointment Details */}
@@ -153,17 +154,42 @@ const BookingConfirmation = ({navigation}) => {
 
             {/* Cancel & Reschedule */}
             <View style={styles.footerRow}>
-              <TouchableOpacity style={styles.cancelBtn}>
-                <Typography style={styles.cancelText}>✖ Cancel</Typography>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.rescheduleBtn}>
-                <Typography style={styles.rescheduleText}>
-                  ⏰ Reschedule
-                </Typography>
-              </TouchableOpacity>
+              <Button
+                onPress={() => setCancelBooking(true)}
+                title={'Cancel'}
+                titleColor={COLOR.red}
+                leftImg={images.cross2}
+                leftImgStyle={{
+                  height: 16,
+                  width: 16,
+                  marginRight: 10,
+                  tintColor: COLOR.red,
+                }}
+                containerStyle={{
+                  width: '45%',
+                  backgroundColor: 'white',
+                  borderWidth: 1,
+                  borderColor: COLOR.red,
+                }}
+              />
+              <Button
+                title={'⏰ Reschedule'}
+                leftImgStyle={{height: 16, width: 16, marginRight: 10}}
+                containerStyle={{width: '45%'}}
+              />
             </View>
           </>
         </ScrollView>
+        <ConfirmModal
+          visible={cancelBooking}
+          close={() => setCancelBooking(false)}
+          title="Cancel Booking"
+          description="Are you sure you want to Cancel Booking?"
+          yesTitle="Yes"
+          noTitle="No"
+          onPressYes={() => {}}
+          onPressNo={() => setCancelBooking(false)}
+        />
       </>
     </View>
   );
@@ -184,11 +210,15 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     borderRadius: 8,
     alignItems: 'center',
-    marginHorizontal: 5,
   },
   noticeIcon: {width: 28, height: 28, marginRight: 8},
   noticeText: {flex: 1, color: '#d98c00', fontSize: 14},
-  section: {padding: 15, borderBottomWidth: 0.5, borderColor: '#ddd'},
+  section: {
+    paddingVertical: 15,
+    borderBottomWidth: 0.5,
+    borderColor: '#ddd',
+    paddingHorizontal: 5,
+  },
   sectionTitle: {fontSize: 16, fontWeight: 'bold', marginBottom: 8},
   listItem: {fontSize: 14, color: '#444', marginVertical: 2},
   salonName: {fontSize: 15, fontWeight: '600', marginBottom: 10},
@@ -209,7 +239,7 @@ const styles = StyleSheet.create({
   },
   actionBtn: {alignItems: 'center'},
   actionIcon: {width: 22, height: 22, marginBottom: 4},
-  actionText: {fontSize: 13, color: COLOR.primary},
+  actionText: {fontSize: 13, fontWeight: '500', marginTop: 2},
   callBtn: {
     borderWidth: 1,
     borderColor: COLOR.primary,
@@ -226,16 +256,15 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   payText: {textAlign: 'center', color: '#fff', fontWeight: '600'},
-  detailText: {fontSize: 14, color: '#444', marginVertical: 2},
+  detailText: {fontSize: 14, color: '#444', marginVertical: 3},
   serviceRow: {flexDirection: 'row', alignItems: 'center', marginTop: 10},
   serviceIcon: {width: 40, height: 40, marginRight: 10},
   serviceName: {fontSize: 15, fontWeight: '600'},
-  serviceSubText: {fontSize: 13, color: '#888'},
+  serviceSubText: {fontSize: 13, color: '#888', marginTop: 2},
   footerRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginVertical: 20,
-    marginBottom: 50,
   },
   cancelBtn: {
     borderWidth: 1,

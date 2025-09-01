@@ -24,6 +24,8 @@ const Input = ({
   onLeftIconPress,
   text,
   inputContainer,
+  leftTintColor,
+  rightIconStyle,
   ...rest
 }) => {
   return (
@@ -38,7 +40,7 @@ const Input = ({
       <View style={[styles.inputContainer,inputContainer]}>
         {leftIcon && (
           <TouchableOpacity onPress={onLeftIconPress} activeOpacity={0.9}>
-            { text ? <Typography size={16} fontWeight={'500'} style={styles.text}>{text}</Typography> : <Image source={leftIcon} style={styles.icon} />}
+            { text ? <Typography size={16} fontWeight={'500'} style={styles.text}>{text}</Typography> : <Image source={leftIcon} style={styles.icon} tintColor={leftTintColor} />}
           </TouchableOpacity>
         )}
 
@@ -62,7 +64,7 @@ const Input = ({
 
         {rightIcon && (
           <TouchableOpacity onPress={onRightIconPress}>
-            <Image source={rightIcon} style={styles.icon} />
+            <Image source={rightIcon} style={[styles.icon,rightIconStyle]} />
           </TouchableOpacity>
         )}
       </View>

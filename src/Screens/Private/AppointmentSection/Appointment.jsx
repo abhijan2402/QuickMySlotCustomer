@@ -10,6 +10,7 @@ import HomeHeader from '../../../Components/HomeHeader';
 import {COLOR} from '../../../Constants/Colors';
 import {Typography} from '../../../Components/UI/Typography';
 import {images} from '../../../Components/UI/images';
+import { windowHeight } from '../../../Constants/Dimensions';
 
 const Appointment = ({navigation}) => {
   const [selectedFilter, setSelectedFilter] = useState('All');
@@ -94,7 +95,6 @@ const Appointment = ({navigation}) => {
       <TouchableOpacity
         onPress={() => navigation.navigate('AppointmentDetail')}
         style={styles.card}>
-        {/* Top Row: Image + Title + Status */}
         <View style={styles.topRow}>
           <View style={styles.leftSection}>
             <Image source={{uri: item.image}} style={styles.serviceImage} />
@@ -105,8 +105,6 @@ const Appointment = ({navigation}) => {
               <Typography style={styles.salonName}>{item.salon}</Typography>
             </View>
           </View>
-
-          {/* Status Badge */}
           <Typography
             style={[
               styles.status,
@@ -120,19 +118,14 @@ const Appointment = ({navigation}) => {
         </View>
 
         <View style={styles.divider} />
-
-        {/* Service + Amount */}
         <View style={styles.bottomRow}>
           <Typography style={styles.salonService}>{item.service}</Typography>
           <Typography style={styles.amount}>{item.amount}</Typography>
         </View>
-        {/* Appointment Date/Time */}
         <View style={styles.infoRow}>
           <Image source={images.calendar} style={{height: 16, width: 16}} />
           <Typography style={styles.dateText}>{item.date}</Typography>
         </View>
-
-        {/* Address + Contact */}
         <View style={styles.infoSection}>
           <View style={styles.infoRow}>
             <Image source={images.mark} style={{height: 16, width: 16}} />
@@ -159,7 +152,6 @@ const Appointment = ({navigation}) => {
       />
       <View></View>
 
-      {/* Filters */}
       <View style={styles.filterRow}>
         {filters.map(filter => {
           const isSelected = selectedFilter === filter.label;
@@ -186,13 +178,23 @@ const Appointment = ({navigation}) => {
         })}
       </View>
 
-      {/* Appointments List */}
       <FlatList
         showsVerticalScrollIndicator={false}
         data={appointments}
         keyExtractor={item => item.id}
         renderItem={renderAppointment}
         contentContainerStyle={{paddingBottom: 20}}
+        ListEmptyComponent={() => {
+              return (
+                <View style={{justifyContent:"center",
+                  alignItems:"center",
+                  marginTop: windowHeight * 0.3
+                }}>
+                  <Image source={images.noData}/>
+                  <Typography size={20} fontWeight={'500'} style={{marginTop:10}}>No Appointments found</Typography>
+                </View>
+              )
+            }}
       />
     </View>
   );
@@ -226,7 +228,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 14,
     marginBottom: 16,
-    marginHorizontal:5,
+    marginHorizontal: 5,
     borderWidth: 1,
     borderColor: '#f2f2f2',
     shadowColor: '#000',
@@ -272,7 +274,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '500',
     color: '#444',
-    marginLeft:10
+    marginLeft: 10,
   },
   divider: {
     borderBottomWidth: 1,
@@ -305,8 +307,8 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#555',
     flexShrink: 1,
-    marginLeft:10,
-    marginTop:2
+    marginLeft: 10,
+    marginTop: 2,
   },
   amount: {
     fontSize: 15,

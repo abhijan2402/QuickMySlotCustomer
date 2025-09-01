@@ -1,4 +1,4 @@
-import React, {useRef, useEffect} from 'react';
+import React, {useRef, useEffect, useState} from 'react';
 import {
   Image,
   StyleSheet,
@@ -9,14 +9,19 @@ import {
   Dimensions,
   Animated,
   Platform,
+  FlatList,
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
 import {Typography} from '../../../Components/UI/Typography';
 import MainHomeHeader from './MainHomeHeader';
+import {images} from '../../../Components/UI/images';
+import Input from '../../../Components/Input';
 
 const {width} = Dimensions.get('window');
 
 const MainHome = ({navigation}) => {
+  const [search, setSearch] = useState('');
+
   const categories = [
     {
       title: 'Salons',
@@ -126,63 +131,74 @@ const MainHome = ({navigation}) => {
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Search Bar */}
-        <View style={styles.searchBar}>
-          <Image
-            source={{
-              uri: 'https://cdn-icons-png.flaticon.com/128/2811/2811806.png',
-            }}
-            style={styles.searchIcon}
-          />
-          <TextInput
-            placeholderTextColor={COLOR.lightGrey}
+        <View style={{marginTop: -10, marginBottom: 10}}>
+          <Input
+            value={search}
+            onChangeText={v => setSearch(v)}
+            leftIcon={images.search}
             placeholder="Search for services..."
-            style={styles.searchInput}
+            inputContainer={{borderColor: COLOR.lightGrey}}
+            style={{marginLeft: 5}}
+            rightIcon={search !== '' ? images.cross2 : ''}
+            rightIconStyle={{height: 14, width: 14}}
+            onRightIconPress={() => setSearch('')}
           />
         </View>
 
         {/* My Bookings */}
-        <Typography size={16} fontWeight="600" style={[styles.sectionTitle,{marginLeft:5}]}>
-          My Bookings
-        </Typography>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{marginHorizontal:5}}>
-          {bookings.map(item => (
-            <View key={item.id} style={styles.bookingCard}>
-              <Typography
-                size={17}
-                fontWeight="bold"
-                style={styles.bookingVendor}>
-                {item.vendor}
-              </Typography>
-              <Typography size={13} style={styles.bookingText}>
-                Services:{' '}
-                <Typography fontWeight="600" color="#7b4ce0">
-                  {item.services}
-                </Typography>
-              </Typography>
-              <Typography size={13} style={styles.bookingText}>
-                Price:{' '}
-                <Typography fontWeight="600" color="#7b4ce0">
-                  {item.price}
-                </Typography>
-              </Typography>
-              <Typography size={13} style={styles.bookingText}>
-                Date:{' '}
-                <Typography fontWeight="600" color="#7b4ce0">
-                  {item.date}
-                </Typography>
-              </Typography>
-              <Typography size={13} style={styles.bookingText}>
-                Address: {item.address}
-              </Typography>
-              <Typography size={13} style={styles.bookingText}>
-                Phone:{' '}
-                <Typography fontWeight="600" color="#7b4ce0">
-                  {item.phone}
-                </Typography>
-              </Typography>
-            </View>
-          ))}
-        </ScrollView>
+       { bookings.length > 0 && <View>
+          <Typography
+            size={16}
+            fontWeight="600"
+            style={[styles.sectionTitle, {marginLeft: 5}]}>
+            My Bookings
+          </Typography>
+          <FlatList
+            data={bookings}
+            horizontal
+            contentContainerStyle={{marginHorizontal: 5}}
+            showsHorizontalScrollIndicator={false}
+            renderItem={({item, index}) => {
+              return (
+                <View key={item.id} style={styles.bookingCard}>
+                  <Typography
+                    size={17}
+                    fontWeight="bold"
+                    style={styles.bookingVendor}>
+                    {item.vendor}
+                  </Typography>
+                  <Typography size={13} style={styles.bookingText}>
+                    Services:{' '}
+                    <Typography fontWeight="600" color="#7b4ce0">
+                      {item.services}
+                    </Typography>
+                  </Typography>
+                  <Typography size={13} style={styles.bookingText}>
+                    Price:{' '}
+                    <Typography fontWeight="600" color="#7b4ce0">
+                      {item.price}
+                    </Typography>
+                  </Typography>
+                  <Typography size={13} style={styles.bookingText}>
+                    Date:{' '}
+                    <Typography fontWeight="600" color="#7b4ce0">
+                      {item.date}
+                    </Typography>
+                  </Typography>
+                  <Typography size={13} style={styles.bookingText}>
+                    Address: {item.address}
+                  </Typography>
+                  <Typography size={13} style={styles.bookingText}>
+                    Phone:{' '}
+                    <Typography fontWeight="600" color="#7b4ce0">
+                      {item.phone}
+                    </Typography>
+                  </Typography>
+                </View>
+              );
+            }}
+          />
+        </View>}
 
         {/* Auto-scroll Banner */}
         <View style={{marginVertical: 20}}>
@@ -207,22 +223,29 @@ const MainHome = ({navigation}) => {
         </View>
 
         {/* Service Categories */}
-        <Typography size={16} fontWeight="600" style={[styles.sectionTitle,{marginLeft:5}]}>
+        <Typography
+          size={16}
+          fontWeight="600"
+          style={[styles.sectionTitle, {marginLeft: 5}]}>
           Service Categories
         </Typography>
-        <View style={styles.categories}>
-          {categories.map((item, index) => (
-            <TouchableOpacity
-              onPress={() => navigation.navigate('SearchServices')}
-              key={index}
-              style={styles.categoryCard}>
-              <Image source={{uri: item.icon}} style={styles.categoryIcon} />
-              <Typography size={14} style={styles.categoryText}>
-                {item.title}
-              </Typography>
-            </TouchableOpacity>
-          ))}
-        </View>
+        <FlatList
+          data={categories}
+          numColumns={2}
+          renderItem={({item, index}) => {
+            return (
+              <TouchableOpacity
+                onPress={() => navigation.navigate('SearchServices')}
+                key={index}
+                style={styles.categoryCard}>
+                <Image source={{uri: item.icon}} style={styles.categoryIcon} />
+                <Typography size={14} style={styles.categoryText}>
+                  {item.title}
+                </Typography>
+              </TouchableOpacity>
+            );
+          }}
+        />
 
         {/* Another Banner */}
         <View style={{marginVertical: 20}}>
@@ -267,7 +290,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     borderWidth: 1,
     borderColor: '#EBEBEA',
-    marginHorizontal:5
+    marginHorizontal: 5,
   },
   searchIcon: {width: 20, height: 20, marginRight: 8},
   searchInput: {flex: 1, color: 'black'},
@@ -301,7 +324,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginHorizontal:5
+    marginHorizontal: 5,
   },
   categoryCard: {
     width: '48%',
@@ -310,6 +333,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: 12,
+    marginHorizontal: 5,
   },
   categoryIcon: {width: 40, height: 40},
   categoryText: {marginTop: 5},

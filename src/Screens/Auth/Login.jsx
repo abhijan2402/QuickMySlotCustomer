@@ -1,5 +1,11 @@
 import React from 'react';
-import {Image, StyleSheet, View} from 'react-native';
+import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  View,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {windowHeight, windowWidth} from '../../Constants/Dimensions';
 import {COLOR} from '../../Constants/Colors';
@@ -8,12 +14,16 @@ import Button from '../../Components/UI/Button';
 import GoogleAuthButton from '../../Components/UI/GoogleAuthButton';
 import {ScrollView} from 'react-native';
 import Input from '../../Components/Input';
-import {Typography} from '../../Components/UI/Typography';  
-import { validators } from '../../Backend/Validator';
+import {Typography} from '../../Components/UI/Typography';
+import {validators} from '../../Backend/Validator';
+import {images} from '../../Components/UI/images';
+import useKeyboard from '../../Constants/Utility';
 
 const Login = ({navigation}) => {
   const [error, setError] = React.useState({});
   const [number, setNumber] = React.useState('');
+    const {isKeyboardVisible} = useKeyboard();
+  
 
   const onSubmit = () => {
     let error = {
@@ -27,9 +37,16 @@ const Login = ({navigation}) => {
 
   const handleLoginSuccess = user => {};
 
-  return (
-    <View
-      style={{flex: 1, paddingHorizontal: 20, backgroundColor: COLOR.white}}>
+ return (
+  <KeyboardAvoidingView
+    style={{flex: 1,paddingHorizontal: 20,backgroundColor:COLOR.white}}
+    behavior={Platform.OS === 'ios' ? 'padding' : isKeyboardVisible ? 'height' : undefined}
+    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 100} 
+  >
+    <ScrollView
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={{flexGrow: 1}}
+      showsVerticalScrollIndicator={false}>
       <LinearGradient
         colors={[COLOR.white, COLOR.white]}
         start={{x: 0, y: 0}}
@@ -37,10 +54,7 @@ const Login = ({navigation}) => {
         style={styles.container}>
         
         {/* Logo */}
-        <Image
-          source={require('../../assets/Images/logo.png')}
-          style={styles.logo}
-        />
+        <Image source={images.logo} style={styles.logo} />
 
         {/* Tagline */}
         <Typography
@@ -49,7 +63,7 @@ const Login = ({navigation}) => {
           color="#242524"
           textAlign="center"
           lineHeight={28}
-          style={{width: windowWidth / 1.2, marginTop: 10}}>
+          style={{width: windowWidth / 1.2, marginTop: 10, marginBottom: 10}}>
           Get Bookings, Expand Business with QuickSlot
         </Typography>
 
@@ -60,6 +74,8 @@ const Login = ({navigation}) => {
           value={number}
           onChangeText={text => setNumber(text)}
           error={error.mobile}
+          leftIcon={true}
+          text={'+ 91'}
         />
 
         {/* Continue Button */}
@@ -72,29 +88,20 @@ const Login = ({navigation}) => {
         {/* Divider with text */}
         <View style={styles.dividerContainer}>
           <View style={styles.divider} />
-          <Typography size={14} color="#888">Or</Typography>
+          <Typography size={14} color="#888" style={{paddingHorizontal: 15}}>
+            Or
+          </Typography>
           <View style={styles.divider} />
         </View>
 
         {/* Google Login Button */}
         <GoogleAuthButton onLoginSuccess={handleLoginSuccess} />
 
-        {/* Register Section (if needed) */}
-        {/* 
-        <View style={styles.registerContainer}>
-          <Typography size={14} color="#555">Don’t have an account? </Typography>
-          <Typography
-            size={14}
-            color={COLOR.primary}
-            fontWeight="600"
-            onPress={() => navigation.navigate('SignUp')}>
-            Register
-          </Typography>
-        </View> 
-        */}
       </LinearGradient>
-    </View>
-  );
+    </ScrollView>
+  </KeyboardAvoidingView>
+);
+
 };
 
 export default Login;
@@ -112,12 +119,13 @@ const styles = StyleSheet.create({
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: windowWidth - 40,
-    marginVertical: 15,
+    marginTop: 15,
+    justifyContent: 'center',
+    marginBottom: 25,
   },
   divider: {
-    flex: 1,
     height: 1,
     backgroundColor: '#ccc',
+    width: windowWidth * 0.3,
   },
 });

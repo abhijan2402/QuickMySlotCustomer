@@ -10,6 +10,7 @@ import {
 import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
 import {Typography} from '../../../Components/UI/Typography';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 const SearchServices = ({navigation}) => {
   const services = [
@@ -40,6 +41,7 @@ const SearchServices = ({navigation}) => {
       image:
         'https://images.pexels.com/photos/3065206/pexels-photo-3065206.jpeg',
     },
+    
   ];
 
   return (
@@ -50,49 +52,56 @@ const SearchServices = ({navigation}) => {
         rightIcon="https://cdn-icons-png.flaticon.com/128/17446/17446833.png"
         leftTint={COLOR.primary}
       />
-      <View style={{paddingHorizontal:5}}>
-         {/* Search Box */}
-      <View style={styles.searchBox}>
-        <TextInput
-          placeholder="Search for services..."
-          placeholderTextColor="#999"
-          style={styles.input}
-        />
-      </View>
+      <View style={{paddingHorizontal: 5}}>
+        {/* Search Box */}
+        <View style={styles.searchBox}>
+          <TextInput
+            placeholder="Search for services..."
+            placeholderTextColor="#999"
+            style={styles.input}
+          />
+        </View>
 
-      {/* List of Services */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{paddingBottom: 70,marginTop:10}}>
-        {services.map(service => (
-          <TouchableOpacity
-            onPress={() => navigation.navigate('ProviderDetails')}
-            key={service.id}
-            style={styles.card}>
-            <Image source={{uri: service.image}} style={styles.cardImage} />
-            <View style={styles.cardContent}>
-              <Typography
-                size={14}
-                fontWeight="bold"
-                color={COLOR.black}
-                style={{marginBottom: 3}}>
-                {service.name}
-              </Typography>
-              <Typography size={12} color="#555" style={{marginBottom:3}}>
-                {service.address}
-              </Typography>
-              <Typography size={12} color="#555" style={{marginBottom:3}}>
-                {service.experience}
-              </Typography>
-              <Typography size={12} color="#555">
-                {service.availability}
-              </Typography>
-            </View>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+        {/* List of Services */}
+        <KeyboardAwareScrollView
+          extraScrollHeight={10} 
+          enableOnAndroid={true}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{paddingBottom: 120}}>
+          {services.map(service => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('ProviderDetails')}
+              key={service.id}
+              style={styles.card}>
+              {/* Image with rounded top corners */}
+              <Image source={{uri: service.image}} style={styles.cardImage} />
+
+              {/* Content */}
+              <View style={styles.cardContent}>
+                <Typography
+                  size={16}
+                  fontWeight="bold"
+                  color={COLOR.black}
+                  style={{marginBottom: 5}}>
+                  {service.name}
+                </Typography>
+
+                <Typography size={13} color="#666" style={styles.textRow}>
+                  📍 {service.address}
+                </Typography>
+
+                <Typography size={13} color="#666" style={styles.textRow}>
+                  💼 {service.experience}
+                </Typography>
+
+                <Typography size={13} color="#666" style={{marginTop: 2}}>
+                  ⏰ {service.availability}
+                </Typography>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </KeyboardAwareScrollView>
       </View>
-     
     </View>
   );
 };
@@ -112,6 +121,8 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderWidth: 1,
     borderColor: '#ddd',
+    marginBottom: 10,
+    marginTop: 10,
   },
   input: {
     fontSize: 14,
@@ -119,20 +130,36 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: COLOR.white,
-    borderRadius: 10,
-    marginVertical: 10,
+    borderRadius: 14,
+    marginVertical: 12,
     overflow: 'hidden',
-    elevation: 2,
+    elevation: 3,
     shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    margin:1
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    shadowOffset: {width: 0, height: 3},
+    margin: 1,
   },
   cardImage: {
     width: '100%',
-    height: 160,
+    height: 180,
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 14,
   },
   cardContent: {
-    padding: 10,
+    padding: 12,
+  },
+  textRow: {
+    marginBottom: 5,
+  },
+  rowBetween: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  badge: {
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 12,
   },
 });

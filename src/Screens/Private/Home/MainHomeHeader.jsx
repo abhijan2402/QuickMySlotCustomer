@@ -139,12 +139,15 @@ const MainHomeHeader = () => {
             style={[styles.icon, {marginRight: 15, tintColor: COLOR.primary}]}
           />
         </TouchableOpacity>
-        <Image
+        <TouchableOpacity onPress={() => navigation.navigate('EditProfile')}>
+ <Image
           source={{
             uri: 'https://cdn-icons-png.flaticon.com/128/17446/17446833.png',
           }}
           style={styles.icon}
         />
+        </TouchableOpacity>
+       
       </View>
     </View>
   );

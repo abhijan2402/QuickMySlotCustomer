@@ -13,7 +13,7 @@ const App = () => {
     <SafeAreaProvider>
       <AuthProvider>
         <SafeAreaView style={styles.safeArea}>
-          <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+          <StatusBar barStyle="dark-content" />
           <NavigationContainer>
             <MainNavigation />
             <NoInternetAlert />

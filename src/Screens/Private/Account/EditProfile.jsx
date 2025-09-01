@@ -16,7 +16,8 @@ import useKeyboard from '../../../Constants/Utility';
 import {isValidForm} from '../../../Backend/Utility';
 import {validators} from '../../../Backend/Validator';
 import Button from '../../../Components/UI/Button';
-import {Typography} from '../../../Components/UI/Typography'; 
+import {Typography} from '../../../Components/UI/Typography';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 const EditProfile = ({navigation}) => {
   const [firstName, setFirstName] = useState('');
@@ -69,40 +70,39 @@ const EditProfile = ({navigation}) => {
         leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
         leftTint={COLOR.black}
       />
-
-      {/* Profile Image */}
-      <View style={styles.profileSection}>
-        <Image source={{uri: profileImage}} style={styles.profileImage} />
-
-        {isEditing && (
-          <TouchableOpacity
-            style={styles.editIconWrapper}
-            onPress={() => setShowModal(true)}>
-            <Image
-              source={require('../../../assets/Images/edit.png')}
-              style={styles.editIcon}
-            />
-          </TouchableOpacity>
-        )}
-      </View>
-
       <KeyboardAvoidingView
         style={{flex: 1}}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={
-          Platform.OS === 'ios' ? 0 : isKeyboardVisible ? 0 : -40
-        }>
+        behavior={
+          Platform.OS === 'ios'
+            ? 'padding'
+            : isKeyboardVisible
+            ? 'height'
+            : undefined
+        }
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 30}>
         <ScrollView
           style={{flex: 1, paddingHorizontal: 5}}
           contentContainerStyle={styles.container}>
-          {/* 🚀 Promo Card */}
-         
+          {/* Profile Image */}
+          <View style={styles.profileSection}>
+            <Image source={{uri: profileImage}} style={styles.profileImage} />
+
+            {isEditing && (
+              <TouchableOpacity
+                style={styles.editIconWrapper}
+                onPress={() => setShowModal(true)}>
+                <Image
+                  source={require('../../../assets/Images/edit.png')}
+                  style={styles.editIcon}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
           {/* Inputs with Error */}
           <Input
             label="Name"
             placeholder="Enter Your name"
             value={firstName}
-            style={{borderColor: COLOR.primary}}
             onChangeText={setFirstName}
             editable={isEditing}
             error={error.name}
@@ -113,7 +113,6 @@ const EditProfile = ({navigation}) => {
             placeholder="Enter email"
             value={email}
             onChangeText={setEmail}
-            style={{borderColor: COLOR.primary}}
             keyboardType="email-address"
             editable={isEditing}
             error={error.email}
@@ -124,25 +123,24 @@ const EditProfile = ({navigation}) => {
             placeholder="Enter phone number"
             value={phone}
             onChangeText={setPhone}
-            style={{borderColor: COLOR.primary}}
             keyboardType="phone-pad"
             editable={isEditing}
             error={error.phone}
+            inputContainer={{marginBottom: 20}}
           />
         </ScrollView>
+        {/* Edit / Update Button */}
+        <Button
+          title={isEditing ? 'Update' : 'Edit'}
+          onPress={() => {
+            if (isEditing) {
+              handleUpdate();
+            } else {
+              setIsEditing(true);
+            }
+          }}
+        />
       </KeyboardAvoidingView>
-
-      {/* Edit / Update Button */}
-      <Button
-        title={isEditing ? 'Update' : 'Edit'}
-        onPress={() => {
-          if (isEditing) {
-            handleUpdate();
-          } else {
-            setIsEditing(true);
-          }
-        }}
-      />
 
       {/* Image Modal */}
       <ImageModal

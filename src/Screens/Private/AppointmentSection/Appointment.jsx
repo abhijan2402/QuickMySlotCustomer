@@ -9,6 +9,7 @@ import {
 import HomeHeader from '../../../Components/HomeHeader';
 import {COLOR} from '../../../Constants/Colors';
 import {Typography} from '../../../Components/UI/Typography';
+import {images} from '../../../Components/UI/images';
 
 const Appointment = ({navigation}) => {
   const [selectedFilter, setSelectedFilter] = useState('All');
@@ -91,38 +92,59 @@ const Appointment = ({navigation}) => {
   const renderAppointment = ({item}) => {
     return (
       <TouchableOpacity
-        onPress={() => {
-          navigation.navigate('AppointmentDetail');
-        }}
+        onPress={() => navigation.navigate('AppointmentDetail')}
         style={styles.card}>
-        {/* Image + Info */}
-        <View style={styles.row}>
-          <Image source={{uri: item.image}} style={styles.serviceImage} />
-          <View style={{flex: 1, marginLeft: 10}}>
-            <Typography style={styles.title}>{item.title}</Typography>
-            <Typography
-              style={[
-                styles.status,
-                {
-                  color: getStatusColor(item.status),
-                  backgroundColor: getBackgroundStatusColor(item.status) + '20',
-                },
-              ]}>
-              {item.status}
-            </Typography>
-            <Typography style={styles.dateText}>{item.date}</Typography>
+        {/* Top Row: Image + Title + Status */}
+        <View style={styles.topRow}>
+          <View style={styles.leftSection}>
+            <Image source={{uri: item.image}} style={styles.serviceImage} />
+            <View style={{marginLeft: 12, flex: 1}}>
+              <Typography style={styles.title} numberOfLines={1}>
+                {item.title}
+              </Typography>
+              <Typography style={styles.salonName}>{item.salon}</Typography>
+            </View>
           </View>
+
+          {/* Status Badge */}
+          <Typography
+            style={[
+              styles.status,
+              {
+                color: getStatusColor(item.status),
+                backgroundColor: getBackgroundStatusColor(item.status) + '25',
+              },
+            ]}>
+            {item.status}
+          </Typography>
         </View>
 
         <View style={styles.divider} />
 
-        {/* Shop Details */}
-        <View style={{marginTop: 5}}>
-          <Typography style={styles.salonName}>{item.salon}</Typography>
+        {/* Service + Amount */}
+        <View style={styles.bottomRow}>
           <Typography style={styles.salonService}>{item.service}</Typography>
-          <Typography style={styles.details}>📍 {item.address}</Typography>
-          <Typography style={styles.details}>📞 {item.contact}</Typography>
-          <Typography style={styles.amount}>💰 {item.amount}</Typography>
+          <Typography style={styles.amount}>{item.amount}</Typography>
+        </View>
+        {/* Appointment Date/Time */}
+        <View style={styles.infoRow}>
+          <Image source={images.calendar} style={{height: 16, width: 16}} />
+          <Typography style={styles.dateText}>{item.date}</Typography>
+        </View>
+
+        {/* Address + Contact */}
+        <View style={styles.infoSection}>
+          <View style={styles.infoRow}>
+            <Image source={images.mark} style={{height: 16, width: 16}} />
+            <Typography style={styles.details} numberOfLines={1}>
+              {item.address}
+            </Typography>
+          </View>
+
+          <View style={styles.infoRow}>
+            <Image source={images.call} style={{height: 14, width: 14}} />
+            <Typography style={styles.details}>{item.contact}</Typography>
+          </View>
         </View>
       </TouchableOpacity>
     );
@@ -135,9 +157,7 @@ const Appointment = ({navigation}) => {
         leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
         leftTint={COLOR.black}
       />
-      <View>
-        
-      </View>
+      <View></View>
 
       {/* Filters */}
       <View style={styles.filterRow}>
@@ -203,69 +223,94 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: COLOR.white,
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 16,
+    marginHorizontal:5,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: '#f2f2f2',
     shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
-    marginHorizontal:10
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    shadowOffset: {width: 0, height: 2},
+    elevation: 3,
   },
-  row: {
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  leftSection: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   serviceImage: {
     width: 55,
     height: 55,
-    borderRadius: 10,
+    borderRadius: 12,
   },
   title: {
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: '700',
     color: COLOR.black,
   },
-  status: {
+  salonName: {
     fontSize: 13,
-    fontWeight: '600',
-    marginTop: 2,
-    alignSelf: 'flex-start',
-    padding: 3,
-    borderRadius: 50,
-    paddingHorizontal: 10,
-  },
-  dateText: {
-    fontSize: 12,
     color: '#666',
     marginTop: 2,
+  },
+  status: {
+    fontSize: 12,
+    fontWeight: '600',
+    paddingVertical: 3,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  dateText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#444',
+    marginLeft:10
   },
   divider: {
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-    marginVertical: 8,
+    marginVertical: 10,
   },
-  salonName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLOR.black,
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   salonService: {
-    fontSize: 12,
-    color: '#777',
+    fontSize: 13,
+    color: '#666',
+  },
+  infoSection: {
+    marginTop: 4,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 4,
   },
+  icon: {
+    fontSize: 13,
+    marginRight: 6,
+  },
   details: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#555',
-    marginBottom: 2,
+    flexShrink: 1,
+    marginLeft:10,
+    marginTop:2
   },
   amount: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
     color: COLOR.primary,
-    marginTop: 4,
   },
 });

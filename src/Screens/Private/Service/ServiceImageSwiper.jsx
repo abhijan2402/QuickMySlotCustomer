@@ -23,7 +23,6 @@ const ImageSwiper = () => {
   const images = [...originalImages, ...originalImages];
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  console.log(currentIndex);
   
   const scrollX = useRef(new Animated.Value(0)).current;
   const flatListRef = useRef(null);

@@ -12,26 +12,31 @@ import CustomButton from '../../Components/CustomButton';
 import {windowHeight} from '../../Constants/Dimensions';
 import HomeHeader from '../../Components/HomeHeader';
 import {AuthContext} from '../../Backend/AuthContent';
-import {Typography} from '../../Components/UI/Typography';  // ✅ import Typography
+import {Typography} from '../../Components/UI/Typography'; // ✅ import Typography
 import Button from '../../Components/UI/Button';
+import {useApi} from '../../Backend/Api';
+import {VERIFY_OTP} from '../../Constants/ApiRoute';
+import {isValidForm, ToastMsg} from '../../Backend/Utility';
+import {validators} from '../../Backend/Validator';
+import {ErrorBox} from '../../Components/UI/ErrorBox';
 
-const OtpScreen = ({navigation}) => {
+const OtpScreen = ({navigation, route}) => {
   const {setUser, setToken} = useContext(AuthContext);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const inputs = useRef([]);
+  const user_id = route?.params?.userId;
+  const phone = route?.params?.phone;
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const {postRequest} = useApi();
 
   const handleChange = (text, index) => {
     let newOtp = [...otp];
     newOtp[index] = text;
-
     setOtp(newOtp);
-
-    // Move to next input automatically
     if (text && index < 5) {
       inputs.current[index + 1].focus();
     }
-
-    // Close keyboard if last digit entered
     if (index === 5 && text) {
       Keyboard.dismiss();
     }
@@ -45,10 +50,35 @@ const OtpScreen = ({navigation}) => {
 
   const verifyOtp = () => {
     const otpCode = otp.join('');
-    console.log('Entered OTP:', otpCode);
-    // setUser('dummyUser');
-    // setToken('dummyToken');
-    navigation.navigate('CompleteProfile');
+    let error = {
+      otp: validators.checkRequire('OTP', otpCode?.length == 6),
+    };
+    console.log(error, 'Error---->>');
+    setError(error);
+    if (isValidForm(error)) {
+      onSubmit();
+    }
+  };
+
+  const onSubmit = async () => {
+    setLoading(true);
+    const otpCode = otp.join('');
+    const form = {user_id: user_id, otp: otpCode};
+    try {
+      const response = await postRequest(VERIFY_OTP, form, false);
+      console.log(response, form, 'otpResponse--->>');
+      setLoading(false);
+      if (response.success) {
+        navigation.navigate('BottomNavigation');
+        ToastMsg(response?.data?.message || 'Success');
+      } else {
+        setError({otp: response.error});
+        ToastMsg(response.error || 'Failed to verify OTP');
+      }
+    } catch (err) {
+      setLoading(false);
+      console.error(err);
+    }
   };
 
   return (
@@ -82,7 +112,7 @@ const OtpScreen = ({navigation}) => {
           lineHeight={20}
           style={{marginTop: 10}}>
           We have sent a 6-digit verification code to your registered mobile
-          number ending in **** 1234. Please enter it below.
+          number ending in **** {phone?.slice(-4)}. Please enter it below.
         </Typography>
       </View>
 
@@ -101,12 +131,19 @@ const OtpScreen = ({navigation}) => {
           />
         ))}
       </View>
+      {error?.otp && (
+        <ErrorBox style={{marginTop: 0, marginBottom: 10}} error={error?.otp} />
+      )}
 
       <Button
         title={'Verify'}
         onPress={() => {
-          navigation.navigate('BottomNavigation')
+          verifyOtp();
         }}
+        containerStyle={{
+          marginTop: windowHeight * 0.06,
+        }}
+        loading={loading}
       />
 
       <View
@@ -146,7 +183,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     marginHorizontal: 5,
     marginVertical: 20,
-    marginBottom: windowHeight * 0.06,
   },
   otpInput: {
     borderWidth: 1,

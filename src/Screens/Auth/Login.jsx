@@ -1,19 +1,23 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Image, StyleSheet, View} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {windowHeight, windowWidth} from '../../Constants/Dimensions';
 import {COLOR} from '../../Constants/Colors';
-import {isValidForm} from '../../Backend/Utility';
+import {isValidForm, showToast, ToastMsg} from '../../Backend/Utility';
 import Button from '../../Components/UI/Button';
 import GoogleAuthButton from '../../Components/UI/GoogleAuthButton';
 import {ScrollView} from 'react-native';
 import Input from '../../Components/Input';
-import {Typography} from '../../Components/UI/Typography';  
-import { validators } from '../../Backend/Validator';
+import {Typography} from '../../Components/UI/Typography';
+import {validators} from '../../Backend/Validator';
+import {SIGN_UP} from '../../Constants/ApiRoute';
+import {useApi} from '../../Backend/Api';
 
 const Login = ({navigation}) => {
-  const [error, setError] = React.useState({});
-  const [number, setNumber] = React.useState('');
+  const {postRequest} = useApi();
+  const [number, setNumber] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const onSubmit = () => {
     let error = {
@@ -21,7 +25,30 @@ const Login = ({navigation}) => {
     };
     setError(error);
     if (isValidForm(error)) {
-      navigation.navigate('OtpScreen');
+      handleSignup();
+    }
+  };
+  const handleSignup = async () => {
+    setLoading(true);
+    const form = {phone: number};
+    try {
+      const response = await postRequest(SIGN_UP, form, false);
+      console.log(response, 'Signup Response');
+      setLoading(false);
+      if (response.success) {
+        ('OTP sent to your mobile number');
+        navigation.navigate('OtpScreen', {
+          userId: response?.data?.user_id,
+          phone: number,
+        });
+        ToastMsg(response?.data?.message || 'OTP sent to your mobile number');
+      } else {
+        setError(response.error);
+        ToastMsg(response.error || 'Signup failed');
+      }
+    } catch (err) {
+      setLoading(false);
+      console.error(err);
     }
   };
 
@@ -35,7 +62,6 @@ const Login = ({navigation}) => {
         start={{x: 0, y: 0}}
         end={{x: 0, y: 1}}
         style={styles.container}>
-        
         {/* Logo */}
         <Image
           source={require('../../assets/Images/logo.png')}
@@ -67,12 +93,15 @@ const Login = ({navigation}) => {
           containerStyle={{marginTop: 30, width: '100%'}}
           title={'Continue'}
           onPress={onSubmit}
+          loading={loading}
         />
 
         {/* Divider with text */}
         <View style={styles.dividerContainer}>
           <View style={styles.divider} />
-          <Typography size={14} color="#888">Or</Typography>
+          <Typography size={14} color="#888">
+            Or
+          </Typography>
           <View style={styles.divider} />
         </View>
 

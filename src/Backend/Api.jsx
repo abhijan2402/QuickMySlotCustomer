@@ -1,21 +1,21 @@
-// src/hooks/useApi.js
-import { useContext } from 'react';
-import { AuthContext } from './AuthContent';
+import {useContext} from 'react';
+import {AuthContext} from './AuthContent';
 
-const BASE_URL = 'http://82.112.236.195:3000/';
-export const IMAGEURL = 'http://82.112.236.195:3000/uploads/profiles/'
-export const SERVICE_LIST_URL = "http://82.112.236.195:3000/uploads/"
-
+const BASE_URL =
+  'https://lemonchiffon-walrus-503913.hostingersite.com/public/api/';
+export const IMAGEURL =
+  'https://lemonchiffon-walrus-503913.hostingersite.com/public/api/uploads/profiles/';
+export const SERVICE_LIST_URL =
+  'https://lemonchiffon-walrus-503913.hostingersite.com/public/api/uploads/';
 
 export const useApi = () => {
-  const { token } = useContext(AuthContext);
-
+  const {token} = useContext(AuthContext);
   const postRequest = async (endpoint, data = {}, isMultipart = false) => {
-    console.log(data, 'DATA');
-    console.log(token, 'TOKEN');
+    console.log(data, 'DATA--->>');
+    console.log(token, 'TOKEN--->>');
     console.log(`${BASE_URL}${endpoint}`);
     const headers = {
-      ...(isMultipart ? {} : { 'Content-Type': 'application/json' }),
+      ...(isMultipart ? {} : {'Content-Type': 'application/json'}),
       Authorization: `Bearer ${token}`,
     };
     try {
@@ -33,7 +33,7 @@ export const useApi = () => {
           status: response.status,
         };
       }
-      return { success: true, data: json };
+      return {success: true, data: json};
     } catch (error) {
       console.log(error, 'ERROR');
       return {
@@ -49,7 +49,7 @@ export const useApi = () => {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          ...(token && { Authorization: `Bearer ${token}` }),
+          ...(token && {Authorization: `Bearer ${token}`}),
         },
       });
       const json = await response.json();
@@ -60,7 +60,7 @@ export const useApi = () => {
           status: response.status,
         };
       }
-      return { success: true, data: json };
+      return {success: true, data: json};
     } catch (error) {
       return {
         success: false,
@@ -75,7 +75,7 @@ export const useApi = () => {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          ...(token && { Authorization: `Bearer ${token}` }),
+          ...(token && {Authorization: `Bearer ${token}`}),
         },
       });
       const json = await response.json();
@@ -86,7 +86,7 @@ export const useApi = () => {
           status: response.status,
         };
       }
-      return { success: true, data: json };
+      return {success: true, data: json};
     } catch (error) {
       return {
         success: false,
@@ -95,13 +95,12 @@ export const useApi = () => {
     }
   };
 
-
   const putRequest = async (endpoint, data = {}, isMultipart = false) => {
     console.log(data, 'DATA');
     console.log(token, 'TOKEN');
     console.log(`${BASE_URL}${endpoint}`);
     const headers = {
-      ...(isMultipart ? {} : { 'Content-Type': 'application/json' }),
+      ...(isMultipart ? {} : {'Content-Type': 'application/json'}),
       Authorization: `Bearer ${token}`,
     };
     try {
@@ -119,7 +118,7 @@ export const useApi = () => {
           status: response.status,
         };
       }
-      return { success: true, data: json };
+      return {success: true, data: json};
     } catch (error) {
       console.log(error, 'ERROR');
       return {
@@ -129,6 +128,5 @@ export const useApi = () => {
     }
   };
 
-
-  return { getRequest, postRequest, deleteRequest, putRequest };
+  return {getRequest, postRequest, deleteRequest, putRequest};
 };

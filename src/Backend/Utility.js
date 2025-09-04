@@ -6,17 +6,21 @@ import {
 } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
+import SimpleToast from 'react-native-simple-toast';
 
 export const RFV = e => {
   return e;
 };
-export const showToast = message => {
-  if (Platform.OS === 'android') {
-    ToastAndroid.show(message, ToastAndroid.SHORT);
-  } else {
-    // ToastMsg(message);
-  }
+export const windowWidth = Dimensions.get('window').width;
+export const windowHeight = Dimensions.get('window').height;
+
+export const ToastMsg = (message, time = 100) => {
+  let timeout = setTimeout(() => {
+    SimpleToast.show(message ? message : 'Sorry, Something went wrong. Please try again later.',SimpleToast.LONG);
+    clearTimeout(timeout);
+  }, 500);
 };
+
 export const regex = {
   email: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
   phoneNumber: /^(0|[1-9][0-9]*)$/,

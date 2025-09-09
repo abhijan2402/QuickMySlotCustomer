@@ -35,27 +35,7 @@ const AuthStack = () => {
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="OtpScreen" component={OtpScreen} />
       <Stack.Screen name="BottomNavigation" component={BottomNavigation} />
-      <Stack.Screen name="MainHome" component={MainHome} />
-      <Stack.Screen name="Faq" component={Faq} />
-      <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
-      <Stack.Screen name="Wallet" component={Wallet} />
-      <Stack.Screen name="Appointment" component={Appointment} />
-      <Stack.Screen name="Cms" component={Cms} />
-      <Stack.Screen name="Support" component={Support} />
-      <Stack.Screen name="Invite" component={Invite} />
-      <Stack.Screen name="MyAnalytics" component={MyAnalytics} />
-      <Stack.Screen name="SearchServices" component={SearchServices} />
-      <Stack.Screen name="ProviderDetails" component={ProviderDetails} />
-      <Stack.Screen name="BookingScreen" component={BookingScreen} />
-      <Stack.Screen name="Checkout" component={Checkout} />
-      <Stack.Screen name="AppointmentDetail" component={AppointmentDetail} />
-      <Stack.Screen name="ServiceList" component={ServiceList} />
-      <Stack.Screen name="NotificationsScreen" component={NotificationsScreen} />
-      <Stack.Screen name="BookingConfirmation" component={BookingConfirmation} />
-      <Stack.Screen name="PayBill" component={PayBill} />
-      <Stack.Screen name="OffersScreen" component={OffersScreen} />
-      <Stack.Screen name="EditProfile" component={EditProfile} />
-
+     
 
       {/* <Stack.Screen name="SignUp" component={SignUp} /> */}
 

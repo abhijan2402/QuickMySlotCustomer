@@ -1,5 +1,12 @@
 import React, {useState} from 'react';
-import {Image, StyleSheet, View} from 'react-native';
+import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  View,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {windowHeight, windowWidth} from '../../Constants/Dimensions';
 import {COLOR} from '../../Constants/Colors';
@@ -11,13 +18,16 @@ import Input from '../../Components/Input';
 import {Typography} from '../../Components/UI/Typography';
 import {validators} from '../../Backend/Validator';
 import {SIGN_UP} from '../../Constants/ApiRoute';
-import {useApi} from '../../Backend/Api';
+import {POST, useApi} from '../../Backend/Api';
+import useKeyboard from '../../Constants/Utility';
+import { images } from '../../Components/UI/images';
+import { isAuth, Token, userDetails } from '../../Redux/action';
 
 const Login = ({navigation}) => {
-  const {postRequest} = useApi();
   const [number, setNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const {isKeyboardVisible} = useKeyboard();
 
   const onSubmit = () => {
     let error = {
@@ -28,101 +38,103 @@ const Login = ({navigation}) => {
       handleSignup();
     }
   };
+
   const handleSignup = async () => {
     setLoading(true);
-    const form = {phone: number};
-    try {
-      const response = await postRequest(SIGN_UP, form, false);
-      console.log(response, 'Signup Response');
-      setLoading(false);
-      if (response.success) {
-        ('OTP sent to your mobile number');
+    const body = {
+      phone_number: number
+    };
+    POST(
+      SIGN_UP,
+      body,
+      success => {
+        console.log(success,'successsuccesssuccess-->>>');
+        setLoading(false);
         navigation.navigate('OtpScreen', {
-          userId: response?.data?.user_id,
+          userId: success?.user_id,
           phone: number,
         });
-        ToastMsg(response?.data?.message || 'OTP sent to your mobile number');
-      } else {
-        setError(response.error);
-        ToastMsg(response.error || 'Signup failed');
-      }
-    } catch (err) {
-      setLoading(false);
-      console.error(err);
-    }
+      },
+      error => {
+        console.log(error,'errorerrorerror>>');
+        setLoading(false);
+        ToastMsg(error?.message);
+      },
+      fail => {
+        setLoading(false);
+      },
+    );
   };
-
   const handleLoginSuccess = user => {};
 
   return (
-    <View
-      style={{flex: 1, paddingHorizontal: 20, backgroundColor: COLOR.white}}>
-      <LinearGradient
-        colors={[COLOR.white, COLOR.white]}
-        start={{x: 0, y: 0}}
-        end={{x: 0, y: 1}}
-        style={styles.container}>
-        {/* Logo */}
-        <Image
-          source={require('../../assets/Images/logo.png')}
-          style={styles.logo}
-        />
+    <KeyboardAvoidingView
+      style={{flex: 1, paddingHorizontal: 20, backgroundColor: COLOR.white}}
+      behavior={
+        Platform.OS === 'ios'
+          ? 'padding'
+          : isKeyboardVisible
+          ? 'height'
+          : undefined
+      }
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 100}>
+      <StatusBar backgroundColor={'white'} />
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{flexGrow: 1}}
+        showsVerticalScrollIndicator={false}>
+        <LinearGradient
+          colors={[COLOR.white, COLOR.white]}
+          start={{x: 0, y: 0}}
+          end={{x: 0, y: 1}}
+          style={styles.container}>
+          {/* Logo */}
+          <Image source={images.logo} style={styles.logo} />
 
-        {/* Tagline */}
-        <Typography
-          size={18}
-          fontWeight="600"
-          color="#242524"
-          textAlign="center"
-          lineHeight={28}
-          style={{width: windowWidth / 1.2, marginTop: 10}}>
-          Get Bookings, Expand Business with QuickSlot
-        </Typography>
-
-        {/* Mobile Number Input */}
-        <Input
-          keyboardType="numeric"
-          placeholder="Enter Mobile Number"
-          value={number}
-          onChangeText={text => setNumber(text)}
-          error={error.mobile}
-        />
-
-        {/* Continue Button */}
-        <Button
-          containerStyle={{marginTop: 30, width: '100%'}}
-          title={'Continue'}
-          onPress={onSubmit}
-          loading={loading}
-        />
-
-        {/* Divider with text */}
-        <View style={styles.dividerContainer}>
-          <View style={styles.divider} />
-          <Typography size={14} color="#888">
-            Or
-          </Typography>
-          <View style={styles.divider} />
-        </View>
-
-        {/* Google Login Button */}
-        <GoogleAuthButton onLoginSuccess={handleLoginSuccess} />
-
-        {/* Register Section (if needed) */}
-        {/* 
-        <View style={styles.registerContainer}>
-          <Typography size={14} color="#555">Don’t have an account? </Typography>
+          {/* Tagline */}
           <Typography
-            size={14}
-            color={COLOR.primary}
+            size={18}
             fontWeight="600"
-            onPress={() => navigation.navigate('SignUp')}>
-            Register
+            color="#242524"
+            textAlign="center"
+            lineHeight={28}
+            style={{width: windowWidth / 1.2, marginTop: 10, marginBottom: 10}}>
+            Get Bookings, Expand Business with QuickSlot
           </Typography>
-        </View> 
-        */}
-      </LinearGradient>
-    </View>
+
+          {/* Mobile Number Input */}
+          <Input
+            keyboardType="numeric"
+            placeholder="Enter Mobile Number"
+            value={number}
+            onChangeText={text => setNumber(text)}
+            error={error.mobile}
+            leftIcon={true}
+            text={'+ 91'}
+          />
+
+          {/* Continue Button */}
+          <Button
+            containerStyle={{marginTop: 30, width: '100%'}}
+            title={'Continue'}
+            onPress={onSubmit}
+            loading={loading}
+          />
+
+          {/* Divider with text */}
+          <View style={styles.dividerContainer}>
+            <View style={styles.divider} />
+            <Typography size={14} color="#888" style={{paddingHorizontal: 15}}>
+              Or
+            </Typography>
+            <View style={styles.divider} />
+          </View>
+
+          {/* Google Login Button */}
+          <GoogleAuthButton onLoginSuccess={handleLoginSuccess} />
+        </LinearGradient>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -141,12 +153,13 @@ const styles = StyleSheet.create({
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: windowWidth - 40,
-    marginVertical: 15,
+    marginTop: 15,
+    justifyContent: 'center',
+    marginBottom: 25,
   },
   divider: {
-    flex: 1,
     height: 1,
     backgroundColor: '#ccc',
+    width: windowWidth * 0.3,
   },
 });

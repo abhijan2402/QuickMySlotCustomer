@@ -47,7 +47,7 @@ const HomeHeader = ({title, leftIcon, rightIcon, leftTint, rightTint,rightIconTw
         )}
         <Image
           source={{uri: rightIcon}}
-          style={[styles.icon, rightTint , {tintColor: rightTint,}]}
+          style={[styles.icon, rightTint , {tintColor: rightTint,marginRight:10}]}
         />
       </View>
     </View>

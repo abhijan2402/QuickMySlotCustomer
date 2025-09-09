@@ -8,6 +8,7 @@ import {
   Image,
   SafeAreaView,
 } from 'react-native';
+import { COLOR } from '../../../Constants/Colors';
 
 const {width} = Dimensions.get('window');
 
@@ -20,19 +21,16 @@ const CouponCarousel = () => {
       id: 1,
       title: 'Get 20% OFF',
       description: '10% Discount + 10% Cashback',
-      // icon: require('./assets/discount-icon.png'), // Add your local icon here
     },
     {
       id: 2,
       title: 'Summer Special Deal',
       description: '15% OFF on all items',
-      // icon: require('./assets/discount-icon.png'),
     },
     {
       id: 3,
       title: 'Free Shipping',
       description: 'On orders above $50',
-      // icon: require('./assets/discount-icon.png'),
     },
   ];
 
@@ -109,12 +107,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     // paddingTop: 20,
+    marginBottom:5
   },
   header: {
     fontSize: 18,
     fontWeight: '600',
     marginHorizontal: 20,
-    marginBottom: 15,
+    marginBottom: 5,
     color: '#000',
   },
   card: {
@@ -158,7 +157,7 @@ const styles = StyleSheet.create({
   },
   pageText: {
     fontSize: 13,
-    color: '#007bff',
+    color: COLOR.primary,
     fontWeight: '500',
   },
   dots: {
@@ -173,7 +172,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 2,
   },
   dotActive: {
-    backgroundColor: '#007bff',
+    backgroundColor: COLOR.primary,
   },
 });
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
   View,
   Text,
@@ -9,17 +9,50 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {COLOR} from '../Constants/Colors'; // adjust path if needed
-import {useNavigation} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {useApi} from '../../../Backend/Api';
 
-const HomeHeader = ({title, leftIcon, rightIcon, leftTint, rightTint,rightIconTwo,onPressRightIconTwo,rightIconTwoStyle}) => {
+const HomeHeader = ({
+  title,
+  leftIcon,
+  rightIcon,
+  leftTint,
+  rightTint,
+  rightIconTwo,
+  onPressRightIconTwo,
+  rightIconTwoStyle,
+}) => {
   const navigation = useNavigation(); // Assuming you're using react-navigation
+  const isFocused = useIsFocused();
+  const {getRequest} = useApi();
+  const {setUser, setToken} = useContext(AuthContext);
+
+  useEffect(() => {
+    if (isFocused) {
+      onSubmit();
+    }
+  }, [isFocused]);
+  const onSubmit = async () => {
+    try {
+      const response = await getRequest(GET_PROFILE);
+      console.log(response, form, 'GET_PROFILE--->>');
+      if (response.success) {
+        setUser(response?.data?.user);
+      } else {
+        setError({otp: response.error});
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <View style={styles.header}>
       {/* Left Icon */}
       <TouchableOpacity
-      style={{
-        width:"20%"
-      }}
+        style={{
+          width: '20%',
+        }}
         onPress={() => {
           navigation.goBack();
         }}>
@@ -30,26 +63,32 @@ const HomeHeader = ({title, leftIcon, rightIcon, leftTint, rightTint,rightIconTw
       </TouchableOpacity>
 
       {/* Title */}
-      <View style={{
-        flex:1,
-        alignItems:'center'
-      }}>
-      <Text style={styles.title}>{title}</Text>
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+        }}>
+        <Text style={styles.title}>{title}</Text>
       </View>
 
       {/* Right Icon */}
-      <View style={{flexDirection:'row',justifyContent:'flex-end',width:"20%"}}>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'flex-end',
+          width: '20%',
+        }}>
         {rightIconTwo && (
           <TouchableOpacity onPress={onPressRightIconTwo}>
-          <Image
-            source={{uri: rightIconTwo}}
-            style={[styles.icon,  {marginRight:5} , rightIconTwoStyle]}
-          />
+            <Image
+              source={{uri: rightIconTwo}}
+              style={[styles.icon, {marginRight: 5}, rightIconTwoStyle]}
+            />
           </TouchableOpacity>
         )}
         <Image
           source={{uri: rightIcon}}
-          style={[styles.icon, rightTint , {tintColor: rightTint,}]}
+          style={[styles.icon, rightTint, {tintColor: rightTint}]}
         />
       </View>
     </View>
@@ -65,7 +104,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 10,
     // paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 5 : 0,
-    paddingTop: Platform.OS === 'android' ?  10 : 0,
+    paddingTop: Platform.OS === 'android' ? 10 : 0,
   },
   icon: {
     width: 30,

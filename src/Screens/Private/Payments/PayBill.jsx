@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
   Modal,
@@ -9,10 +8,10 @@ import {
   Image,
 } from 'react-native';
 import Button from '../../../Components/UI/Button';
-import Header from '../../../Components/FeedHeader';
 import HomeHeader from '../../../Components/HomeHeader';
 import CustomButton from '../../../Components/CustomButton';
 import {COLOR} from '../../../Constants/Colors';
+import {Typography} from '../../../Components/UI/Typography';
 
 const PayBill = () => {
   const [appointments, setAppointments] = useState([
@@ -47,14 +46,13 @@ const PayBill = () => {
 
   return (
     <View style={{flex: 1, backgroundColor: 'white', padding: 20}}>
-      {/* <Header title={'Pending Payments'}/> */}
       <HomeHeader
         title="Pending Payments"
         leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
         leftTint={COLOR.black}
       />
 
-      <ScrollView>
+      <ScrollView style={{marginTop:10}}>
         {appointments.map(appointment => {
           const selectedItems = services.filter(service =>
             appointment.services.includes(service.id),
@@ -76,21 +74,27 @@ const PayBill = () => {
               />
 
               {/* Salon Info */}
-              <Text style={styles.salonName}>Glamour Touch Salon</Text>
-              <Text style={styles.salonRating}>⭐️⭐️⭐️ (3.5)</Text>
-              <Text style={styles.salonTagline}>Luxury salon services</Text>
+              <Typography style={styles.salonName}>
+                Glamour Touch Salon
+              </Typography>
+              <Typography style={styles.salonRating}>⭐️⭐️⭐️ (3.5)</Typography>
+              <Typography style={styles.salonTagline}>
+                Luxury salon services
+              </Typography>
 
               {/* Appointment Info */}
-              <Text style={styles.bookingLabel}>
+              <Typography style={styles.bookingLabel}>
                 Appointment: {appointment.date} at {appointment.time}
-              </Text>
-              <Text style={styles.bookingLabel}>
+              </Typography>
+              <Typography style={styles.bookingLabel}>
                 Due Date: {appointment.dueDate}
-              </Text>
-              <Text style={styles.bookingLabel}>
+              </Typography>
+              <Typography style={styles.bookingLabel}>
                 Amount Due:{' '}
-                <Text style={styles.amountDue}>${total.toFixed(2)}</Text>
-              </Text>
+                <Typography style={styles.amountDue}>
+                  ${total.toFixed(2)}
+                </Typography>
+              </Typography>
 
               {/* Pay Now Button */}
               <TouchableOpacity
@@ -99,7 +103,7 @@ const PayBill = () => {
                   setSelectedAppointment(appointment);
                   setModalVisible(true);
                 }}>
-                <Text style={styles.payButtonText}>Pay Now</Text>
+                <Typography style={styles.payButtonText}>Pay Now</Typography>
               </TouchableOpacity>
             </View>
           );
@@ -110,31 +114,37 @@ const PayBill = () => {
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.sheetTitle}>Payment Details</Text>
+            <Typography style={styles.sheetTitle}>Payment Details</Typography>
             <ScrollView style={styles.scrollView}>
               {selectedAppointment && (
                 <>
                   <View style={styles.bookingInfo}>
-                    <Text style={styles.bookingLabel}>Appointment ID:</Text>
-                    <Text style={styles.bookingValue}>
+                    <Typography style={styles.bookingLabel}>
+                      Appointment ID:
+                    </Typography>
+                    <Typography style={styles.bookingValue}>
                       {selectedAppointment.id}
-                    </Text>
+                    </Typography>
                   </View>
                   <View style={styles.bookingInfo}>
-                    <Text style={styles.bookingLabel}>Date & Time:</Text>
-                    <Text style={styles.bookingValue}>
+                    <Typography style={styles.bookingLabel}>
+                      Date & Time:
+                    </Typography>
+                    <Typography style={styles.bookingValue}>
                       {selectedAppointment.date} at {selectedAppointment.time}
-                    </Text>
+                    </Typography>
                   </View>
 
                   {selectedAppointment.services.map(serviceId => {
                     const service = services.find(s => s.id === serviceId);
                     return (
                       <View key={service.id} style={styles.billRow}>
-                        <Text style={styles.billLabel}>{service.name}</Text>
-                        <Text style={styles.billValue}>
+                        <Typography style={styles.billLabel}>
+                          {service.name}
+                        </Typography>
+                        <Typography style={styles.billValue}>
                           ${service.price.toFixed(2)}
-                        </Text>
+                        </Typography>
                       </View>
                     );
                   })}
@@ -155,28 +165,36 @@ const PayBill = () => {
                     return (
                       <>
                         <View style={styles.billRow}>
-                          <Text style={styles.billLabel}>Subtotal</Text>
-                          <Text style={styles.billValue}>
+                          <Typography style={styles.billLabel}>
+                            Subtotal
+                          </Typography>
+                          <Typography style={styles.billValue}>
                             ${subtotal.toFixed(2)}
-                          </Text>
+                          </Typography>
                         </View>
                         <View style={styles.billRow}>
-                          <Text style={styles.billLabel}>Taxes (10%)</Text>
-                          <Text style={styles.billValue}>
+                          <Typography style={styles.billLabel}>
+                            Taxes (10%)
+                          </Typography>
+                          <Typography style={styles.billValue}>
                             ${tax.toFixed(2)}
-                          </Text>
+                          </Typography>
                         </View>
                         <View style={styles.billRow}>
-                          <Text style={styles.billLabel}>Platform Fee</Text>
-                          <Text style={styles.billValue}>
+                          <Typography style={styles.billLabel}>
+                            Platform Fee
+                          </Typography>
+                          <Typography style={styles.billValue}>
                             ${platformFee.toFixed(2)}
-                          </Text>
+                          </Typography>
                         </View>
                         <View style={styles.amountDueContainer}>
-                          <Text style={styles.amountLabel}>Total Due:</Text>
-                          <Text style={styles.amountValue}>
+                          <Typography style={styles.amountLabel}>
+                            Total Due:
+                          </Typography>
+                          <Typography style={styles.amountValue}>
                             ${total.toFixed(2)}
-                          </Text>
+                          </Typography>
                         </View>
                       </>
                     );
@@ -185,6 +203,7 @@ const PayBill = () => {
               )}
             </ScrollView>
             <CustomButton
+            style={{width: '100%'}}
               onPress={() => {
                 console.log('Payment initiated for', selectedAppointment?.id);
                 setModalVisible(false);
@@ -197,6 +216,7 @@ const PayBill = () => {
                 borderWidth: 1,
                 borderColor: 'gray',
                 marginTop: 10,
+                width: '100%'
               }}
               textStyle={{color: 'gray'}}
               onPress={() => {
@@ -279,7 +299,6 @@ const styles = StyleSheet.create({
     borderTopColor: '#eee',
     paddingTop: 15,
     marginTop: 10,
-    marginBottom: 15,
   },
   amountLabel: {
     fontSize: 18,
@@ -317,30 +336,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   salonImage: {
-  width: '100%',
-  height: 140,
-  borderRadius: 10,
-  marginBottom: 10,
-},
-salonName: {
-  fontSize: 18,
-  fontWeight: 'bold',
-  color: COLOR.primary,
-  marginBottom: 4,
-},
-salonRating: {
-  fontSize: 14,
-  color: COLOR.textSecondary,
-  marginBottom: 2,
-},
-salonTagline: {
-  fontSize: 14,
-  color: COLOR.grey,
-  marginBottom: 8,
-},
-amountDue: {
-  color: COLOR.primary,
-  fontWeight: 'bold',
-},
-
+    width: '100%',
+    height: 140,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  salonName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLOR.primary,
+    marginBottom: 4,
+  },
+  salonRating: {
+    fontSize: 14,
+    color: COLOR.textSecondary,
+    marginBottom: 2,
+  },
+  salonTagline: {
+    fontSize: 14,
+    color: COLOR.grey,
+    marginBottom: 8,
+  },
+  amountDue: {
+    color: COLOR.primary,
+    fontWeight: 'bold',
+  },
 });

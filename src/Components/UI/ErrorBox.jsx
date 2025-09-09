@@ -14,7 +14,7 @@ export const ErrorBox = ({ error, style }) => {
             alignSelf: 'flex-end',
             width: '100%',
             marginTop: 5,
-            textAlign: 'right',
+            // textAlign: 'right',
           },
           style,
         ]}

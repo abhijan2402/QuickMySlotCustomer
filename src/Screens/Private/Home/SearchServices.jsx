@@ -1,17 +1,24 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TextInput,
   Image,
   ScrollView,
   TouchableOpacity,
+  FlatList,
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
+import {Typography} from '../../../Components/UI/Typography';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import Input from '../../../Components/Input';
+import {images} from '../../../Components/UI/images';
+import { windowHeight } from '../../../Constants/Dimensions';
 
 const SearchServices = ({navigation}) => {
+  const [search, setSearch] = useState('');
+
   const services = [
     {
       id: 1,
@@ -50,34 +57,75 @@ const SearchServices = ({navigation}) => {
         rightIcon="https://cdn-icons-png.flaticon.com/128/17446/17446833.png"
         leftTint={COLOR.primary}
       />
-      <View style={styles.searchBox}>
-        <TextInput
-          placeholder="Search for services..."
-          placeholderTextColor="#999"
-          style={styles.input}
-        />
-      </View>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{paddingBottom: 70}}>
+      <View style={{paddingHorizontal: 5}}>
         {/* Search Box */}
+        <View style={{marginTop: -10, marginBottom: 10}}>
+          <Input
+            value={search}
+            onChangeText={v => setSearch(v)}
+            leftIcon={images.search}
+            placeholder="Search for services..."
+            inputContainer={{borderColor: COLOR.lightGrey}}
+            style={{marginLeft: 5}}
+            rightIcon={search !== '' ? images.cross2 : ''}
+            rightIconStyle={{height: 14, width: 14}}
+            onRightIconPress={() => setSearch('')}
+          />
+        </View>
 
-        {/* Render Multiple Services */}
-        {services.map(service => (
-          <TouchableOpacity
-            onPress={() => navigation.navigate('ProviderDetails')}
-            key={service.id}
-            style={styles.card}>
-            <Image source={{uri: service.image}} style={styles.cardImage} />
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>{service.name}</Text>
-              <Text style={styles.cardText}>{service.address}</Text>
-              <Text style={styles.cardText}>{service.experience}</Text>
-              <Text style={styles.cardText}>{service.availability}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+        {/* List of Services */}
+        <KeyboardAwareScrollView
+          extraScrollHeight={10}
+          enableOnAndroid={true}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{paddingBottom: 120}}>
+          <FlatList
+            data={services}
+            keyExtractor={item => item.id.toString()}
+            renderItem={({item, index}) => {
+              return (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('ProviderDetails')}
+                  style={styles.card}>
+                  <Image source={{uri: item.image}} style={styles.cardImage} />
+                  <View style={styles.cardContent}>
+                    <Typography
+                      size={16}
+                      fontWeight="bold"
+                      color={COLOR.black}
+                      style={{marginBottom: 5}}>
+                      {item.name}
+                    </Typography>
+
+                    <Typography size={13} color="#666" style={styles.textRow}>
+                      📍 {item.address}
+                    </Typography>
+
+                    <Typography size={13} color="#666" style={styles.textRow}>
+                      💼 {item.experience}
+                    </Typography>
+
+                    <Typography size={13} color="#666" style={{marginTop: 2}}>
+                      ⏰ {item.availability}
+                    </Typography>
+                  </View>
+                </TouchableOpacity>
+              );
+            }}
+            ListEmptyComponent={() => {
+              return (
+                <View style={{justifyContent:"center",
+                  alignItems:"center",
+                  marginTop: windowHeight * 0.3
+                }}>
+                  <Image source={images.noData}/>
+                  <Typography size={20} fontWeight={'500'} style={{marginTop:10}}>No services found</Typography>
+                </View>
+              )
+            }}
+          />
+        </KeyboardAwareScrollView>
+      </View>
     </View>
   );
 };
@@ -97,6 +145,8 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderWidth: 1,
     borderColor: '#ddd',
+    marginBottom: 10,
+    marginTop: 10,
   },
   input: {
     fontSize: 14,
@@ -104,29 +154,36 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: COLOR.white,
-    borderRadius: 10,
-    marginVertical: 15,
+    borderRadius: 14,
+    marginVertical: 12,
     overflow: 'hidden',
-    elevation: 2,
+    elevation: 3,
     shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    shadowOffset: {width: 0, height: 3},
+    margin: 1,
   },
   cardImage: {
     width: '100%',
-    height: 160,
+    height: 180,
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 14,
   },
   cardContent: {
-    padding: 10,
+    padding: 12,
   },
-  cardTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: COLOR.black,
-    marginBottom: 3,
+  textRow: {
+    marginBottom: 5,
   },
-  cardText: {
-    fontSize: 12,
-    color: '#555',
+  rowBetween: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  badge: {
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 12,
   },
 });

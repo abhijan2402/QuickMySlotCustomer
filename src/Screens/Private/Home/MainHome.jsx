@@ -1,4 +1,4 @@
-import React, {useRef, useEffect} from 'react';
+import React, {useRef, useEffect, useState, useContext} from 'react';
 import {
   Image,
   StyleSheet,
@@ -9,14 +9,24 @@ import {
   Dimensions,
   Animated,
   Platform,
+  FlatList,
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
 import {Typography} from '../../../Components/UI/Typography';
 import MainHomeHeader from './MainHomeHeader';
+import {images} from '../../../Components/UI/images';
+import Input from '../../../Components/Input';
+import {useIsFocused} from '@react-navigation/native';
+import {useApi} from '../../../Backend/Api';
+import {AuthContext} from '../../../Backend/AuthContent';
+import {GET_PROFILE} from '../../../Constants/ApiRoute';
 
 const {width} = Dimensions.get('window');
 
 const MainHome = ({navigation}) => {
+  const [search, setSearch] = useState('');
+  const isFocused = useIsFocused();
+
   const categories = [
     {
       title: 'Salons',
@@ -90,99 +100,94 @@ const MainHome = ({navigation}) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    const pulse = Animated.loop(
-      Animated.sequence([
-        Animated.timing(scaleAnim, {
-          toValue: 1.15,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleAnim, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-    pulse.start();
-  }, []);
-
+    if (isFocused) {
+      getProfile();
+    }
+  }, [isFocused]);
+  const getProfile = async () => {
+    try {
+      const response = await getRequest(GET_PROFILE);
+      console.log(response, 'GET_PROFILE--->>>');
+    } catch (err) {
+      console.error(err);
+    }
+  };
   return (
     <View style={styles.container}>
       {/* Header */}
       <MainHomeHeader />
-
-      {/* Floating Offers Button */}
-      <Animated.View style={[styles.fab, {transform: [{scale: scaleAnim}]}]}>
-        <TouchableOpacity onPress={() => navigation.navigate('Offers')}>
-          <Image
-            source={{
-              uri: 'https://cdn-icons-png.flaticon.com/128/8829/8829209.png',
-            }}
-            style={styles.fabIcon}
-          />
-        </TouchableOpacity>
-      </Animated.View>
-
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Search Bar */}
-        <View style={styles.searchBar}>
-          <Image
-            source={{
-              uri: 'https://cdn-icons-png.flaticon.com/128/2811/2811806.png',
-            }}
-            style={styles.searchIcon}
-          />
-          <TextInput
-            placeholderTextColor={COLOR.lightGrey}
+        <View style={{marginTop: -10, marginBottom: 10}}>
+          <Input
+            value={search}
+            onChangeText={v => setSearch(v)}
+            leftIcon={images.search}
             placeholder="Search for services..."
-            style={styles.searchInput}
+            inputContainer={{borderColor: COLOR.lightGrey}}
+            style={{marginLeft: 5}}
+            rightIcon={search !== '' ? images.cross2 : ''}
+            rightIconStyle={{height: 14, width: 14}}
+            onRightIconPress={() => setSearch('')}
           />
         </View>
 
         {/* My Bookings */}
-        <Typography size={16} fontWeight="600" style={styles.sectionTitle}>
-          My Bookings
-        </Typography>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {bookings.map(item => (
-            <View key={item.id} style={styles.bookingCard}>
-              <Typography
-                size={17}
-                fontWeight="bold"
-                style={styles.bookingVendor}>
-                {item.vendor}
-              </Typography>
-              <Typography size={13} style={styles.bookingText}>
-                Services:{' '}
-                <Typography fontWeight="600" color="#7b4ce0">
-                  {item.services}
-                </Typography>
-              </Typography>
-              <Typography size={13} style={styles.bookingText}>
-                Price:{' '}
-                <Typography fontWeight="600" color="#7b4ce0">
-                  {item.price}
-                </Typography>
-              </Typography>
-              <Typography size={13} style={styles.bookingText}>
-                Date:{' '}
-                <Typography fontWeight="600" color="#7b4ce0">
-                  {item.date}
-                </Typography>
-              </Typography>
-              <Typography size={13} style={styles.bookingText}>
-                Address: {item.address}
-              </Typography>
-              <Typography size={13} style={styles.bookingText}>
-                Phone:{' '}
-                <Typography fontWeight="600" color="#7b4ce0">
-                  {item.phone}
-                </Typography>
-              </Typography>
-            </View>
-          ))}
-        </ScrollView>
+        {bookings.length > 0 && (
+          <View>
+            <Typography
+              size={16}
+              fontWeight="600"
+              style={[styles.sectionTitle, {marginLeft: 5}]}>
+              My Bookings
+            </Typography>
+            <FlatList
+              data={bookings}
+              horizontal
+              contentContainerStyle={{marginHorizontal: 5}}
+              showsHorizontalScrollIndicator={false}
+              renderItem={({item, index}) => {
+                return (
+                  <View key={item.id} style={styles.bookingCard}>
+                    <Typography
+                      size={17}
+                      fontWeight="bold"
+                      style={styles.bookingVendor}>
+                      {item.vendor}
+                    </Typography>
+                    <Typography size={13} style={styles.bookingText}>
+                      Services:{' '}
+                      <Typography fontWeight="600" color="#7b4ce0">
+                        {item.services}
+                      </Typography>
+                    </Typography>
+                    <Typography size={13} style={styles.bookingText}>
+                      Price:{' '}
+                      <Typography fontWeight="600" color="#7b4ce0">
+                        {item.price}
+                      </Typography>
+                    </Typography>
+                    <Typography size={13} style={styles.bookingText}>
+                      Date:{' '}
+                      <Typography fontWeight="600" color="#7b4ce0">
+                        {item.date}
+                      </Typography>
+                    </Typography>
+                    <Typography size={13} style={styles.bookingText}>
+                      Address: {item.address}
+                    </Typography>
+                    <Typography size={13} style={styles.bookingText}>
+                      Phone:{' '}
+                      <Typography fontWeight="600" color="#7b4ce0">
+                        {item.phone}
+                      </Typography>
+                    </Typography>
+                  </View>
+                );
+              }}
+            />
+          </View>
+        )}
 
         {/* Auto-scroll Banner */}
         <View style={{marginVertical: 20}}>
@@ -207,22 +212,29 @@ const MainHome = ({navigation}) => {
         </View>
 
         {/* Service Categories */}
-        <Typography size={16} fontWeight="600" style={styles.sectionTitle}>
+        <Typography
+          size={16}
+          fontWeight="600"
+          style={[styles.sectionTitle, {marginLeft: 5}]}>
           Service Categories
         </Typography>
-        <View style={styles.categories}>
-          {categories.map((item, index) => (
-            <TouchableOpacity
-              onPress={() => navigation.navigate('SearchServices')}
-              key={index}
-              style={styles.categoryCard}>
-              <Image source={{uri: item.icon}} style={styles.categoryIcon} />
-              <Typography size={14} style={styles.categoryText}>
-                {item.title}
-              </Typography>
-            </TouchableOpacity>
-          ))}
-        </View>
+        <FlatList
+          data={categories}
+          numColumns={2}
+          renderItem={({item, index}) => {
+            return (
+              <TouchableOpacity
+                onPress={() => navigation.navigate('SearchServices')}
+                key={index}
+                style={styles.categoryCard}>
+                <Image source={{uri: item.icon}} style={styles.categoryIcon} />
+                <Typography size={14} style={styles.categoryText}>
+                  {item.title}
+                </Typography>
+              </TouchableOpacity>
+            );
+          }}
+        />
 
         {/* Another Banner */}
         <View style={{marginVertical: 20}}>
@@ -252,45 +264,6 @@ const MainHome = ({navigation}) => {
 
 export default MainHome;
 
-// const MainHomeHeader = ()=>{
-//   const navigation = useNavigation()
-//   return(
-//       <View style={styles.header}>
-//           <TouchableOpacity
-//           style={{
-//             width:"20%"
-//           }}
-//             onPress={() => {
-//               navigation.goBack();
-//             }}>
-//             <Image
-//               source={{uri: 'https://cdn-icons-png.flaticon.com/128/535/535239.png'}}
-//               style={[styles.icon, {tintColor: COLOR.primary}]}
-//             />
-//           </TouchableOpacity>
-//           <View style={{
-//             flex:1,
-//             alignItems:'center'
-//           }}>
-//           <Text style={styles.title}>{'QuickMySlot'}</Text>
-//           </View>
-//           <View style={{flexDirection:'row',justifyContent:'flex-end',width:"20%",alignItems:'center'}}>
-//               <TouchableOpacity onPress={()=>{
-//               navigation.navigate('NotificationsScreen')
-//               }}>
-//               <Image
-//                 source={{uri: 'https://cdn-icons-png.flaticon.com/128/2529/2529521.png'}}
-//                 style={[styles.icon,  {marginRight:5,tintColor:COLOR.primary} ]}
-//               />
-//               </TouchableOpacity>
-//             <Image
-//               source={{uri: 'https://cdn-icons-png.flaticon.com/128/17446/17446833.png'}}
-//               style={[styles.icon]}
-//             />
-//           </View>
-//         </View>
-//   )
-// }
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: COLOR.white, paddingHorizontal: 15},
 
@@ -306,6 +279,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     borderWidth: 1,
     borderColor: '#EBEBEA',
+    marginHorizontal: 5,
   },
   searchIcon: {width: 20, height: 20, marginRight: 8},
   searchInput: {flex: 1, color: 'black'},
@@ -339,7 +313,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: 40,
+    marginHorizontal: 5,
   },
   categoryCard: {
     width: '48%',
@@ -348,6 +322,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: 12,
+    marginHorizontal: 5,
   },
   categoryIcon: {width: 40, height: 40},
   categoryText: {marginTop: 5},

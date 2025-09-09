@@ -1,17 +1,16 @@
 import React, {useRef, useState} from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
   Image,
   ScrollView,
   Animated,
-  Easing,
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
+import {Typography} from '../../../Components/UI/Typography';
 
 const categories = [
   {
@@ -91,7 +90,7 @@ const ServiceList = ({navigation}) => {
   const [selectedCategory, setSelectedCategory] = useState('Hair Care');
   const [expanded, setExpanded] = useState({});
   const [selectedServices, setSelectedServices] = useState([]);
-  const rotateAnim = useRef({}).current;
+  const rotationValues = useRef({}).current;
 
   const addService = service => {
     if (!selectedServices.find(s => s.id === service.id)) {
@@ -102,15 +101,7 @@ const ServiceList = ({navigation}) => {
   const isAdded = serviceId => {
     return selectedServices.some(s => s.id === serviceId);
   };
-  const rotateInterpolate = id =>
-    rotateAnim[id]
-      ? rotateAnim[id].interpolate({
-          inputRange: [0, 1],
-          outputRange: ['0deg', '180deg'],
-        })
-      : '0deg';
 
-  const rotationValues = useRef({}).current;
   const toggleExpand = catId => {
     if (!rotationValues[catId]) {
       rotationValues[catId] = new Animated.Value(0);
@@ -145,11 +136,14 @@ const ServiceList = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <HomeHeader
-        title="Services"
-        leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
-        leftTint={COLOR.black}
-      />
+      <View style={{paddingHorizontal: 15}}>
+        <HomeHeader
+          title="Services"
+          leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
+          leftTint={COLOR.black}
+        />
+      </View>
+
       <View style={{flex: 1, flexDirection: 'row'}}>
         {/* Left Side Category */}
         <View style={styles.leftPane}>
@@ -167,13 +161,14 @@ const ServiceList = ({navigation}) => {
                   source={{uri: item.image}}
                   style={styles.categoryImage}
                 />
-                <Text
+                <Typography
+                  size={13}
                   style={[
                     styles.categoryText,
                     selectedCategory === item.name && {fontWeight: 'bold'},
                   ]}>
                   {item.name}
-                </Text>
+                </Typography>
               </TouchableOpacity>
             )}
           />
@@ -181,7 +176,9 @@ const ServiceList = ({navigation}) => {
 
         {/* Right Side Services */}
         <View style={styles.rightPane}>
-          <Text style={styles.heading}>{selectedCategory}</Text>
+          <Typography size={18} fontWeight="bold" style={styles.heading}>
+            {selectedCategory}
+          </Typography>
 
           <ScrollView>
             {services[selectedCategory]?.map(cat => (
@@ -189,24 +186,29 @@ const ServiceList = ({navigation}) => {
                 <TouchableOpacity
                   onPress={() => toggleExpand(cat.id)}
                   style={styles.serviceHeader}>
-                  <Text style={styles.serviceCategoryText}>
+                  <Typography size={16} fontWeight="600">
                     {cat.category} ({cat.services.length})
-                  </Text>
+                  </Typography>
                   <Animated.Image
                     source={{
                       uri: 'https://cdn-icons-png.flaticon.com/128/2985/2985150.png',
                     }}
-                    style={[{width: 20, height: 20}, getRotationStyle(cat.id)]}
+                    style={[{width: 20, height: 20,marginRight:10}, getRotationStyle(cat.id)]}
                   />
                 </TouchableOpacity>
 
                 {expanded[cat.id] &&
                   cat.services.map(srv => (
                     <View key={srv.id} style={styles.serviceRow}>
-                      <Text style={styles.serviceName}>
+                      <Typography size={14} style={styles.serviceName}>
                         {srv.name} -{' '}
-                        <Text style={styles.servicePrice}>₹{srv.price}</Text>
-                      </Text>
+                        <Typography
+                          size={14}
+                          fontWeight="bold"
+                          color={COLOR.primary}>
+                          ₹{srv.price}
+                        </Typography>
+                      </Typography>
                       <TouchableOpacity
                         style={[
                           styles.addBtn,
@@ -214,13 +216,12 @@ const ServiceList = ({navigation}) => {
                         ]}
                         disabled={isAdded(srv.id)}
                         onPress={() => addService(srv)}>
-                        <Text
-                          style={[
-                            styles.addBtnText,
-                            isAdded(srv.id) && styles.addedBtnText,
-                          ]}>
+                        <Typography
+                          size={13}
+                          fontWeight="600"
+                          color={isAdded(srv.id) ? COLOR.white : COLOR.black}>
                           {isAdded(srv.id) ? 'Added' : 'Add'}
-                        </Text>
+                        </Typography>
                       </TouchableOpacity>
                     </View>
                   ))}
@@ -235,9 +236,9 @@ const ServiceList = ({navigation}) => {
         <TouchableOpacity
           onPress={() => navigation.navigate('BookingScreen')}
           style={styles.bookNowBtn}>
-          <Text style={styles.bookNowText}>
+          <Typography size={16} fontWeight="bold" color={COLOR.white}>
             Book Now ({selectedServices.length})
-          </Text>
+          </Typography>
         </TouchableOpacity>
       )}
     </View>
@@ -250,21 +251,17 @@ const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: '#fff'},
   leftPane: {width: 100, backgroundColor: '#f9f9f9'},
   categoryItem: {
-    // flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
-    // paddingHorizontal: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
   activeCategory: {backgroundColor: '#e6f0ff'},
   categoryImage: {width: 40, height: 40, borderRadius: 8, marginRight: 8},
-  categoryText: {fontSize: 13, flexShrink: 1},
+  categoryText: {flexShrink: 1},
 
   rightPane: {flex: 1, padding: 10},
   heading: {
-    fontSize: 18,
-    fontWeight: 'bold',
     marginBottom: 10,
     color: COLOR.black,
   },
@@ -278,29 +275,25 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 8,
   },
-  serviceCategoryText: {fontSize: 16, fontWeight: '600'},
   serviceRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 6,
     paddingHorizontal: 5,
   },
-  serviceName: {fontSize: 14, flex: 1, flexWrap: 'wrap'},
-  servicePrice: {color: COLOR.primary, fontWeight: 'bold'},
+  serviceName: {flex: 1, flexWrap: 'wrap'},
   addBtn: {
     backgroundColor: COLOR.white,
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 8,
     borderWidth: 1,
+    marginRight:5
   },
-  addBtnText: {color: '#fff', fontWeight: '600', color: COLOR.black},
   addedBtn: {backgroundColor: COLOR.primary, borderWidth: 0},
-  addedBtnText: {color: '#fff'},
-
   bookNowBtn: {
     position: 'absolute',
-    bottom: 45,
+    bottom: 10,
     left: 20,
     right: 20,
     backgroundColor: COLOR.primary,
@@ -313,6 +306,4 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  bookNowText: {color: '#fff', fontSize: 16, fontWeight: 'bold'},
-  arrowIcon: {width: 20, height: 20, tintColor: COLOR.black},
 });

@@ -1,4 +1,4 @@
-import React, {useContext, useRef, useState} from 'react';
+import React, {useContext, useRef, useState, useEffect} from 'react';
 import {
   Image,
   SafeAreaView,
@@ -12,23 +12,36 @@ import CustomButton from '../../Components/CustomButton';
 import {windowHeight} from '../../Constants/Dimensions';
 import HomeHeader from '../../Components/HomeHeader';
 import {AuthContext} from '../../Backend/AuthContent';
-import {Typography} from '../../Components/UI/Typography'; // ✅ import Typography
+import {Typography} from '../../Components/UI/Typography';
 import Button from '../../Components/UI/Button';
-import {useApi} from '../../Backend/Api';
-import {VERIFY_OTP} from '../../Constants/ApiRoute';
+import {POST, useApi} from '../../Backend/Api';
+import {RESEND_OTP, VERIFY_OTP} from '../../Constants/ApiRoute';
 import {isValidForm, ToastMsg} from '../../Backend/Utility';
 import {validators} from '../../Backend/Validator';
 import {ErrorBox} from '../../Components/UI/ErrorBox';
+import {isAuth, Token, userDetails} from '../../Redux/action';
+import {useDispatch} from 'react-redux';
 
 const OtpScreen = ({navigation, route}) => {
-  const {setUser, setToken} = useContext(AuthContext);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const inputs = useRef([]);
   const user_id = route?.params?.userId;
   const phone = route?.params?.phone;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const {postRequest} = useApi();
+  const dispatch = useDispatch();
+  // 🔥 Timer state
+  const [timer, setTimer] = useState(60);
+
+  useEffect(() => {
+    let interval;
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [timer]);
 
   const handleChange = (text, index) => {
     let newOtp = [...otp];
@@ -61,24 +74,51 @@ const OtpScreen = ({navigation, route}) => {
   };
 
   const onSubmit = async () => {
-    setLoading(true);
+    // setLoading(true);
     const otpCode = otp.join('');
-    const form = {user_id: user_id, otp: otpCode};
-    try {
-      const response = await postRequest(VERIFY_OTP, form, false);
-      console.log(response, form, 'otpResponse--->>');
-      setLoading(false);
-      if (response.success) {
-        navigation.navigate('BottomNavigation');
-        ToastMsg(response?.data?.message || 'Success');
-      } else {
-        setError({otp: response.error});
-        ToastMsg(response.error || 'Failed to verify OTP');
-      }
-    } catch (err) {
-      setLoading(false);
-      console.error(err);
-    }
+
+    const body = {user_id: user_id, otp: otpCode};
+    POST(
+      VERIFY_OTP,
+      body,
+      success => {
+        console.log(success, 'successsuccesssuccess-->>>');
+        setLoading(false);
+        ToastMsg(success?.message);
+        dispatch(Token(success?.token));
+        dispatch(isAuth(true));
+        const d = {...success?.user};
+        dispatch(userDetails(d));
+      },
+      error => {
+        console.log(error, 'errorerrorerror>>');
+        setLoading(false);
+        ToastMsg(error?.message);
+      },
+      fail => {
+        console.log(fail, 'failfailfailfail');
+        setLoading(false);
+      },
+    );
+  };
+
+  const resend = async () => {
+    const form = {phone_number: phone};
+    POST(
+      RESEND_OTP,
+      form,
+      success => {
+        console.log(success, 'successsuccesssuccess-->>>');
+        ToastMsg(success?.message);
+      },
+      error => {
+        console.log(error, 'errorerrorerror>>');
+        ToastMsg(error?.message);
+      },
+      fail => {
+        console.log(fail, 'failfailfailfail');
+      },
+    );
   };
 
   return (
@@ -137,9 +177,7 @@ const OtpScreen = ({navigation, route}) => {
 
       <Button
         title={'Verify'}
-        onPress={() => {
-          verifyOtp();
-        }}
+        onPress={verifyOtp}
         containerStyle={{
           marginTop: windowHeight * 0.06,
         }}
@@ -151,13 +189,20 @@ const OtpScreen = ({navigation, route}) => {
         <Typography size={14} color={COLOR.black}>
           Didn't receive the code?{' '}
         </Typography>
-        <Typography
-          size={14}
-          color={COLOR.primary}
-          fontWeight="600"
-          onPress={() => console.log('Resend OTP pressed')}>
-          Resend OTP
-        </Typography>
+        {timer > 0 ? (
+          <Typography size={14} color={COLOR.gray}>
+            Resend in {timer}s
+          </Typography>
+        ) : (
+          <Typography
+            size={14}
+            color={COLOR.primary}
+            fontWeight="600"
+            disabled={false}
+            onPress={resend}>
+            Resend OTP
+          </Typography>
+        )}
       </View>
     </SafeAreaView>
   );

@@ -1,12 +1,13 @@
 import React, {useState} from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
   Image,
   TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
@@ -14,16 +15,27 @@ import CustomButton from '../../../Components/CustomButton';
 import {windowHeight, windowWidth} from '../../../Constants/Dimensions';
 import ScheduleCard from '../../../Components/UI/ScheduleCard';
 import moment from 'moment';
+import {Typography} from '../../../Components/UI/Typography';
+import LinearGradient from 'react-native-linear-gradient';
+import Input from '../../../Components/Input';
+import {images} from '../../../Components/UI/images';
+import SimpleModal from '../../../Components/UI/SimpleModal';
+import Button from '../../../Components/UI/Button';
+import useKeyboard from '../../../Constants/Utility';
 
 const BookingScreen = ({navigation}) => {
   const [selectedServices, setSelectedServices] = useState([]);
   const [selectedDate, setSelectedDate] = useState(27);
-  const [selectedTime, setSelectedTime] = useState(null);
+  const [selectedTimes, setSelectedTimes] = useState([]);
   const [note, setNote] = useState('');
   const [selectTime, setSelectTime] = useState(null);
+  const [availOffer, setAvailOffer] = useState(false);
+  const [calculate, setCalculate] = useState(false);
+
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [dateStart, setDateStart] = useState(null);
-  const [location_id, setLocation_id] = useState(mockLocation);
+  const {isKeyboardVisible} = useKeyboard();
+  const [showServices, setShowServices] = useState(false);
 
   // Mock location data with provider availability
   const mockLocation = {
@@ -56,35 +68,15 @@ const BookingScreen = ({navigation}) => {
           {start_time: '15:00:00', end_time: '16:00:00'},
         ],
       },
-      // Add more dates as needed
     ],
   };
 
-  // Demo services (not displayed but used for price calc if selected)
-  const services = [
-    {
-      id: 1,
-      name: 'Haircut & Styling',
-      price: 45,
-    },
-    {
-      id: 2,
-      name: 'Hair Spa',
-      price: 60,
-    },
-    {
-      id: 3,
-      name: 'Hair Coloring',
-      price: 120,
-    },
-  ];
+  const [location_id, setLocation_id] = useState(mockLocation);
 
-  const dates = [
-    {day: 27, label: 'Fri'},
-    {day: 28, label: 'Sat'},
-    {day: 29, label: 'Sun'},
-    {day: 30, label: 'Mon'},
-    {day: 31, label: 'Tue'},
+  const services = [
+    {id: 1, name: 'Haircut & Styling', price: 45},
+    {id: 2, name: 'Hair Spa', price: 60},
+    {id: 3, name: 'Hair Coloring', price: 120},
   ];
 
   const times = [
@@ -114,17 +106,26 @@ const BookingScreen = ({navigation}) => {
     }
   };
 
-  // If no services selected, show demo price
+  const toggleTimeSelection = time => {
+    if (selectedTimes.includes(time)) {
+      setSelectedTimes(selectedTimes.filter(t => t !== time));
+    } else {
+      if (selectedTimes.length < 3) {
+        setSelectedTimes([...selectedTimes, time]);
+      }
+    }
+  };
+
   const selectedItems =
     selectedServices.length > 0
       ? services.filter(s => selectedServices.includes(s.id))
-      : [services[0]]; // default demo service
-  const platformFee = 2; // fixed platform fee
+      : [services[0]];
+
+  const platformFee = 2;
   const subtotal = selectedItems.reduce((sum, s) => sum + s.price, 0);
   const tax = subtotal * 0.1;
   const total = subtotal + tax + platformFee;
 
-  // Mock function to convert time slots (replace with your actual implementation)
   const convertTimeSlots = (slots, date) => {
     return slots.map(slot => ({
       ...slot,
@@ -137,27 +138,61 @@ const BookingScreen = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <HomeHeader
-        title="Available Services"
-        leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
-        leftTint={COLOR.primary}
-        onLeftPress={() => navigation.goBack()}
-      />
-
-      <View
-        style={{
-          // height: windowHeight / 1.2,
-          flex: 1,
-        }}>
-        <ScrollView showsVerticalScrollIndicator={false} style={{flex: 1}}>
+      <View style={{paddingHorizontal: 15}}>
+        <HomeHeader
+          title="Available Services"
+          leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
+          leftTint={COLOR.primary}
+          onLeftPress={() => navigation.goBack()}
+        />
+      </View>
+      <KeyboardAvoidingView
+        style={{flex: 1}}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 40}
+        behavior={
+          Platform.OS === 'ios'
+            ? 'padding'
+            : isKeyboardVisible
+            ? 'height'
+            : undefined
+        }>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          style={{flex: 1, marginHorizontal: 20}}>
           {/* Salon Card */}
           <View style={styles.salonCard}>
-            <Text style={styles.salonName}>Glamour Touch Salon</Text>
-            <Text style={styles.salonSubtitle}>Luxury salon services</Text>
+            <View>
+              <Typography style={styles.salonName}>
+                Glamour Touch Salon
+              </Typography>
+              <Typography style={styles.salonSubtitle}>
+                Luxury salon services
+              </Typography>
+            </View>
+            <TouchableOpacity
+              style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Image
+                source={images.support}
+                style={{height: 18, width: 18}}
+                tintColor={COLOR.primary}
+              />
+              <Typography
+                size={16}
+                fontWeight={'500'}
+                style={{marginLeft: 5}}
+                color={COLOR.primary}>
+                Support
+              </Typography>
+            </TouchableOpacity>
           </View>
 
           {/* Date Selector */}
-
+          <Typography
+            size={16}
+            fontWeight={'500'}
+            style={{marginTop: 20, marginBottom: 5}}>
+            Select Date & Time of Appoinment
+          </Typography>
           <ScheduleCard
             selected_date={
               selectTime?.date || moment()?.utc()?.format('YYYY-MM-DD')
@@ -173,7 +208,7 @@ const BookingScreen = ({navigation}) => {
                 v => v?.date == selected_date,
               );
               const now = new Date();
-              const todayStr = now.toISOString().split('T')[0]; // "YYYY-MM-DD"
+              const todayStr = now.toISOString().split('T')[0];
 
               let upcomingSlots = [];
 
@@ -197,57 +232,37 @@ const BookingScreen = ({navigation}) => {
             }}
           />
 
-          {/*  */}
-
-          {/* <Text style={styles.sectionTitle}>Choose Date & Time</Text> */}
-          {/* <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.dateRow}>
-            {dates.map(d => (
-              <TouchableOpacity
-                key={d.day}
-                style={[
-                  styles.dateBox,
-                  selectedDate === d.day && styles.selectedDateBox,
-                ]}
-                onPress={() => setSelectedDate(d.day)}>
-                <Text
-                  style={[
-                    styles.dateDay,
-                    selectedDate === d.day && styles.selectedDateText,
-                  ]}>
-                  {d.day}
-                </Text>
-                <Text
-                  style={[
-                    styles.dateLabel,
-                    selectedDate === d.day && styles.selectedDateText,
-                  ]}>
-                  {d.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView> */}
-
           {/* Time Selector */}
-          <Text style={styles.sectionTitle}>Choose Time</Text>
+          <Typography style={styles.sectionTitle}>Choose Time</Typography>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 10,
+            }}>
+            <Typography size={16}>You can select up-to 3 time slots</Typography>
+            <Image
+              source={images.info}
+              style={{height: 15, width: 15, marginLeft: 5}}
+            />
+          </View>
+
           <View style={styles.timeGrid}>
             {times.map(time => (
               <TouchableOpacity
                 key={time}
                 style={[
                   styles.timeBox,
-                  selectedTime === time && styles.selectedTimeBox,
+                  selectedTimes.includes(time) && styles.selectedTimeBox,
                 ]}
-                onPress={() => setSelectedTime(time)}>
-                <Text
+                onPress={() => toggleTimeSelection(time)}>
+                <Typography
                   style={[
                     styles.timeText,
-                    selectedTime === time && styles.selectedTimeText,
+                    selectedTimes.includes(time) && styles.selectedTimeText,
                   ]}>
                   {time}
-                </Text>
+                </Typography>
               </TouchableOpacity>
             ))}
           </View>
@@ -258,92 +273,793 @@ const BookingScreen = ({navigation}) => {
               navigation.navigate('OffersScreen');
             }}
             style={styles.offerBtn}>
-            <View style={{flexDirection:"row",alignItems:"center"}}>
-              <Image
-                source={{
-                  uri: 'https://cdn-icons-png.flaticon.com/128/726/726476.png',
-                }}
-                style={styles.offerIcon}
-              />
-              <Text style={styles.offerText}>Choose Offer</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Image source={images.offer} style={styles.offerIcon} />
+              <Typography style={styles.offerText}>Choose Offer</Typography>
             </View>
 
             <Image
               source={{
                 uri: 'https://cdn-icons-png.flaticon.com/128/2985/2985179.png',
               }}
-              style={[
-                styles.offerIcon,
-                {marginRight: 0},
-              ]}
+              style={[styles.offerIcon, {marginRight: 0}]}
             />
           </TouchableOpacity>
-
-          {/* Price Breakdown */}
-
-          <View style={styles.billContainer}>
-            <Text style={styles.billTitle}>Bill Details</Text>
-
-            {/* Show each selected service */}
-            {selectedItems.map(item => (
-              <View key={item.id} style={styles.billRow}>
-                <Text style={styles.billLabel}>{item.name}</Text>
-                <Text style={styles.billValue}>${item.price.toFixed(2)}</Text>
+          <View style={styles.offerApplied}>
+            <View style={{flexDirection: 'row'}}>
+              <Image source={images.offer} style={{height: 24, width: 24}} />
+              <View style={{marginLeft: 10}}>
+                <Typography size={14} fontWeight={'500'}>
+                  Offer Applied
+                </Typography>
+                <Typography size={16} fontWeight={'500'} style={{marginTop: 3}}>
+                  FIRST40
+                </Typography>
               </View>
-            ))}
+            </View>
+            <View style={{marginRight: 10}}>
+              <Image source={images.cross2} style={{height: 14, width: 14}} />
+            </View>
+          </View>
 
-            {/* Subtotal */}
-            <View style={styles.billRow}>
-              <Text style={styles.billLabel}>Subtotal</Text>
-              <Text style={styles.billValue}>${subtotal.toFixed(2)}</Text>
+          {/* Bill Details */}
+          <View style={styles.billContainer}>
+            <Typography style={styles.billTitle}>Bill Details</Typography>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginVertical: 5,
+              }}>
+              <TouchableOpacity
+                style={{flexDirection: 'row', alignItems: 'center'}}
+                onPress={() => setShowServices(!showServices)}>
+                <Typography size={14} fontWeight={'500'}>
+                  Your Services
+                </Typography>
+                <TouchableOpacity
+                  onPress={() => setShowServices(!showServices)}
+                  style={{
+                    marginLeft: 5,
+                    backgroundColor: COLOR.lightGrey,
+                    height: 16,
+                    width: 16,
+                    borderRadius: 50,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 5,
+                  }}>
+                  <Image
+                    source={images.ArrowDown}
+                    style={{height: 10, width: 10}}
+                  />
+                </TouchableOpacity>
+              </TouchableOpacity>
+              <Typography size={14} fontWeight={'500'}>
+                ₹ 944
+              </Typography>
             </View>
 
-            {/* Tax */}
-            <View style={styles.billRow}>
-              <Text style={styles.billLabel}>Taxes (10%)</Text>
-              <Text style={styles.billValue}>${tax.toFixed(2)}</Text>
-            </View>
+            {/* Services List */}
+            {showServices && (
+              <View>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    marginTop: 10,
+                    justifyContent: 'space-around',
+                  }}>
+                  <View style={{alignItems: 'center'}}>
+                    <Image
+                      source={images.manhair}
+                      style={{height: 20, width: 20, marginBottom: 5}}
+                      tintColor={COLOR.primary}
+                    />
+                    <Typography size={12} fontWeight={'500'}>
+                      Men
+                    </Typography>
+                  </View>
+                  <View>
+                    <Typography
+                      size={12}
+                      fontWeight={'500'}
+                      style={{
+                        width: windowWidth * 0.65,
+                        borderBottomWidth: 1,
+                        paddingBottom: 5,
+                        borderBottomColor: COLOR.lightGrey,
+                      }}>
+                      Men's Grooming
+                    </Typography>
+                    <View style={styles.serviceRow}>
+                      <View>
+                        <Typography style={styles.serviceLabel}>
+                          Bread Trim
+                        </Typography>
+                        <Typography style={styles.serviceSub}>
+                          From ₹ 300 + GST
+                        </Typography>
+                      </View>
+                      <TouchableOpacity>
+                        <Image
+                          source={images.cross2}
+                          style={styles.removeIcon}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    marginTop: 10,
+                    justifyContent: 'space-around',
+                  }}>
+                  <View style={{alignItems: 'center'}}>
+                    <Image
+                      source={images.manhair}
+                      style={{height: 20, width: 20, marginBottom: 5}}
+                      tintColor={COLOR.primary}
+                    />
+                    <Typography size={12} fontWeight={'500'}>
+                      Men
+                    </Typography>
+                  </View>
+                  <View>
+                    <Typography
+                      size={12}
+                      fontWeight={'500'}
+                      style={{
+                        width: windowWidth * 0.65,
+                        borderBottomWidth: 1,
+                        paddingBottom: 5,
+                        borderBottomColor: COLOR.lightGrey,
+                      }}>
+                      Hair Care | Haircut{' '}
+                    </Typography>
+                    <View style={styles.serviceRow}>
+                      <View>
+                        <Typography style={styles.serviceLabel}>
+                          Haircut
+                        </Typography>
+                        <Typography style={styles.serviceSub}>
+                          Includes hair wash
+                        </Typography>
+                        <Typography style={styles.serviceSub}>
+                          From ₹ 300 + GST
+                        </Typography>
+                      </View>
+                      <TouchableOpacity>
+                        <Image
+                          source={images.cross2}
+                          style={styles.removeIcon}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            )}
 
-            {/* Platform Fee */}
-            <View style={styles.billRow}>
-              <Text style={styles.billLabel}>Platform Fee</Text>
-              <Text style={styles.billValue}>${platformFee.toFixed(2)}</Text>
+            {/* Offer Applied */}
+            <View style={styles.offerAppliedRow}>
+              <Typography style={styles.offerAppliedText}>
+                Offer Applied
+              </Typography>
+              <Typography style={styles.offerCode}>FIRST40</Typography>
             </View>
 
             {/* Total */}
-            <View style={styles.billRow}>
-              <Text style={styles.totalLabel}>Total</Text>
-              <Text style={styles.totalValue}>${total.toFixed(2)}</Text>
+            <View style={styles.totalRow}>
+              <Typography style={styles.totalLabel}>Approx Total</Typography>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Typography style={styles.strikePrice}>
+                  ₹${(total + 50).toFixed(2)}
+                </Typography>
+                <Typography style={styles.finalPrice}>
+                  {' '}
+                  ₹{total.toFixed(2)}
+                </Typography>
+              </View>
             </View>
           </View>
 
-          {/* Add Note */}
-          <View style={styles.noteContainer}>
-            <Text style={styles.noteLabel}>Request / Add Note</Text>
-            <TextInput
-              style={styles.noteInput}
-              placeholder="Type your request here..."
-              multiline
+          <LinearGradient
+            colors={['#796FC3', '#ADA4E2']}
+            start={{x: 1, y: 0}}
+            end={{x: 1, y: 1}}
+            style={styles.voucherCard}>
+            <View style={styles.voucherHeader}>
+              <Image
+                source={{
+                  uri: 'https://cdn-icons-png.flaticon.com/512/3523/3523887.png',
+                }}
+                style={styles.voucherIcon}
+              />
+              <View style={{flex: 1}}>
+                <Typography size={16} fontWeight="600" color="#fff">
+                  Earn 15% Discount Voucher
+                </Typography>
+                <Typography
+                  size={14}
+                  fontWeight="600"
+                  color="#fff"
+                  style={{marginTop: 2}}>
+                  + ₹103
+                </Typography>
+              </View>
+            </View>
+
+            <Typography
+              size={13}
+              fontWeight="400"
+              color="#f3f3f3"
+              style={{
+                marginTop: 10,
+                lineHeight: 20,
+                letterSpacing: 0.3,
+              }}>
+              💡 Use this voucher to save on your next appointment!
+            </Typography>
+          </LinearGradient>
+          <Typography
+            size={15}
+            fontWeight={'400'}
+            color="gray"
+            lineHeight={20}
+            style={{marginBottom: 15}}>
+            <Typography size={15} fontWeight={'400'}>
+              Note:
+            </Typography>{' '}
+            The total may vary after consultation depending on the length,
+            density, product & stylist you choose.
+          </Typography>
+
+          <View
+            style={{
+              backgroundColor: COLOR.white,
+              padding: 15,
+              borderWidth: 1,
+              borderColor: COLOR.lightGrey,
+              borderRadius: 10,
+              marginBottom: 10,
+            }}>
+            <TouchableOpacity
+              onPress={() => setAvailOffer(true)}
+              activeOpacity={0.7}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingBottom: 15,
+                borderBottomWidth: 1,
+                borderBottomColor: COLOR.lightGrey,
+              }}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Image source={images.info} style={{height: 18, width: 18.2}} />
+                <Typography
+                  size={16}
+                  fontWeight={'500'}
+                  style={{marginLeft: 10}}>
+                  How to avail this offer ?
+                </Typography>
+              </View>
+              <View>
+                <Image
+                  source={images.rightArrow}
+                  style={{height: 18, width: 18}}
+                />
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setCalculate(true)}
+              activeOpacity={0.7}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingBottom: 15,
+                borderBottomWidth: 1,
+                borderBottomColor: COLOR.lightGrey,
+                marginTop: 15,
+              }}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Image
+                  source={images.calculator}
+                  style={{height: 18, width: 18.2}}
+                />
+                <Typography
+                  size={16}
+                  fontWeight={'500'}
+                  style={{marginLeft: 10}}>
+                  Calculate your bill with offer
+                </Typography>
+              </View>
+              <View>
+                <Image
+                  source={images.rightArrow}
+                  style={{height: 18, width: 18}}
+                />
+              </View>
+            </TouchableOpacity>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: 15,
+              }}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Image
+                  source={images.compose}
+                  style={{height: 18, width: 18.2}}
+                />
+                <Typography
+                  size={16}
+                  fontWeight={'500'}
+                  style={{marginLeft: 10}}>
+                  Add a request
+                </Typography>
+              </View>
+            </View>
+            <Input
+              placeholder="Eg: Stylist Name"
               value={note}
               onChangeText={setNote}
+              height={60}
+              inputContainer={{marginTop: -10}}
             />
           </View>
-
-          {/* Book Now Button */}
-          <CustomButton
+          {/* Book Now */}
+          <Button
             title="Book Now"
-            style={{width: '94%', marginBottom: 20}}
+            containerStyle={{marginBottom: 10, marginTop: 10}}
             onPress={() => {
-              // Checkout
               navigation.navigate('BookingConfirmation', {
                 selectedServices,
                 total,
                 note,
+                selectedTimes,
               });
             }}
           />
         </ScrollView>
-      </View>
+      </KeyboardAvoidingView>
+      <SimpleModal
+        visible={availOffer}
+        onClose={() => setAvailOffer(false)}
+        overlay={{justifyContent: 'flex-end'}}
+        modalContainer={{
+          width: '100%',
+          borderRadius: 0,
+          borderTopRightRadius: 20,
+          borderTopLeftRadius: 20,
+          maxHeight: '70%',
+        }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingBottom: 10,
+          }}>
+          <Typography
+            size={18}
+            fontWeight={'700'}
+            textAlign={'center'}
+            style={{marginTop: 10}}>
+            How to avail the offer ?
+          </Typography>
+          <TouchableOpacity style={{}} onPress={() => setAvailOffer(false)}>
+            <Image source={images.cross2} style={{height: 16, width: 16}} />
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView showsVerticalScrollIndicator={false} style={{}}>
+          <View
+            style={{
+              paddingVertical: 10,
+              paddingHorizontal: 15,
+              marginTop: 20,
+              borderWidth: 1,
+              borderColor: COLOR.lightGrey,
+              borderRadius: 16,
+            }}>
+            <Typography size={16} fontWeight={'500'} color={COLOR.primary}>
+              Step 1
+            </Typography>
+            <Typography size={18} fontWeight={'500'} style={{marginTop: 5}}>
+              Book your appoinment with the app
+            </Typography>
+          </View>
+          <View
+            style={{
+              paddingVertical: 10,
+              paddingHorizontal: 15,
+              marginTop: 15,
+              borderWidth: 1,
+              borderColor: COLOR.lightGrey,
+              borderRadius: 16,
+            }}>
+            <Typography size={16} fontWeight={'500'} color={COLOR.primary}>
+              Step 2
+            </Typography>
+            <Typography size={18} fontWeight={'500'} style={{marginTop: 5}}>
+              Visit for your appoinment to avail all the services
+            </Typography>
+          </View>
+          <View
+            style={{
+              paddingVertical: 10,
+              paddingHorizontal: 15,
+              marginTop: 15,
+              borderWidth: 1,
+              borderColor: COLOR.lightGrey,
+              borderRadius: 16,
+            }}>
+            <Typography size={16} fontWeight={'500'} color={COLOR.primary}>
+              Step 3
+            </Typography>
+            <Typography size={18} fontWeight={'500'} style={{marginTop: 5}}>
+              Pay your bill with the app using any mode of online payment after
+              availing your services
+            </Typography>
+          </View>
+          <Typography size={14} fontWeight={'500'} style={{marginTop: 15}}>
+            *Discount will be applicable on the final bill amount including all
+            taxes.
+          </Typography>
+          <View
+            style={{
+              paddingVertical: 10,
+              paddingHorizontal: 15,
+              marginTop: 15,
+              borderWidth: 1,
+              borderColor: COLOR.lightGrey,
+              borderRadius: 16,
+            }}>
+            <Typography
+              size={18}
+              fontWeight={'500'}
+              textAlign={'center'}
+              color={COLOR.primary}>
+              Sample Bill
+            </Typography>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: 15,
+              }}>
+              <Typography size={14} fontWeight={'500'}>
+                if Total Bill is
+              </Typography>
+              <Typography size={14} fontWeight={'500'}>
+                ₹ 944
+              </Typography>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: 15,
+              }}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Image source={images.promo} style={{height: 16, width: 18}} />
+                <Typography
+                  size={14}
+                  fontWeight={'500'}
+                  style={{marginLeft: 10}}>
+                  Discount Voucher
+                </Typography>
+              </View>
+
+              <Typography size={14} fontWeight={'500'}>
+                - ₹ 25
+              </Typography>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: 15,
+              }}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Image
+                  source={images.discount}
+                  style={{height: 16, width: 16}}
+                />
+                <Typography
+                  size={14}
+                  fontWeight={'500'}
+                  style={{marginLeft: 10}}>
+                  25% Discount
+                </Typography>
+              </View>
+              <Typography size={14} fontWeight={'500'}>
+                - ₹ 229
+              </Typography>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: 15,
+                borderBottomWidth: 1,
+                borderBottomColor: COLOR.lightGrey,
+                paddingBottom: 20,
+              }}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Image source={images.phone} style={{height: 16, width: 16}} />
+                <Typography
+                  size={14}
+                  fontWeight={'500'}
+                  style={{marginLeft: 10}}>
+                  Platform Fee
+                </Typography>
+              </View>
+              <Typography size={14} fontWeight={'500'}>
+                + ₹ 10
+              </Typography>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: 15,
+              }}>
+              <Typography size={14} fontWeight={'500'}>
+                Net Payable Amount :
+              </Typography>
+              <Typography size={14} fontWeight={'500'}>
+                + ₹ 690
+              </Typography>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: 20,
+              }}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Image source={images.money} style={{height: 16, width: 16}} />
+                <Typography
+                  size={14}
+                  fontWeight={'500'}
+                  style={{marginLeft: 10}}>
+                  15% Discount Voucher Earned
+                </Typography>
+              </View>
+              <Typography size={14} fontWeight={'500'}>
+                + ₹ 103
+              </Typography>
+            </View>
+            <Typography
+              size={14}
+              fontWeight={'500'}
+              style={{marginTop: 20, marginBottom: 5}}>
+              Note: App Discount Voucher earned can be used to pay for next
+              appoinment at any partner on the app
+            </Typography>
+          </View>
+          <TouchableOpacity>
+            <Typography
+              size={16}
+              fontWeight={'500'}
+              color={COLOR.primary}
+              style={{marginTop: 15}}>
+              Still confused ?
+            </Typography>
+          </TouchableOpacity>
+
+          <Button
+            containerStyle={{
+              width: '100%',
+              marginTop: 15,
+              backgroundColor: 'green',
+            }}
+            title={'Whatsapp Customer Care'}
+            leftImg={images.discount}
+            leftImgStyle={{
+              height: 20,
+              width: 20,
+              tintColor: COLOR.white,
+              marginRight: 20,
+            }}
+          />
+        </ScrollView>
+      </SimpleModal>
+      <SimpleModal
+        visible={calculate}
+        onClose={() => setCalculate(false)}
+        overlay={{justifyContent: 'flex-end'}}
+        modalContainer={{
+          width: '100%',
+          borderRadius: 0,
+          borderTopRightRadius: 20,
+          borderTopLeftRadius: 20,
+          maxHeight: '70%',
+        }}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <Typography size={18} fontWeight={'500'} textAlign={'center'}>
+            This is a Sample bill for your refrence
+          </Typography>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginTop: 20,
+            }}>
+            <View
+              style={{
+                width: '66%',
+                borderWidth: 1,
+                borderColor: COLOR.primary,
+                borderRadius: 8,
+                height: 50,
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingHorizontal: 10,
+              }}>
+              <TextInput
+                style={{flex: 1, marginRight: 10, color: COLOR.black}}
+              />
+              <TouchableOpacity>
+                <Image source={images.cross2} style={{height: 14, width: 14}} />
+              </TouchableOpacity>
+            </View>
+            <Button
+              containerStyle={{width: '30%', height: 50, marginBottom: 0}}
+              title={'Calculate'}
+            />
+          </View>
+          <View
+            style={{
+              paddingVertical: 10,
+              paddingHorizontal: 15,
+              marginTop: 15,
+              borderWidth: 1,
+              borderColor: COLOR.lightGrey,
+              borderRadius: 16,
+            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: 5,
+              }}>
+              <Typography size={14} fontWeight={'500'}>
+                if Total Bill is
+              </Typography>
+              <Typography size={14} fontWeight={'500'}>
+                ₹ 944
+              </Typography>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: 15,
+              }}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Image
+                  source={images.promo}
+                  style={{height: 16, width: 18}}
+                  tintColor={COLOR.primary}
+                />
+                <Typography
+                  size={14}
+                  fontWeight={'500'}
+                  style={{marginLeft: 10}}>
+                  Discount Voucher
+                </Typography>
+              </View>
+
+              <Typography size={14} fontWeight={'500'}>
+                - ₹ 25
+              </Typography>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: 15,
+              }}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Image
+                  source={images.discount}
+                  style={{height: 16, width: 16}}
+                  tintColor={COLOR.primary}
+                />
+                <Typography
+                  size={14}
+                  fontWeight={'500'}
+                  style={{marginLeft: 10}}>
+                  25% Discount
+                </Typography>
+              </View>
+              <Typography size={14} fontWeight={'500'}>
+                - ₹ 229
+              </Typography>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: 15,
+                borderBottomWidth: 1,
+                borderBottomColor: COLOR.lightGrey,
+                paddingBottom: 20,
+              }}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Image source={images.phone} style={{height: 16, width: 16}} />
+                <Typography
+                  size={14}
+                  fontWeight={'500'}
+                  style={{marginLeft: 10}}>
+                  Platform Fee
+                </Typography>
+              </View>
+              <Typography size={14} fontWeight={'500'}>
+                + ₹ 10
+              </Typography>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: 15,
+              }}>
+              <Typography size={14} fontWeight={'500'}>
+                Net Payable Amount :
+              </Typography>
+              <Typography size={14} fontWeight={'500'}>
+                + ₹ 690
+              </Typography>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: 20,
+              }}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Image source={images.money} style={{height: 16, width: 16}} />
+                <Typography
+                  size={14}
+                  fontWeight={'500'}
+                  style={{marginLeft: 10}}>
+                  15% Discount Voucher Earned
+                </Typography>
+              </View>
+              <Typography size={14} fontWeight={'500'}>
+                + ₹ 103
+              </Typography>
+            </View>
+            <Typography
+              size={14}
+              fontWeight={'500'}
+              style={{marginTop: 20, marginBottom: 5}}>
+              Note: App Discount Voucher earned can be used to pay for next
+              appoinment at any partner on the app
+            </Typography>
+          </View>
+        </ScrollView>
+      </SimpleModal>
     </View>
   );
 };
@@ -352,42 +1068,30 @@ export default BookingScreen;
 
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: '#fff'},
-
   salonCard: {
-    backgroundColor: COLOR.primary,
+    backgroundColor: COLOR.white,
     padding: 15,
     borderRadius: 8,
-    margin: 15,
+    marginTop: 10,
+    elevation: 2,
+    margin: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  salonName: {color: '#fff', fontSize: 16, fontWeight: '600'},
-  salonSubtitle: {color: '#eee', fontSize: 14},
+  salonName: {color: COLOR.primary, fontSize: 16, fontWeight: '600'},
+  salonSubtitle: {color: COLOR.black, fontSize: 14},
 
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    marginHorizontal: 15,
     marginTop: 15,
     marginBottom: 5,
   },
-
-  dateRow: {paddingHorizontal: 15},
-  dateBox: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    padding: 10,
-    marginRight: 10,
-    alignItems: 'center',
-  },
-  selectedDateBox: {backgroundColor: COLOR.primary},
-  dateDay: {fontSize: 16, fontWeight: '600', color: '#333'},
-  dateLabel: {fontSize: 12, color: '#666'},
-  selectedDateText: {color: '#fff'},
-
   timeGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 15,
-    marginBottom: 20,
+    marginBottom: 10,
     marginTop: 5,
   },
   timeBox: {
@@ -399,39 +1103,31 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginHorizontal: 5,
     marginBottom: 10,
-    width: windowWidth / 4.82,
+    width: (windowWidth - 80) / 4,
     alignItems: 'center',
   },
   selectedTimeBox: {backgroundColor: COLOR.primary},
   timeText: {color: '#333', fontSize: 13},
   selectedTimeText: {color: '#fff'},
-
   offerBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLOR.white,
     padding: 12,
-    marginHorizontal: 15,
     borderRadius: 10,
-    marginBottom: 15,
+    marginBottom: 20,
     elevation: 2,
     justifyContent: 'space-between',
+    margin: 1,
   },
   offerIcon: {width: 24, height: 24, marginRight: 10},
-  offerText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLOR.primary,
-    // width: windowWidth / 1.2,
-  },
-
+  offerText: {fontSize: 15, fontWeight: '600', color: COLOR.primary},
   billContainer: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: COLOR.white,
     padding: 15,
-    margin: 15,
-    borderRadius: 8,
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#eee',
+    borderColor: COLOR.lightGrey,
   },
   billTitle: {fontSize: 16, fontWeight: '600', marginBottom: 10},
   billRow: {
@@ -443,22 +1139,73 @@ const styles = StyleSheet.create({
   billValue: {fontSize: 14, fontWeight: '600'},
   totalLabel: {fontSize: 15, fontWeight: '700'},
   totalValue: {fontSize: 15, fontWeight: '700', color: COLOR.primary},
-
-  noteContainer: {
-    marginHorizontal: 15,
-    marginBottom: 15,
-  },
-  noteLabel: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginBottom: 6,
-  },
+  noteContainer: {marginBottom: 15},
+  noteLabel: {fontSize: 15, fontWeight: '600', marginBottom: 6, marginTop: 20},
   noteInput: {
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 8,
-    padding: 10,
     minHeight: 60,
     textAlignVertical: 'top',
   },
+  voucherCard: {
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 15,
+    marginTop: 15,
+  },
+  voucherHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  voucherIcon: {
+    width: 36,
+    height: 36,
+    marginRight: 10,
+  },
+  offerApplied: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    padding: 10,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: COLOR.lightGrey,
+    borderRadius: 8,
+  },
+  serviceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 5,
+  },
+  serviceLabel: {fontSize: 15, fontWeight: '600', color: '#333'},
+  serviceSub: {fontSize: 12, color: '#888', marginTop: 2},
+  removeIcon: {width: 14, height: 14, tintColor: '#444'},
+
+  offerAppliedRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  offerAppliedText: {fontSize: 14, fontWeight: '600', color: '#444'},
+  offerCode: {fontSize: 14, fontWeight: '600', color: '#222'},
+
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  strikePrice: {
+    fontSize: 14,
+    color: '#888',
+    textDecorationLine: 'line-through',
+    marginRight: 6,
+  },
+  finalPrice: {fontSize: 16, fontWeight: 'bold', color: COLOR.primary},
 });

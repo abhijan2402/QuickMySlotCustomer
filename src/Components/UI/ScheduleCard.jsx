@@ -11,8 +11,8 @@ import {
 import {Dropdown} from 'react-native-element-dropdown';
 import moment from 'moment';
 import {useIsFocused} from '@react-navigation/native';
-import { images } from './images';
-import { COLOR } from '../../Constants/Colors';
+import {images} from './images';
+import {COLOR} from '../../Constants/Colors';
 
 // Mock constants since we don't have the actual files
 // const COLOR = {
@@ -23,7 +23,6 @@ import { COLOR } from '../../Constants/Colors';
 //   calenderBorder: '#0055CC',
 //   black: '#000',
 // };
-
 
 // Simple Typography component since we don't have the actual one
 const Typography = ({children, color, size, style}) => (
@@ -72,7 +71,8 @@ const ScheduleCard = ({
   const is_Focus = useIsFocused();
   const flatListRef = useRef(null);
   const nextSixMonths = generateNextSixMonths();
-  
+  const [fullDate, setFullDate] = useState('');
+
   useEffect(() => {
     let date = selected_date
       ? moment(selected_date, 'YYYY-MM-DD')?.format('DD')
@@ -93,7 +93,7 @@ const ScheduleCard = ({
     const currentDay = today.getDate();
     const currentMonth = today.getMonth();
     const currentYear = today.getFullYear();
-    
+
     for (let i = 1; i <= daysInMonth; i++) {
       const date = new Date(year, month, i);
       if (
@@ -115,7 +115,7 @@ const ScheduleCard = ({
     selectedMonth?.month,
     selectedMonth?.year,
   );
-  
+
   useEffect(() => {
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
@@ -123,7 +123,7 @@ const ScheduleCard = ({
     const startOfMonth = moment(new Date())
       .startOf('month')
       .format('YYYY-MM-DD');
-      
+
     if (selected_date) {
       let tempDate = moment(selected_date, 'YYYY-MM-DD')?.format('MMMM');
       let temp = nextSixMonths.find(v => v?.name == tempDate);
@@ -138,7 +138,7 @@ const ScheduleCard = ({
       });
     }
   }, [locationId]);
-  
+
   const handleMonthChange = monthData => {
     const selectedMonthIndex = nextSixMonths.findIndex(
       item => item?.name == monthData?.name,
@@ -166,6 +166,14 @@ const ScheduleCard = ({
     });
   };
 
+  useEffect(() => {
+    const today = moment();
+    let formattedDate = today.format('dddd, DD MMMM YYYY');
+    formattedDate += ' (Today)';
+    setFullDate(formattedDate);
+    setSelectedDate(today.date());
+  }, []);
+
   const renderDateItem = ({item, index}) => {
     const isSelected = item?.date == selectedDate;
     return (
@@ -178,15 +186,31 @@ const ScheduleCard = ({
         onPress={() => {
           onChangeDateVal(item, selectedMonth);
           setSelectedDate(item?.date);
+
+          const selectedMoment = moment(
+            `${selectedMonth?.year}-${selectedMonth?.month + 1}-${item?.date}`,
+            'YYYY-M-D',
+          );
+
+          const today = moment();
+          const tomorrow = moment().add(1, 'days');
+
+          let formattedDate = selectedMoment.format('dddd, DD MMMM YYYY');
+
+          if (selectedMoment.isSame(today, 'day')) {
+            formattedDate += ' (Today)';
+          } else if (selectedMoment.isSame(tomorrow, 'day')) {
+            formattedDate += ' (Tomorrow)';
+          }
+
+          setFullDate(formattedDate);
         }}>
         <Typography
           color={COLOR.grey}
           style={[isSelected && styles.selectedDayText]}>
           {item?.day}
         </Typography>
-        <Typography
-          size={20}
-          style={[isSelected && styles.selectedDateText]}>
+        <Typography size={20} style={[isSelected && styles.selectedDateText]}>
           {item?.date}
         </Typography>
       </TouchableOpacity>
@@ -195,16 +219,19 @@ const ScheduleCard = ({
 
   return (
     <View style={styles.container}>
+      <View style={styles.scheduleInfo}>
+        <Typography size={16} >
+          {' '}
+          {fullDate}
+        </Typography>
+      </View>
       <View style={styles.header}>
         <Typography style={styles.modalText}>
           {title ? title : 'Schedules'}
         </Typography>
         {calendar && (
           <View style={styles.monthSelector}>
-            <Image
-              source={images.calender}
-              style={styles.black_Calendar}
-            />
+            <Image source={images.calender} style={styles.black_Calendar} />
             <Dropdown
               data={nextSixMonths}
               placeholder={''}
@@ -238,13 +265,8 @@ const ScheduleCard = ({
               renderRightIcon={() => {
                 return (
                   <>
-                    <Typography>
-                      {selectedMonth?.year}
-                    </Typography>
-                    <Image
-                      source={images.ArrowDown}
-                      style={styles.arrowIcon}
-                    />
+                    <Typography>{selectedMonth?.year}</Typography>
+                    <Image source={images.ArrowDown} style={styles.arrowIcon} />
                   </>
                 );
               }}
@@ -278,13 +300,10 @@ const ScheduleCard = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 10,
-  },
+  container: {},
   listContainer: {
     alignItems: 'center',
     marginTop: 10,
-    marginHorizontal: 10,
   },
   dateContainer: {
     width: 60,
@@ -315,8 +334,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderRadius: 14,
-    marginTop: 20,
-    marginHorizontal: 15,
+    marginTop: 10,
   },
   monthSelector: {
     flexDirection: 'row',
@@ -330,7 +348,7 @@ const styles = StyleSheet.create({
     margin: 6,
     marginBottom: 8,
     tintColor: COLOR.black,
-    marginTop:10
+    marginTop: 10,
   },
   modalText: {
     fontSize: 22,
@@ -339,6 +357,14 @@ const styles = StyleSheet.create({
     height: 18,
     width: 18,
     margin: 5,
+  },
+  scheduleInfo: {
+    backgroundColor: COLOR.white,
+    padding: 10,
+    borderRadius: 8,
+    margin: 1,
+    borderWidth: 1,
+    borderColor: COLOR.grey
   },
 });
 

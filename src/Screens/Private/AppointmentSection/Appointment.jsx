@@ -10,7 +10,8 @@ import HomeHeader from '../../../Components/HomeHeader';
 import {COLOR} from '../../../Constants/Colors';
 import {Typography} from '../../../Components/UI/Typography';
 import {images} from '../../../Components/UI/images';
-import { windowHeight } from '../../../Constants/Dimensions';
+import {windowHeight} from '../../../Constants/Dimensions';
+import {Font} from '../../../Constants/Font';
 
 const Appointment = ({navigation}) => {
   const [selectedFilter, setSelectedFilter] = useState('All');
@@ -99,7 +100,10 @@ const Appointment = ({navigation}) => {
           <View style={styles.leftSection}>
             <Image source={{uri: item.image}} style={styles.serviceImage} />
             <View style={{marginLeft: 12, flex: 1}}>
-              <Typography style={styles.title} numberOfLines={1}>
+              <Typography
+                font={Font.medium}
+                style={styles.title}
+                numberOfLines={1}>
                 {item.title}
               </Typography>
               <Typography style={styles.salonName}>{item.salon}</Typography>
@@ -185,16 +189,20 @@ const Appointment = ({navigation}) => {
         renderItem={renderAppointment}
         contentContainerStyle={{paddingBottom: 20}}
         ListEmptyComponent={() => {
-              return (
-                <View style={{justifyContent:"center",
-                  alignItems:"center",
-                  marginTop: windowHeight * 0.3
-                }}>
-                  <Image source={images.noData}/>
-                  <Typography size={20} fontWeight={'500'} style={{marginTop:10}}>No Appointments found</Typography>
-                </View>
-              )
-            }}
+          return (
+            <View
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginTop: windowHeight * 0.3,
+              }}>
+              <Image source={images.noData} />
+              <Typography size={20} fontWeight={'500'} style={{marginTop: 10}}>
+                No Appointments found
+              </Typography>
+            </View>
+          );
+        }}
       />
     </View>
   );
@@ -221,7 +229,7 @@ const styles = StyleSheet.create({
   },
   filterText: {
     fontSize: 13,
-    fontWeight: '500',
+    fontFamily: Font.semibold,
   },
   card: {
     backgroundColor: COLOR.white,
@@ -254,7 +262,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: Font.bold,
     color: COLOR.black,
   },
   salonName: {
@@ -264,7 +272,7 @@ const styles = StyleSheet.create({
   },
   status: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: Font.semibold,
     paddingVertical: 3,
     paddingHorizontal: 12,
     borderRadius: 20,
@@ -272,7 +280,8 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 13,
-    fontWeight: '500',
+    fontFamily: Font.semibold,
+
     color: '#444',
     marginLeft: 10,
   },
@@ -290,6 +299,7 @@ const styles = StyleSheet.create({
   salonService: {
     fontSize: 13,
     color: '#666',
+    fontFamily: Font.semibold,
   },
   infoSection: {
     marginTop: 4,
@@ -309,10 +319,12 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     marginLeft: 10,
     marginTop: 2,
+    fontFamily: Font.medium,
   },
   amount: {
     fontSize: 15,
-    fontWeight: '700',
+    // fontWeight: '700',
     color: COLOR.primary,
+    fontFamily: Font.semibold,
   },
 });

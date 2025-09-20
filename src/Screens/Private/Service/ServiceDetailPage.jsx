@@ -20,6 +20,7 @@ import {
   openMapWithDirections,
 } from '../../../Constants/Utils';
 import SimpleModal from '../../../Components/UI/SimpleModal';
+import {Font} from '../../../Constants/Font';
 
 const ProviderDetails = ({navigation}) => {
   const [activeTab, setActiveTab] = useState('Services');
@@ -98,7 +99,12 @@ const ProviderDetails = ({navigation}) => {
               alignItems: 'center',
               marginTop: -10,
             }}>
-            <Text style={[{fontSize: 16, marginBottom: 2}]}>Unisex</Text>
+            <Text
+              style={[
+                {fontSize: 16, marginBottom: 2, fontFamily: Font.medium},
+              ]}>
+              Unisex
+            </Text>
             <View
               style={{
                 width: 1.5,
@@ -107,7 +113,7 @@ const ProviderDetails = ({navigation}) => {
                 backgroundColor: 'black',
               }}
             />
-            <Text style={[{fontSize: 16}]}>₹₹</Text>
+            <Text style={[{fontSize: 16, fontFamily: Font.medium}]}>₹₹</Text>
           </View>
           <TouchableOpacity
             onPress={() => setModalVisible(true)}
@@ -125,7 +131,13 @@ const ProviderDetails = ({navigation}) => {
               source={require('../../../assets/Images/close.png')}
               style={{height: 16, width: 16}}
             />
-            <Text style={{fontSize: 14, marginLeft: 5, marginBottom: 2}}>
+            <Text
+              style={{
+                fontSize: 13,
+                marginLeft: 5,
+                // marginBottom: 2,
+                fontFamily: Font.regular,
+              }}>
               Closed Now
             </Text>
             <View
@@ -136,7 +148,13 @@ const ProviderDetails = ({navigation}) => {
                 backgroundColor: 'black',
               }}
             />
-            <Text style={{fontSize: 14, marginRight: 5, marginBottom: 2}}>
+            <Text
+              style={{
+                fontSize: 13,
+                marginRight: 5,
+                // marginBottom: 2,
+                fontFamily: Font.regular,
+              }}>
               Opens Today at 10:00 AM
             </Text>
             <Image
@@ -170,18 +188,30 @@ const ProviderDetails = ({navigation}) => {
                 source={require('../../../assets/Images/direction.png')}
                 style={{height: 16, width: 16}}
               />
-              <Text style={{fontSize: 14, marginLeft: 5, marginBottom: 2}}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  marginLeft: 5,
+                  marginBottom: 2,
+                  fontFamily: Font.medium,
+                }}>
                 Get Directions
               </Text>
               <View
                 style={{
                   width: 1.5,
-                  height: 15,
+                  height: 13,
                   marginHorizontal: 5,
                   backgroundColor: 'black',
                 }}
               />
-              <Text style={{fontSize: 14, marginRight: 5, marginBottom: 2}}>
+              <Text
+                style={{
+                  fontSize: 13,
+                  marginRight: 5,
+                  marginBottom: 2,
+                  fontFamily: Font.regular,
+                }}>
                 194.04 Kms
               </Text>
               <Image
@@ -206,7 +236,12 @@ const ProviderDetails = ({navigation}) => {
                 source={require('../../../assets/Images/call.png')}
                 style={{height: 16, width: 16}}
               />
-              <Text style={{fontSize: 14, marginLeft: 5, marginBottom: 2}}>
+              <Text
+                style={{
+                  fontSize: 13,
+                  marginLeft: 5,
+                  fontFamily: Font.regular,
+                }}>
                 Contact
               </Text>
             </TouchableOpacity>
@@ -532,7 +567,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 15,
-    fontWeight: 'bold',
+    fontFamily: Font.semibold,
     marginBottom: 8,
     color: COLOR.black,
   },
@@ -540,6 +575,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#555',
     lineHeight: 18,
+    fontFamily: Font.medium,
   },
   tabContainer: {
     flexDirection: 'row',
@@ -559,9 +595,9 @@ const styles = StyleSheet.create({
     borderBottomColor: COLOR.primary,
   },
   tabText: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#666',
-    fontWeight: '600',
+    fontFamily: Font.semibold,
   },
   activeTabText: {
     color: COLOR.primary,
@@ -572,7 +608,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   categoryCard: {
-    width: '22.5%',
+    width: '20%',
     backgroundColor: '#f9f9f9',
     padding: 8,
     paddingHorizontal: 5,
@@ -587,8 +623,8 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   categoryText: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 11,
+    fontFamily: Font.semibold,
     color: COLOR.black,
   },
   photo: {
@@ -606,17 +642,19 @@ const styles = StyleSheet.create({
   },
   reviewUser: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontFamily: Font.semibold,
     color: COLOR.black,
   },
   reviewText: {
     fontSize: 13,
     color: '#555',
+    fontFamily: Font.medium,
+
     marginTop: 4,
   },
   title: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: Font.semibold,
     marginBottom: 15,
     color: '#000',
   },
@@ -632,8 +670,9 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   amenityText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#333',
+    fontFamily: Font.medium,
     flexShrink: 1,
   },
   row: {

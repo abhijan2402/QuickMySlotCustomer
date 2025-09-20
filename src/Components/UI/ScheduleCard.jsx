@@ -13,6 +13,7 @@ import moment from 'moment';
 import {useIsFocused} from '@react-navigation/native';
 import {images} from './images';
 import {COLOR} from '../../Constants/Colors';
+import {Font} from '../../Constants/Font';
 
 // Mock constants since we don't have the actual files
 // const COLOR = {
@@ -206,11 +207,15 @@ const ScheduleCard = ({
           setFullDate(formattedDate);
         }}>
         <Typography
+          font={Font.semibold}
           color={COLOR.grey}
           style={[isSelected && styles.selectedDayText]}>
           {item?.day}
         </Typography>
-        <Typography size={20} style={[isSelected && styles.selectedDateText]}>
+        <Typography
+          font={Font.medium}
+          size={20}
+          style={[isSelected && styles.selectedDateText]}>
           {item?.date}
         </Typography>
       </TouchableOpacity>
@@ -220,10 +225,7 @@ const ScheduleCard = ({
   return (
     <View style={styles.container}>
       <View style={styles.scheduleInfo}>
-        <Typography size={16} >
-          {' '}
-          {fullDate}
-        </Typography>
+        <Typography size={16}> {fullDate}</Typography>
       </View>
       <View style={styles.header}>
         <Typography style={styles.modalText}>
@@ -306,8 +308,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   dateContainer: {
-    width: 60,
-    height: 80,
+    width: 50,
+    height: 65,
     borderRadius: 14,
     backgroundColor: COLOR.white,
     borderWidth: 1,
@@ -315,19 +317,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginHorizontal: 5,
+    marginRight: 5,
   },
   selectedDateContainer: {
     backgroundColor: COLOR.primaryLight,
     borderWidth: 2,
     borderColor: COLOR.primary,
-    width: 65,
-    height: 85,
+    width: 50,
+    height: 65,
+    marginRight: 5,
   },
   selectedDayText: {
     color: '#fff',
+    fontFamily: Font.semibold,
   },
   selectedDateText: {
     color: '#fff',
+    fontFamily: Font.semibold,
   },
   header: {
     flexDirection: 'row',
@@ -364,7 +370,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     margin: 1,
     borderWidth: 1,
-    borderColor: COLOR.grey
+    borderColor: COLOR.grey,
   },
 });
 

@@ -8,6 +8,8 @@ import MainHome from '../Screens/Private/Home/MainHome';
 import Appointment from '../Screens/Private/AppointmentSection/Appointment';
 import MyAnalytics from '../Screens/Private/Home/Analytics';
 import {useNavigation} from '@react-navigation/native';
+import {Font} from '../Constants/Font';
+import {windowWidth} from '../Constants/Dimensions';
 
 const Tab = createBottomTabNavigator();
 
@@ -18,42 +20,43 @@ const BottomNavigation = () => {
   const navigation = useNavigation();
   const icons = {
     Dashboard: 'https://cdn-icons-png.flaticon.com/128/1828/1828765.png',
-    Appointments: 'https://cdn-icons-png.flaticon.com/128/8302/8302424.png',
+    Bookings: 'https://cdn-icons-png.flaticon.com/128/8302/8302424.png',
     Analytics: 'https://cdn-icons-png.flaticon.com/128/2041/2041637.png',
     Profile: 'https://cdn-icons-png.flaticon.com/128/9308/9308008.png',
   };
   const CustomBarButton = () => {
     return (
-    <TouchableOpacity
-      activeOpacity={0.99}
-      style={{
-        top: -20,
-        justifyContent: 'center',
-        alignItems: 'center',
-        ...styles.shadow,
-      }}
-      onPress={() => {
-        navigation.navigate('PayBill');
-      }}>
-      <View
+      <TouchableOpacity
+        activeOpacity={0.99}
         style={{
-          width: 60,
-          height: 60,
-          borderRadius: 30,
-          backgroundColor: COLOR.primary,
+          top: -20,
           justifyContent: 'center',
           alignItems: 'center',
-          elevation: 5,
+          ...styles.shadow,
+        }}
+        onPress={() => {
+          navigation.navigate('PayBill');
         }}>
-        <Text
+        <View
           style={{
-            color: 'white',
-            fontSize: 12,
+            width: 60,
+            height: 60,
+            borderRadius: 30,
+            backgroundColor: COLOR.primary,
+            justifyContent: 'center',
+            alignItems: 'center',
+            elevation: 5,
           }}>
-          Pay Bill
-        </Text>
-      </View>
-    </TouchableOpacity>
+          <Text
+            style={{
+              color: 'white',
+              fontSize: 12,
+              fontFamily: Font.semibold,
+            }}>
+            Pay Bill
+          </Text>
+        </View>
+      </TouchableOpacity>
     );
   };
 
@@ -66,11 +69,15 @@ const BottomNavigation = () => {
         tabBarLabelStyle: {
           fontSize: 12,
           marginTop: 4,
+          borderWidth: 1,
         },
         tabBarStyle: {
           paddingVertical: 8,
           height: 60,
           position: 'relative',
+          height: 60 + insets.bottom, // dynamically add safe area
+          paddingBottom: insets.bottom, // ensures icons/labels are above gesture bar
+          borderWidth: 1,
         },
         tabBarIcon: ({focused}) => {
           const iconUri = icons[route.name];
@@ -100,8 +107,9 @@ const BottomNavigation = () => {
                 color,
                 fontSize: 11,
                 marginTop: 4,
+                fontFamily: Font.medium,
                 textAlign: 'center',
-                width: '100%',
+                width: windowWidth * 0.3,
               }}>
               {label}
             </Text>
@@ -109,7 +117,7 @@ const BottomNavigation = () => {
         },
       })}>
       <Tab.Screen name={'Dashboard'} component={MainHome} />
-      <Tab.Screen name={'Appointments'} component={Appointment} />
+      <Tab.Screen name={'Bookings'} component={Appointment} />
       <Tab.Screen
         name={'PayBill'}
         component={View} // Dummy component

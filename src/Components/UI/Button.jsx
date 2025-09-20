@@ -8,8 +8,9 @@ import {
 } from 'react-native';
 import React from 'react';
 import {Typography} from './Typography';
-import { COLOR } from '../../Constants/Colors';
-import { TouchableOpacity } from 'react-native';
+import {COLOR} from '../../Constants/Colors';
+import {TouchableOpacity} from 'react-native';
+import {Font} from '../../Constants/Font';
 
 const Button = ({
   onPress = () => {},
@@ -26,11 +27,10 @@ const Button = ({
   leftImgStyle,
   titleContainerStyle,
   colorsicon,
-  leftIcon='',
+  leftIcon = '',
   indStyle,
   leftIconValue = false,
 }) => {
-
   const handlebutton = () => {
     if (loading || disabled) {
     } else {
@@ -63,11 +63,11 @@ const Button = ({
           <Typography
             size={titleSize}
             color={titleColor ?? COLOR.white}
-            font={titleType}
+            // font={titleType}
+            font={Font.semibold}
             style={{
               marginLeft: leftIcon ? 5 : 0,
-              fontSize:16,
-              fontWeight:"500"
+              fontSize: 16,
             }}
             numberOfLines={1}>
             {title}
@@ -80,12 +80,12 @@ const Button = ({
 
 export default Button;
 
-const createStyles = (theme) =>
+const createStyles = theme =>
   StyleSheet.create({
     buttons: {
       backgroundColor: theme?.buttonColor,
       borderRadius: 7,
-      height: 55,
+      height: 65,
       width: '100%',
       alignSelf: 'center',
       justifyContent: 'center',
@@ -97,7 +97,7 @@ const createStyles = (theme) =>
       shadowOpacity: Platform.OS === 'ios' ? 0.2 : 0.2,
       shadowRadius: 4,
       elevation: Platform.OS === 'ios' ? 0 : 5,
-      marginBottom:10
+      marginBottom: 10,
     },
     indicator: {
       justifyContent: 'center',

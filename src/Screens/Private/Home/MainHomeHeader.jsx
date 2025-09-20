@@ -15,6 +15,7 @@ import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {COLOR} from '../../../Constants/Colors';
 import {images} from '../../../Components/UI/images';
 import {Typography} from '../../../Components/UI/Typography';
+import {Font} from '../../../Constants/Font';
 
 const MainHomeHeader = () => {
   const navigation = useNavigation();
@@ -127,9 +128,11 @@ const MainHomeHeader = () => {
         </View>
       </TouchableOpacity>
       <View style={styles.iconsContainer}>
-        <TouchableOpacity  activeOpacity={0.99} onPress={() => {
-          navigation.navigate('OffersScreen');
-        }}>
+        <TouchableOpacity
+          activeOpacity={0.99}
+          onPress={() => {
+            navigation.navigate('OffersScreen');
+          }}>
           <View
             style={{
               flexDirection: 'row',
@@ -197,10 +200,11 @@ const styles = StyleSheet.create({
   locationTitle: {
     fontSize: 12,
     color: '#666',
+    fontFamily: Font.semibold,
   },
   locationAddress: {
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: Font.medium,
     color: COLOR.primary,
   },
   iconsContainer: {

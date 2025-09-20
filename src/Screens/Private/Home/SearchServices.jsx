@@ -14,7 +14,8 @@ import {Typography} from '../../../Components/UI/Typography';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import Input from '../../../Components/Input';
 import {images} from '../../../Components/UI/images';
-import { windowHeight } from '../../../Constants/Dimensions';
+import {windowHeight} from '../../../Constants/Dimensions';
+import {Font} from '../../../Constants/Font';
 
 const SearchServices = ({navigation}) => {
   const [search, setSearch] = useState('');
@@ -91,21 +92,33 @@ const SearchServices = ({navigation}) => {
                   <View style={styles.cardContent}>
                     <Typography
                       size={16}
-                      fontWeight="bold"
+                      font={Font.semibold}
                       color={COLOR.black}
                       style={{marginBottom: 5}}>
                       {item.name}
                     </Typography>
 
-                    <Typography size={13} color="#666" style={styles.textRow}>
+                    <Typography
+                      size={13}
+                      color="#666"
+                      font={Font.medium}
+                      style={styles.textRow}>
                       📍 {item.address}
                     </Typography>
 
-                    <Typography size={13} color="#666" style={styles.textRow}>
+                    <Typography
+                      size={13}
+                      font={Font.medium}
+                      color="#666"
+                      style={styles.textRow}>
                       💼 {item.experience}
                     </Typography>
 
-                    <Typography size={13} color="#666" style={{marginTop: 2}}>
+                    <Typography
+                      font={Font.semibold}
+                      size={13}
+                      color="#666"
+                      style={{marginTop: 2}}>
                       ⏰ {item.availability}
                     </Typography>
                   </View>
@@ -114,14 +127,21 @@ const SearchServices = ({navigation}) => {
             }}
             ListEmptyComponent={() => {
               return (
-                <View style={{justifyContent:"center",
-                  alignItems:"center",
-                  marginTop: windowHeight * 0.3
-                }}>
-                  <Image source={images.noData}/>
-                  <Typography size={20} fontWeight={'500'} style={{marginTop:10}}>No services found</Typography>
+                <View
+                  style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginTop: windowHeight * 0.3,
+                  }}>
+                  <Image source={images.noData} />
+                  <Typography
+                    size={20}
+                    fontWeight={'500'}
+                    style={{marginTop: 10}}>
+                    No services found
+                  </Typography>
                 </View>
-              )
+              );
             }}
           />
         </KeyboardAwareScrollView>

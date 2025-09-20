@@ -12,6 +12,7 @@ import {handleCall, handleOpenMap} from '../../../Constants/Utils';
 import {Typography} from '../../../Components/UI/Typography';
 import ConfirmModal from '../../../Components/UI/ConfirmModel';
 import Button from '../../../Components/UI/Button';
+import {Font} from '../../../Constants/Font';
 
 const AppointmentDetail = ({route, navigation}) => {
   const [cancelAppointment, setCancelAppointment] = useState(false);
@@ -47,6 +48,7 @@ const AppointmentDetail = ({route, navigation}) => {
         leftTint={COLOR.black}
       />
       <ScrollView
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{paddingHorizontal: 5, paddingBottom: 10}}>
         {/* Shop Info */}
         <View style={styles.card}>
@@ -207,7 +209,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: Font.bold,
     marginBottom: 6,
     color: COLOR.primary,
   },
@@ -219,13 +221,13 @@ const styles = StyleSheet.create({
   },
   shopName: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: Font.semibold,
     color: COLOR.black,
     marginBottom: 3,
   },
   text: {
     fontSize: 13,
-    fontWeight: '500',
+    fontFamily: Font.semibold,
     color: '#444',
     marginBottom: 3,
   },
@@ -234,12 +236,13 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     backgroundColor: COLOR.primary,
     paddingHorizontal: 12,
+
     paddingVertical: 6,
     borderRadius: 6,
   },
   chatBtnText: {
     color: COLOR.white,
-    fontWeight: '600',
+    fontFamily: Font.medium,
     fontSize: 13,
   },
   serviceRow: {
@@ -253,7 +256,7 @@ const styles = StyleSheet.create({
     marginVertical: 6,
   },
   priceCard: {
-    backgroundColor: 'rgba(121, 111, 195, 0.08)', 
+    backgroundColor: 'rgba(121, 111, 195, 0.08)',
     borderRadius: 12,
     padding: 15,
     marginTop: 10,
@@ -263,14 +266,14 @@ const styles = StyleSheet.create({
 
   priceTitle: {
     fontSize: 15,
-    fontWeight: '700',
     marginBottom: 8,
     color: COLOR.primary,
+    fontFamily: Font.medium,
   },
   grandTotal: {
     fontSize: 15,
-    fontWeight: '700',
     color: COLOR.primary,
+    fontFamily: Font.medium,
   },
   cancelBtn: {
     paddingVertical: 12,
@@ -282,7 +285,7 @@ const styles = StyleSheet.create({
   cancelBtnText: {
     color: COLOR.red,
     textAlign: 'center',
-    fontWeight: '600',
+    fontFamily: Font.medium,
     fontSize: 15,
   },
 });

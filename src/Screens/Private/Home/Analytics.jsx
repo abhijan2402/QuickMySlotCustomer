@@ -9,6 +9,7 @@ import {
 import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
 import {Typography} from '../../../Components/UI/Typography';
+import {Font} from '../../../Constants/Font';
 
 const {width} = Dimensions.get('window');
 
@@ -21,7 +22,8 @@ const MyAnalytics = ({navigation}) => {
         leftTint={COLOR.black}
       />
 
-      <ScrollView contentContainerStyle={{paddingHorizontal: 10,paddingVertical:15}}>
+      <ScrollView
+        contentContainerStyle={{paddingHorizontal: 10, paddingVertical: 15}}>
         {/* Spending & Savings */}
         <View style={styles.card}>
           <Typography style={styles.sectionTitle}>
@@ -66,7 +68,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLOR.white,
-    paddingHorizontal:15
+    paddingHorizontal: 15,
   },
   header: {
     flexDirection: 'row',
@@ -98,7 +100,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   sectionTitle: {
-    fontWeight: '600',
+    fontFamily: Font.semibold,
     fontSize: 14,
     marginBottom: 10,
     color: COLOR.black,
@@ -119,13 +121,14 @@ const styles = StyleSheet.create({
   },
   amount: {
     color: COLOR.primary || '#8E44AD',
-    fontWeight: 'bold',
+    fontFamily: Font.semibold,
     fontSize: 16,
   },
   label: {
     color: COLOR.black,
     fontSize: 12,
     textAlign: 'center',
+    fontFamily: Font.medium,
     marginTop: 4,
   },
   cashbackCard: {
@@ -137,12 +140,13 @@ const styles = StyleSheet.create({
   cashbackAmount: {
     color: COLOR.white,
     fontSize: 18,
-    fontWeight: 'bold',
+    fontFamily: Font.bold,
   },
   cashbackText: {
     color: COLOR.white,
     fontSize: 13,
     textAlign: 'center',
     marginTop: 4,
+    fontFamily: Font.medium,
   },
 });

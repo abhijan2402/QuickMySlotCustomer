@@ -41,10 +41,10 @@ const Login = ({navigation}) => {
   };
 
   const handleSignup = async () => {
-    navigation.navigate('OtpScreen', {
-      // userId: success?.user_id,
-      // phone: number,
-    });
+    // navigation.navigate('OtpScreen', {
+    //   // userId: success?.user_id,
+    //   // phone: number,
+    // });
     setLoading(true);
     const body = {
       phone_number: number,

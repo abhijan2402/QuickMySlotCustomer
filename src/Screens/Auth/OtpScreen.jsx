@@ -76,9 +76,9 @@ const OtpScreen = ({navigation, route}) => {
   };
 
   const onSubmit = async () => {
-    dispatch(Token('ABC'));
-    dispatch(isAuth(true));
-    return;
+    // dispatch(Token('ABC'));
+    // dispatch(isAuth(true));
+    // return;
     // setLoading(true);
     const otpCode = otp.join('');
 

@@ -17,101 +17,74 @@ import MainHomeHeader from './MainHomeHeader';
 import {images} from '../../../Components/UI/images';
 import Input from '../../../Components/Input';
 import {useIsFocused} from '@react-navigation/native';
-import {useApi} from '../../../Backend/Api';
+import {GET_WITH_TOKEN, useApi} from '../../../Backend/Api';
 import {AuthContext} from '../../../Backend/AuthContent';
-import {GET_PROFILE} from '../../../Constants/ApiRoute';
+import {GET_PROFILE, HOME} from '../../../Constants/ApiRoute';
 import {Font} from '../../../Constants/Font';
+import Video from 'react-native-video';
 
 const {width} = Dimensions.get('window');
 
 const MainHome = ({navigation}) => {
   const [search, setSearch] = useState('');
   const isFocused = useIsFocused();
-
-  const categories = [
-    {
-      title: 'Salons',
-      icon: 'https://cdn-icons-png.flaticon.com/128/1057/1057317.png',
-    },
-    {
-      title: 'Healthcare',
-      icon: 'https://cdn-icons-png.flaticon.com/128/2382/2382461.png',
-    },
-    {
-      title: 'Spa',
-      icon: 'https://cdn-icons-png.flaticon.com/128/5732/5732044.png',
-    },
-    {
-      title: 'Pet Clinic',
-      icon: 'https://cdn-icons-png.flaticon.com/128/616/616408.png',
-    },
-    {
-      title: 'Automotive Car',
-      icon: 'https://cdn-icons-png.flaticon.com/128/741/741407.png',
-    },
-    {
-      title: 'Retail/Designer',
-      icon: 'https://cdn-icons-png.flaticon.com/128/18302/18302431.png',
-    },
-    {
-      title: 'Tattoo & Piercing',
-      icon: 'https://cdn-icons-png.flaticon.com/128/2678/2678993.png',
-    },
-  ];
-
-  const bookings = [
-    {
-      id: '1',
-      vendor: 'Glamour Salon',
-      services: 'Haircut, Facial',
-      price: '₹1200',
-      date: '20 Aug 2025, 3:00 PM',
-      address: '123 Street, Jaipur',
-      phone: '+91 9876543210',
-    },
-    {
-      id: '2',
-      vendor: 'HealthCare Plus',
-      services: 'General Checkup',
-      price: '₹500',
-      date: '22 Aug 2025, 10:30 AM',
-      address: '45 Mall Road, Delhi',
-      phone: '+91 9123456789',
-    },
-  ];
-
-  const banners = [
-    'https://images.pexels.com/photos/3997985/pexels-photo-3997985.jpeg',
-    'https://images.pexels.com/photos/853427/pexels-photo-853427.jpeg',
-    'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg',
-  ];
-
-  // Auto-scroll logic
-  const scrollX = useRef(new Animated.Value(0)).current;
-  const scrollRef = useRef(null);
-  useEffect(() => {
-    let index = 0;
-    const interval = setInterval(() => {
-      index = (index + 1) % banners.length;
-      scrollRef.current?.scrollTo({x: index * width, animated: true});
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const [loading, setLoading] = useState(false);
+  const [topBanners, setTopBanners] = useState([]);
+  const [bottomBanners, setBottomBanners] = useState([]);
+  const [myBookings, setMyBookings] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     if (isFocused) {
-      getProfile();
+      fetchUserProfile();
+      setLoading(true);
+      GET_WITH_TOKEN(
+        HOME,
+        success => {
+          console.log(success);
+          const allBanners = success?.data?.banners || [];
+          setBottomBanners(allBanners.filter(b => b.position === 'bottom'));
+          setTopBanners(allBanners.filter(b => b.position === 'top'));
+          setMyBookings(success?.data?.self_bookings);
+          setCategories(success?.data?.categories);
+          setLoading(false);
+        },
+        error => setLoading(false),
+        fail => setLoading(false),
+      );
     }
   }, [isFocused]);
-  const getProfile = async () => {
-    try {
-      const response = await getRequest(GET_PROFILE);
-      console.log(response, 'GET_PROFILE--->>>');
-    } catch (err) {
-      console.error(err);
-    }
+
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    if (bottomBanners.length === 0) return;
+
+    let index = 0;
+    const interval = setInterval(() => {
+      index = (index + 1) % bottomBanners.length;
+      scrollRef.current?.scrollToOffset({
+        offset: index * width,
+        animated: true,
+      });
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [bottomBanners]);
+
+  global.fetchUserProfile = () => {
+    GET_WITH_TOKEN(
+      GET_PROFILE,
+      success => {
+        console.log(success, 'successsuccesssuccess-->>>');
+      },
+      error => {
+        console.log(error, 'errorerrorerror>>');
+      },
+      fail => {},
+    );
   };
   return (
     <View style={styles.container}>
@@ -134,7 +107,7 @@ const MainHome = ({navigation}) => {
         </View>
 
         {/* My Bookings */}
-        {bookings.length > 0 && (
+        {myBookings.length > 0 && (
           <View>
             <Typography
               size={16}
@@ -143,7 +116,7 @@ const MainHome = ({navigation}) => {
               My Bookings
             </Typography>
             <FlatList
-              data={bookings}
+              data={myBookings}
               horizontal
               contentContainerStyle={{marginHorizontal: 5}}
               showsHorizontalScrollIndicator={false}
@@ -154,7 +127,7 @@ const MainHome = ({navigation}) => {
                       size={17}
                       font={Font.medium}
                       style={styles.bookingVendor}>
-                      {item.vendor}
+                      {/* {item.vendor} */}
                     </Typography>
                     <Typography
                       font={Font.medium}
@@ -162,7 +135,7 @@ const MainHome = ({navigation}) => {
                       style={styles.bookingText}>
                       Services:{' '}
                       <Typography font={Font.medium} color="#7b4ce0">
-                        {item.services}
+                        {/* {item.services} */}
                       </Typography>
                     </Typography>
                     <Typography
@@ -171,7 +144,7 @@ const MainHome = ({navigation}) => {
                       style={styles.bookingText}>
                       Price:{' '}
                       <Typography font={Font.medium} color="#7b4ce0">
-                        {item.price}
+                        {/* {item.price} */}
                       </Typography>
                     </Typography>
                     <Typography
@@ -180,14 +153,15 @@ const MainHome = ({navigation}) => {
                       style={styles.bookingText}>
                       Date:{' '}
                       <Typography font={Font.medium} color="#7b4ce0">
-                        {item.date}
+                        {/* {item.date} */}
                       </Typography>
                     </Typography>
                     <Typography
                       font={Font.medium}
                       size={13}
                       style={styles.bookingText}>
-                      Address: {item.address}
+                      Address:
+                      {/* {item.address} */}
                     </Typography>
                     <Typography
                       font={Font.medium}
@@ -195,7 +169,7 @@ const MainHome = ({navigation}) => {
                       style={styles.bookingText}>
                       Phone:{' '}
                       <Typography font={Font.medium} color="#7b4ce0">
-                        {item.phone}
+                        {/* {item.phone} */}
                       </Typography>
                     </Typography>
                   </View>
@@ -207,24 +181,28 @@ const MainHome = ({navigation}) => {
 
         {/* Auto-scroll Banner */}
         <View style={{marginVertical: 20}}>
-          <ScrollView
-            ref={scrollRef}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onScroll={Animated.event(
-              [{nativeEvent: {contentOffset: {x: scrollX}}}],
-              {useNativeDriver: false},
-            )}
-            scrollEventThrottle={16}>
-            {banners.map((img, index) => (
-              <Image
-                key={index}
-                source={{uri: img}}
-                style={styles.bannerImage}
-              />
-            ))}
-          </ScrollView>
+          {topBanners.length > 0 && (
+            <FlatList
+              ref={scrollRef}
+              data={topBanners}
+              horizontal
+              pagingEnabled
+              keyExtractor={item => item.id.toString()}
+              showsHorizontalScrollIndicator={false}
+              renderItem={({item}) => (
+                <TouchableOpacity onPress={() => setPaused(!paused)}>
+                  <Video
+                    source={{uri}}
+                    style={styles.bannerImage}
+                    resizeMode="cover"
+                    repeat
+                    paused={paused}
+                    muted
+                  />
+                </TouchableOpacity>
+              )}
+            />
+          )}
         </View>
 
         {/* Service Categories */}
@@ -240,15 +218,22 @@ const MainHome = ({navigation}) => {
           renderItem={({item, index}) => {
             return (
               <TouchableOpacity
-                onPress={() => navigation.navigate('SearchServices')}
+                onPress={() =>
+                  navigation.navigate('SearchServices', {
+                    id: item?.id,
+                  })
+                }
                 key={index}
                 style={styles.categoryCard}>
-                <Image source={{uri: item.icon}} style={styles.categoryIcon} />
+                <Image
+                  source={{uri: item?.image}}
+                  style={styles.categoryIcon}
+                />
                 <Typography
                   font={Font.medium}
                   size={14}
                   style={styles.categoryText}>
-                  {item.title}
+                  {item?.name}
                 </Typography>
               </TouchableOpacity>
             );
@@ -257,24 +242,24 @@ const MainHome = ({navigation}) => {
 
         {/* Another Banner */}
         <View style={{marginVertical: 20}}>
-          <ScrollView
-            ref={scrollRef}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onScroll={Animated.event(
-              [{nativeEvent: {contentOffset: {x: scrollX}}}],
-              {useNativeDriver: false},
-            )}
-            scrollEventThrottle={16}>
-            {banners.map((img, index) => (
-              <Image
-                key={index}
-                source={{uri: img}}
-                style={styles.bannerImage}
-              />
-            ))}
-          </ScrollView>
+          {bottomBanners.length > 0 && (
+            <FlatList
+              ref={scrollRef}
+              data={bottomBanners}
+              horizontal
+              pagingEnabled
+              keyExtractor={item => item.id.toString()}
+              showsHorizontalScrollIndicator={false}
+              renderItem={({item}) => (
+                <View style={{width}}>
+                  <Image
+                    source={{uri: item?.image}}
+                    style={styles.bannerImage}
+                  />
+                </View>
+              )}
+            />
+          )}
         </View>
       </ScrollView>
     </View>

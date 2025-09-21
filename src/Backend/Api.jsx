@@ -9,7 +9,7 @@ const errorHandling = {
   },
 };
 
-export const API = 'https://lemonchiffon-walrus-503913.hostingersite.com/public/api/';
+export const API = 'http://lemonchiffon-walrus-503913.hostingersite.com/public/api/';
 export const token = store.getState().Token;
 export const statusMessage = {
   400: 'Invalid request format.',
@@ -169,7 +169,7 @@ export const POST_FORM_DATA = async (
   try {
     await axios({
       method: 'post',
-      url: `${BASE_URL2}${route}`,
+      url: `${API}${route}`,
       data: body,
       headers: {
         'Content-Type': 'multipart/form-data',

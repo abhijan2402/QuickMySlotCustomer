@@ -28,6 +28,7 @@ const OtpScreen = ({navigation, route}) => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const inputs = useRef([]);
   const user_id = route?.params?.userId;
+  
   const phone = route?.params?.phone;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -132,6 +133,7 @@ const OtpScreen = ({navigation, route}) => {
         title="OTP Verification"
         showBack="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
         leftTint={COLOR.black}
+        onBackPress={() => navigation.goBack()}
       />
 
       <Image
@@ -186,7 +188,6 @@ const OtpScreen = ({navigation, route}) => {
           onPress={verifyOtp}
           containerStyle={{
             marginTop: windowHeight * 0.06,
-            padding: 20,
           }}
           loading={loading}
         />

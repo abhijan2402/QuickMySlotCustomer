@@ -135,9 +135,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   text: {
-    borderRightWidth: 1,
-    // borderRightColor: COLOR.lightGrey,
-    paddingRight: 5,
     marginRight: 5,
     fontFamily: Font.medium,
   },

@@ -10,6 +10,7 @@ import React from 'react';
 import {images} from './images';
 import {Typography} from './Typography';
 import {COLOR} from '../../Constants/Colors';
+import {Font} from '../../Constants/Font';
 
 const ConfirmModal = ({
   visible = false,
@@ -37,7 +38,7 @@ const ConfirmModal = ({
           </TouchableOpacity>
 
           {/* Title */}
-          <Typography size={20} textAlign="center" fontWeight={'500'}>
+          <Typography size={20} textAlign="center" font={Font.semibold}>
             {title}
           </Typography>
 
@@ -48,6 +49,7 @@ const ConfirmModal = ({
               textAlign="center"
               size={16}
               lineHeight={20}
+              font={Font.medium}
               color="rgba(0, 0, 0, 0.69)">
               {description}
             </Typography>
@@ -59,7 +61,7 @@ const ConfirmModal = ({
             <TouchableOpacity
               style={[styles.btn, styles.noBtn]}
               onPress={onPressNo || close}>
-              <Typography size={16} fontWeight={'500'} color={COLOR.red}>
+              <Typography size={14} font={Font.semibold} color={COLOR.red}>
                 {noTitle}
               </Typography>
             </TouchableOpacity>
@@ -69,9 +71,13 @@ const ConfirmModal = ({
               style={[styles.btn, styles.yesBtn]}
               onPress={onPressYes}
               disabled={loading}>
-              {loading ? <ActivityIndicator color={COLOR.white} /> : <Typography size={16} fontWeight={'500'} color={'#fff'}>
-                {yesTitle}
-              </Typography>}
+              {loading ? (
+                <ActivityIndicator color={COLOR.white} />
+              ) : (
+                <Typography size={14} font={Font.semibold} color={'#fff'}>
+                  {yesTitle}
+                </Typography>
+              )}
             </TouchableOpacity>
           </View>
         </View>

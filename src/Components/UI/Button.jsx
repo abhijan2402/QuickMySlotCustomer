@@ -84,8 +84,8 @@ const createStyles = theme =>
   StyleSheet.create({
     buttons: {
       backgroundColor: theme?.buttonColor,
-      borderRadius: 7,
-      height: 65,
+      borderRadius: 14,
+      height: 50,
       width: '100%',
       alignSelf: 'center',
       justifyContent: 'center',

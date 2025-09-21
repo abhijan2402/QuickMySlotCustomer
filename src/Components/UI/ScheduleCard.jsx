@@ -26,8 +26,16 @@ import {Font} from '../../Constants/Font';
 // };
 
 // Simple Typography component since we don't have the actual one
-const Typography = ({children, color, size, style}) => (
-  <Text style={[{color: color || '#000', fontSize: size || 14}, style]}>
+const Typography = ({children, color, size, style, font}) => (
+  <Text
+    style={[
+      {
+        color: color || '#000',
+        fontSize: size || 14,
+        fontFamily: font || Font.medium,
+      },
+      style,
+    ]}>
     {children}
   </Text>
 );
@@ -225,7 +233,9 @@ const ScheduleCard = ({
   return (
     <View style={styles.container}>
       <View style={styles.scheduleInfo}>
-        <Typography size={16}> {fullDate}</Typography>
+        <Typography size={14} font={Font.semibold}>
+          {fullDate}
+        </Typography>
       </View>
       <View style={styles.header}>
         <Typography style={styles.modalText}>
@@ -244,6 +254,7 @@ const ScheduleCard = ({
                 minWidth: 100,
                 fontSize: 14,
                 marginBottom: Platform.OS == 'ios' ? 5 : 0,
+                fontFamily: Font.medium,
               }}
               labelField={'formatted'}
               valueField={'name'}
@@ -258,6 +269,7 @@ const ScheduleCard = ({
                 fontSize: 14,
                 marginTop: 0,
                 width: 25,
+                fontFamily: Font.medium,
               }}
               onChange={v => {
                 setSelectedDate(null);
@@ -267,7 +279,9 @@ const ScheduleCard = ({
               renderRightIcon={() => {
                 return (
                   <>
-                    <Typography>{selectedMonth?.year}</Typography>
+                    <Typography font={Font.medium}>
+                      {selectedMonth?.year}
+                    </Typography>
                     <Image source={images.ArrowDown} style={styles.arrowIcon} />
                   </>
                 );
@@ -357,7 +371,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   modalText: {
-    fontSize: 22,
+    fontSize: 16,
+    fontFamily: Font.semibold,
   },
   arrowIcon: {
     height: 18,

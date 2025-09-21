@@ -1,7 +1,7 @@
 export const COLOR = {
   // === Primary Brand Colors ===
-  primary: '#796FC3', // Primary brand color
-  primaryLight: '#8880CA91', // Used for backgrounds/buttons (HomeBtnBg)
+  primary: '#EE4E34', // Primary brand color
+  primaryLight: '#fac1b9ff', // Used for backgrounds/buttons (HomeBtnBg)
   primarySoft: '#796FC31A', // Icon background (very soft primary)
 
   // === Neutral Colors ===
@@ -34,7 +34,7 @@ export const COLOR = {
   buttonDisabled: '#D1D1D6',
   buttonHover: '#5E57A4',
   buttonActive: '#4B478A',
-  buttonColor: '#665BBAFF',
+  buttonColor: '#EE4E34',
 
   // === Borders / Lines ===
   border: '#E5E5EA',

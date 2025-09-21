@@ -2,20 +2,17 @@ import React, {useState} from 'react';
 import {
   View,
   StyleSheet,
-  TextInput,
   Image,
-  ScrollView,
   TouchableOpacity,
   FlatList,
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
 import {Typography} from '../../../Components/UI/Typography';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import Input from '../../../Components/Input';
 import {images} from '../../../Components/UI/images';
 import {windowHeight} from '../../../Constants/Dimensions';
 import {Font} from '../../../Constants/Font';
+import Input from '../../../Components/Input';
 
 const SearchServices = ({navigation}) => {
   const [search, setSearch] = useState('');
@@ -26,7 +23,8 @@ const SearchServices = ({navigation}) => {
       name: 'Glamour Touch Salon',
       address: '123 Beauty Blvd, Anytown, CA 90210',
       experience: '8 Years of Experience',
-      availability: 'Available Mon-Sat, 9 AM - 4 PM',
+      availability: 'Mon-Sat, 9 AM - 4 PM',
+      rating: 4.8,
       image:
         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlJbFNhVA9DFsv-c9J73u3EKz0HnMb2iK4vA&s',
     },
@@ -35,7 +33,8 @@ const SearchServices = ({navigation}) => {
       name: 'Luxury Spa Center',
       address: '456 Relax St, Bliss City, CA 90211',
       experience: '5 Years of Experience',
-      availability: 'Available Tue-Sun, 10 AM - 6 PM',
+      availability: 'Tue-Sun, 10 AM - 6 PM',
+      rating: 4.6,
       image:
         'https://www.shutterstock.com/image-photo/portrait-pretty-relaxed-young-woman-600nw-2478831041.jpg',
     },
@@ -44,11 +43,76 @@ const SearchServices = ({navigation}) => {
       name: 'Hair & Beauty Studio',
       address: '789 Style Ave, Fashion Town, CA 90212',
       experience: '10 Years of Experience',
-      availability: 'Available Mon-Fri, 8 AM - 5 PM',
+      availability: 'Mon-Fri, 8 AM - 5 PM',
+      rating: 4.9,
       image:
         'https://images.pexels.com/photos/3065206/pexels-photo-3065206.jpeg',
     },
   ];
+
+  const renderCard = ({item}) => (
+    <TouchableOpacity
+      activeOpacity={0.85}
+      onPress={() => navigation.navigate('ProviderDetails')}
+      style={styles.card}>
+      {/* Image with Rating Badge */}
+      <View>
+        <Image source={{uri: item.image}} style={styles.cardImage} />
+        <View style={styles.ratingBadge}>
+          <Typography size={12} font={Font.medium} color={COLOR.white}>
+            ⭐ {item.rating}
+          </Typography>
+        </View>
+      </View>
+
+      {/* Card Content */}
+      <View style={styles.cardContent}>
+        <Typography
+          size={16}
+          font={Font.semibold}
+          color={COLOR.black}
+          style={styles.cardTitle}>
+          {item.name}
+        </Typography>
+
+        <Typography
+          size={13}
+          color="#666"
+          font={Font.medium}
+          style={styles.textRow}>
+          📍 {item.address}
+        </Typography>
+
+        <Typography
+          size={13}
+          color="#666"
+          font={Font.medium}
+          style={styles.textRow}>
+          💼 {item.experience}
+        </Typography>
+
+        <Typography
+          font={Font.semibold}
+          size={13}
+          color="#666"
+          style={styles.availability}>
+          ⏰ {item.availability}
+        </Typography>
+      </View>
+    </TouchableOpacity>
+  );
+
+  const renderEmpty = () => (
+    <View style={styles.emptyContainer}>
+      <Image source={images.noData} style={styles.emptyImage} />
+      <Typography size={18} font={Font.medium} style={styles.emptyText}>
+        No services found
+      </Typography>
+      <Typography size={14} color={COLOR.grey} style={{marginTop: 4}}>
+        Try searching with a different keyword.
+      </Typography>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
@@ -56,96 +120,33 @@ const SearchServices = ({navigation}) => {
         title="Services"
         leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
         rightIcon="https://cdn-icons-png.flaticon.com/128/17446/17446833.png"
-        leftTint={COLOR.primary}
+        leftTint={COLOR.black}
       />
-      <View style={{paddingHorizontal: 5}}>
-        {/* Search Box */}
-        <View style={{marginTop: -10, marginBottom: 10}}>
-          <Input
-            value={search}
-            onChangeText={v => setSearch(v)}
-            leftIcon={images.search}
-            placeholder="Search for services..."
-            inputContainer={{borderColor: COLOR.lightGrey}}
-            style={{marginLeft: 5}}
-            rightIcon={search !== '' ? images.cross2 : ''}
-            rightIconStyle={{height: 14, width: 14}}
-            onRightIconPress={() => setSearch('')}
-          />
-        </View>
 
-        {/* List of Services */}
-        <KeyboardAwareScrollView
-          extraScrollHeight={10}
-          enableOnAndroid={true}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{paddingBottom: 120}}>
-          <FlatList
-            data={services}
-            keyExtractor={item => item.id.toString()}
-            renderItem={({item, index}) => {
-              return (
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('ProviderDetails')}
-                  style={styles.card}>
-                  <Image source={{uri: item.image}} style={styles.cardImage} />
-                  <View style={styles.cardContent}>
-                    <Typography
-                      size={16}
-                      font={Font.semibold}
-                      color={COLOR.black}
-                      style={{marginBottom: 5}}>
-                      {item.name}
-                    </Typography>
-
-                    <Typography
-                      size={13}
-                      color="#666"
-                      font={Font.medium}
-                      style={styles.textRow}>
-                      📍 {item.address}
-                    </Typography>
-
-                    <Typography
-                      size={13}
-                      font={Font.medium}
-                      color="#666"
-                      style={styles.textRow}>
-                      💼 {item.experience}
-                    </Typography>
-
-                    <Typography
-                      font={Font.semibold}
-                      size={13}
-                      color="#666"
-                      style={{marginTop: 2}}>
-                      ⏰ {item.availability}
-                    </Typography>
-                  </View>
-                </TouchableOpacity>
-              );
-            }}
-            ListEmptyComponent={() => {
-              return (
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    marginTop: windowHeight * 0.3,
-                  }}>
-                  <Image source={images.noData} />
-                  <Typography
-                    size={20}
-                    fontWeight={'500'}
-                    style={{marginTop: 10}}>
-                    No services found
-                  </Typography>
-                </View>
-              );
-            }}
-          />
-        </KeyboardAwareScrollView>
+      {/* Search Box (Kept Same) */}
+      <View style={{paddingHorizontal: 5, marginTop: -10, marginBottom: 10}}>
+        <Input
+          value={search}
+          onChangeText={v => setSearch(v)}
+          leftIcon={images.search}
+          placeholder="Search for services..."
+          inputContainer={{borderColor: COLOR.lightGrey}}
+          style={{marginLeft: 5}}
+          rightIcon={search !== '' ? images.cross2 : ''}
+          rightIconStyle={{height: 14, width: 14}}
+          onRightIconPress={() => setSearch('')}
+        />
       </View>
+
+      {/* Services List */}
+      <FlatList
+        data={services}
+        keyExtractor={item => item.id.toString()}
+        renderItem={renderCard}
+        contentContainerStyle={{paddingBottom: 120, paddingHorizontal: 5}}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={renderEmpty}
+      />
     </View>
   );
 };
@@ -156,54 +157,66 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLOR.white,
-    paddingHorizontal: 15,
-  },
-  searchBox: {
-    backgroundColor: COLOR.white,
-    borderRadius: 8,
     paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    marginBottom: 10,
-    marginTop: 10,
   },
-  input: {
-    fontSize: 14,
-    color: COLOR.black,
-  },
+
+  /* Card Styles */
   card: {
     backgroundColor: COLOR.white,
-    borderRadius: 14,
+    borderRadius: 16,
     marginVertical: 12,
     overflow: 'hidden',
     elevation: 3,
     shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    shadowOffset: {width: 0, height: 3},
-    margin: 1,
+    shadowOpacity: 0.08,
+    shadowRadius: 5,
+    shadowOffset: {width: 0, height: 2},
   },
   cardImage: {
     width: '100%',
-    height: 180,
-    borderTopLeftRadius: 14,
-    borderTopRightRadius: 14,
+    height: 190,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  ratingBadge: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    backgroundColor: COLOR.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    elevation: 3,
   },
   cardContent: {
-    padding: 12,
+    padding: 14,
+  },
+  cardTitle: {
+    marginBottom: 6,
   },
   textRow: {
-    marginBottom: 5,
+    marginBottom: 4,
   },
-  rowBetween: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  availability: {
+    marginTop: 6,
+    color: COLOR.primary,
+  },
+
+  /* Empty State */
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
+    marginTop: windowHeight * 0.2,
+    paddingHorizontal: 20,
   },
-  badge: {
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 12,
+  emptyImage: {
+    height: 120,
+    width: 120,
+    resizeMode: 'contain',
+  },
+  emptyText: {
+    marginTop: 10,
+    color: COLOR.black,
   },
 });

@@ -190,10 +190,10 @@ const ProviderDetails = ({navigation}) => {
               />
               <Text
                 style={{
-                  fontSize: 14,
+                  fontSize: 13,
                   marginLeft: 5,
                   marginBottom: 2,
-                  fontFamily: Font.medium,
+                  fontFamily: Font.regular,
                 }}>
                 Get Directions
               </Text>
@@ -262,7 +262,7 @@ const ProviderDetails = ({navigation}) => {
             }>
             <Image
               source={require('../../../assets/Images/location.png')}
-              style={{height: 16, width: 16, tintColor: 'blue'}}
+              style={{height: 16, width: 16, tintColor: COLOR.primary}}
             />
             <Text
               style={[
@@ -271,6 +271,7 @@ const ProviderDetails = ({navigation}) => {
                   marginLeft: 10,
                   color: 'blue',
                   textDecorationLine: 'underline',
+                  color: COLOR.primary,
                 },
               ]}>
               Get Directions

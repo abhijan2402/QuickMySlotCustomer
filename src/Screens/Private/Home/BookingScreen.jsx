@@ -81,22 +81,22 @@ const BookingScreen = ({navigation}) => {
   ];
 
   const times = [
-    '08:00 AM',
-    '08:30 AM',
-    '09:00 AM',
-    '09:30 AM',
-    '10:00 AM',
-    '10:30 AM',
-    '11:00 AM',
-    '11:30 AM',
-    '13:00 PM',
-    '13:30 PM',
-    '14:00 PM',
-    '14:30 PM',
-    '15:00 PM',
-    '15:30 PM',
-    '16:00 PM',
-    '16:30 PM',
+    '08:00',
+    '08:30',
+    '09:00',
+    '09:30',
+    '10:00',
+    '10:30',
+    '11:00',
+    '11:30',
+    '13:00',
+    '13:30',
+    '14:00',
+    '14:30',
+    '15:00',
+    '15:30',
+    '16:00',
+    '16:30',
   ];
 
   const toggleService = id => {
@@ -189,7 +189,7 @@ const BookingScreen = ({navigation}) => {
 
           {/* Date Selector */}
           <Typography
-            size={16}
+            size={14}
             font={Font.semibold}
             style={{marginTop: 20, marginBottom: 5}}>
             Select Date & Time of Appoinment
@@ -234,14 +234,17 @@ const BookingScreen = ({navigation}) => {
           />
 
           {/* Time Selector */}
-          <Typography style={styles.sectionTitle}>Choose Time</Typography>
+          {/* <Typography style={styles.sectionTitle}>Choose Time</Typography> */}
           <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
               marginBottom: 10,
+              marginTop: 10,
             }}>
-            <Typography size={14}>You can select up-to 3 time slots</Typography>
+            <Typography font={Font.medium} size={14}>
+              You can select up-to 3 time slots
+            </Typography>
             <Image
               source={images.info}
               style={{height: 15, width: 15, marginLeft: 5}}
@@ -290,12 +293,13 @@ const BookingScreen = ({navigation}) => {
             <View style={{flexDirection: 'row'}}>
               <Image source={images.offer} style={{height: 24, width: 24}} />
               <View style={{marginLeft: 10}}>
-                <Typography size={14} font={Font.semibold}>
+                <Typography size={13} font={Font.medium}>
                   Offer Applied
                 </Typography>
                 <Typography
-                  size={16}
+                  size={14}
                   font={Font.semibold}
+                  color={COLOR.primary}
                   style={{marginTop: 3}}>
                   FIRST40
                 </Typography>
@@ -470,7 +474,7 @@ const BookingScreen = ({navigation}) => {
           </View>
 
           <LinearGradient
-            colors={['#796FC3', '#ADA4E2']}
+            colors={['#EE4E34', '#ff9d90ff']}
             start={{x: 1, y: 0}}
             end={{x: 1, y: 1}}
             style={styles.voucherCard}>
@@ -482,12 +486,12 @@ const BookingScreen = ({navigation}) => {
                 style={styles.voucherIcon}
               />
               <View style={{flex: 1}}>
-                <Typography size={16} fontWeight="600" color="#fff">
+                <Typography size={16} font={Font.medium} color="#fff">
                   Earn 15% Discount Voucher
                 </Typography>
                 <Typography
                   size={14}
-                  fontWeight="600"
+                  font={Font.semibold}
                   color="#fff"
                   style={{marginTop: 2}}>
                   + ₹103
@@ -497,7 +501,7 @@ const BookingScreen = ({navigation}) => {
 
             <Typography
               size={13}
-              fontWeight="400"
+              font={Font.semibold}
               color="#f3f3f3"
               style={{
                 marginTop: 10,
@@ -513,7 +517,7 @@ const BookingScreen = ({navigation}) => {
             color="gray"
             lineHeight={20}
             style={{marginBottom: 15}}>
-            <Typography size={15} font={Font.medium}>
+            <Typography size={15} font={Font.semibold}>
               Note:
             </Typography>{' '}
             The total may vary after consultation depending on the length,
@@ -543,8 +547,8 @@ const BookingScreen = ({navigation}) => {
               <View style={{flexDirection: 'row', alignItems: 'center'}}>
                 <Image source={images.info} style={{height: 18, width: 18.2}} />
                 <Typography
-                  size={16}
-                  font={Font.semibold}
+                  size={14}
+                  font={Font.medium}
                   style={{marginLeft: 10}}>
                   How to avail this offer ?
                 </Typography>
@@ -574,8 +578,8 @@ const BookingScreen = ({navigation}) => {
                   style={{height: 18, width: 18.2}}
                 />
                 <Typography
-                  size={16}
-                  font={Font.semibold}
+                  size={14}
+                  font={Font.medium}
                   style={{marginLeft: 10}}>
                   Calculate your bill with offer
                 </Typography>
@@ -600,8 +604,8 @@ const BookingScreen = ({navigation}) => {
                   style={{height: 18, width: 18.2}}
                 />
                 <Typography
-                  size={16}
-                  font={Font.semibold}
+                  size={14}
+                  font={Font.medium}
                   style={{marginLeft: 10}}>
                   Add a request
                 </Typography>
@@ -613,6 +617,7 @@ const BookingScreen = ({navigation}) => {
               onChangeText={setNote}
               height={60}
               inputContainer={{marginTop: -10}}
+              textAlignVertical="top"
             />
           </View>
           {/* Book Now */}
@@ -650,7 +655,7 @@ const BookingScreen = ({navigation}) => {
           }}>
           <Typography
             size={18}
-            fontWeight={'700'}
+            font={Font.semibold}
             textAlign={'center'}
             style={{marginTop: 10}}>
             How to avail the offer ?
@@ -670,10 +675,10 @@ const BookingScreen = ({navigation}) => {
               borderColor: COLOR.lightGrey,
               borderRadius: 16,
             }}>
-            <Typography size={16} font={Font.semibold} color={COLOR.primary}>
+            <Typography size={15} font={Font.medium} color={COLOR.primary}>
               Step 1
             </Typography>
-            <Typography size={18} font={Font.semibold} style={{marginTop: 5}}>
+            <Typography size={15} font={Font.medium} style={{marginTop: 5}}>
               Book your appoinment with the app
             </Typography>
           </View>
@@ -686,10 +691,10 @@ const BookingScreen = ({navigation}) => {
               borderColor: COLOR.lightGrey,
               borderRadius: 16,
             }}>
-            <Typography size={16} font={Font.semibold} color={COLOR.primary}>
+            <Typography size={15} font={Font.medium} color={COLOR.primary}>
               Step 2
             </Typography>
-            <Typography size={18} font={Font.semibold} style={{marginTop: 5}}>
+            <Typography size={15} font={Font.medium} style={{marginTop: 5}}>
               Visit for your appoinment to avail all the services
             </Typography>
           </View>
@@ -702,10 +707,10 @@ const BookingScreen = ({navigation}) => {
               borderColor: COLOR.lightGrey,
               borderRadius: 16,
             }}>
-            <Typography size={16} font={Font.semibold} color={COLOR.primary}>
+            <Typography size={15} font={Font.medium} color={COLOR.primary}>
               Step 3
             </Typography>
-            <Typography size={18} font={Font.semibold} style={{marginTop: 5}}>
+            <Typography size={15} font={Font.medium} style={{marginTop: 5}}>
               Pay your bill with the app using any mode of online payment after
               availing your services
             </Typography>
@@ -892,7 +897,7 @@ const BookingScreen = ({navigation}) => {
           maxHeight: '70%',
         }}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          <Typography size={18} font={Font.semibold} textAlign={'center'}>
+          <Typography size={16} font={Font.semibold} textAlign={'center'}>
             This is a Sample bill for your refrence
           </Typography>
           <View
@@ -921,7 +926,12 @@ const BookingScreen = ({navigation}) => {
               </TouchableOpacity>
             </View>
             <Button
-              containerStyle={{width: '30%', height: 50, marginBottom: 0}}
+              containerStyle={{
+                width: '30%',
+                height: 50,
+                marginBottom: 0,
+                fontFamily: Font.medium,
+              }}
               title={'Calculate'}
             />
           </View>
@@ -1056,7 +1066,7 @@ const BookingScreen = ({navigation}) => {
             </View>
             <Typography
               size={14}
-              font={Font.semibold}
+              font={Font.medium}
               style={{marginTop: 20, marginBottom: 5}}>
               Note: App Discount Voucher earned can be used to pay for next
               appoinment at any partner on the app
@@ -1112,7 +1122,7 @@ const styles = StyleSheet.create({
     fontFamily: Font.medium,
   },
   selectedTimeBox: {backgroundColor: COLOR.primary, fontFamily: Font.medium},
-  timeText: {color: '#333', fontSize: 13},
+  timeText: {color: '#333', fontSize: 13, fontFamily: Font.semibold},
   selectedTimeText: {color: '#fff', fontFamily: Font.medium},
   offerBtn: {
     flexDirection: 'row',
@@ -1202,7 +1212,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     marginBottom: 8,
   },
-  offerAppliedText: {fontSize: 14, fontFamily: Font.semibold, color: '#444'},
+  offerAppliedText: {fontSize: 14, fontFamily: Font.medium, color: '#444'},
   offerCode: {fontSize: 14, fontFamily: Font.semibold, color: '#222'},
 
   totalRow: {

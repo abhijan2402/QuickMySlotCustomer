@@ -9,7 +9,8 @@ const errorHandling = {
   },
 };
 
-export const API = 'https://lemonchiffon-walrus-503913.hostingersite.com/public/api/';
+export const API =
+  'https://lemonchiffon-walrus-503913.hostingersite.com/public/api/';
 export const token = store.getState().Token;
 export const statusMessage = {
   400: 'Invalid request format.',
@@ -80,8 +81,8 @@ export const GET_WITH_TOKEN = async (
   status = () => {},
 ) => {
   const tokenVal = store.getState().Token;
-  console.log(tokenVal,"TOKENNNN");
-  
+  console.log(tokenVal, 'TOKENNNN');
+
   try {
     await axios({
       method: 'get',
@@ -127,7 +128,7 @@ export const POST = async (
   },
 ) => {
   try {
-    axios({
+    const res = await axios({
       method: 'post',
       url: `${API}${route}`,
       data: body,
@@ -135,27 +136,20 @@ export const POST = async (
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
-      validateStatus: function (status) {
-        return status >= 200 && status <= 999; // default
-      },
-    })
-      .then(res => {
-        console.log(res,'resresresresresadas');
-        if (res?.status == 200) {
-          onSuccess(res?.data);
-        } else {
-          onError(res?.data);
-        }
-      })
-      .catch(err => {
-        console.log(err,'fadaerrerrerr');
-        onError(err);
-      });
+      validateStatus: status => status >= 200 && status <= 999,
+    });
+
+    if (res.status === 200) {
+      onSuccess(res.data);
+    } else {
+      onError(res.data);
+    }
   } catch (error) {
+    console.log(error, 'POST ERROR');
     onFail({data: null, msg: 'Network Error', status: 'error'});
-    return {data: null, msg: 'Network Error', status: 'error'};
   }
 };
+
 export const POST_FORM_DATA = async (
   route,
   body,
@@ -207,7 +201,7 @@ export const POST_WITH_TOKEN = async (
     SimpleToast.show('Check Network, Try Again.', SimpleToast.SHORT);
   },
 ) => {
-  const tokenVal = store.getState().Token;  
+  const tokenVal = store.getState().Token;
   try {
     await axios({
       method: 'post',
@@ -231,7 +225,6 @@ export const POST_WITH_TOKEN = async (
         }
       })
       .catch(err => {
-        
         onError(err);
       });
   } catch (error) {
@@ -287,7 +280,7 @@ export const DELETE_WITH_TOKEN = async (
   headers = {},
 ) => {
   const tokenVal = store.getState().Token;
-  
+
   try {
     axios({
       method: 'delete',
@@ -299,7 +292,7 @@ export const DELETE_WITH_TOKEN = async (
       },
       ...errorHandling,
     })
-      .then(res => {        
+      .then(res => {
         if (res?.status == 200) {
           onSuccess(res?.data);
         } else {

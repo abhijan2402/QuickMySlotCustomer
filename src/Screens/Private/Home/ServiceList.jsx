@@ -11,6 +11,7 @@ import {
 import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
 import {Typography} from '../../../Components/UI/Typography';
+import {Font} from '../../../Constants/Font';
 
 const categories = [
   {
@@ -176,7 +177,7 @@ const ServiceList = ({navigation}) => {
 
         {/* Right Side Services */}
         <View style={styles.rightPane}>
-          <Typography size={18} fontWeight="bold" style={styles.heading}>
+          <Typography size={17} font={Font.semibold} style={styles.heading}>
             {selectedCategory}
           </Typography>
 
@@ -186,25 +187,31 @@ const ServiceList = ({navigation}) => {
                 <TouchableOpacity
                   onPress={() => toggleExpand(cat.id)}
                   style={styles.serviceHeader}>
-                  <Typography size={16} fontWeight="600">
+                  <Typography size={14} font={Font.medium}>
                     {cat.category} ({cat.services.length})
                   </Typography>
                   <Animated.Image
                     source={{
                       uri: 'https://cdn-icons-png.flaticon.com/128/2985/2985150.png',
                     }}
-                    style={[{width: 20, height: 20,marginRight:10}, getRotationStyle(cat.id)]}
+                    style={[
+                      {width: 20, height: 20, marginRight: 10},
+                      getRotationStyle(cat.id),
+                    ]}
                   />
                 </TouchableOpacity>
 
                 {expanded[cat.id] &&
                   cat.services.map(srv => (
                     <View key={srv.id} style={styles.serviceRow}>
-                      <Typography size={14} style={styles.serviceName}>
+                      <Typography
+                        size={14}
+                        style={styles.serviceName}
+                        font={Font.semibold}>
                         {srv.name} -{' '}
                         <Typography
                           size={14}
-                          fontWeight="bold"
+                          font={Font.medium}
                           color={COLOR.primary}>
                           ₹{srv.price}
                         </Typography>
@@ -218,7 +225,7 @@ const ServiceList = ({navigation}) => {
                         onPress={() => addService(srv)}>
                         <Typography
                           size={13}
-                          fontWeight="600"
+                          font={Font.semibold}
                           color={isAdded(srv.id) ? COLOR.white : COLOR.black}>
                           {isAdded(srv.id) ? 'Added' : 'Add'}
                         </Typography>
@@ -236,7 +243,7 @@ const ServiceList = ({navigation}) => {
         <TouchableOpacity
           onPress={() => navigation.navigate('BookingScreen')}
           style={styles.bookNowBtn}>
-          <Typography size={16} fontWeight="bold" color={COLOR.white}>
+          <Typography size={16} font={Font.semibold} color={COLOR.white}>
             Book Now ({selectedServices.length})
           </Typography>
         </TouchableOpacity>
@@ -258,7 +265,7 @@ const styles = StyleSheet.create({
   },
   activeCategory: {backgroundColor: '#e6f0ff'},
   categoryImage: {width: 40, height: 40, borderRadius: 8, marginRight: 8},
-  categoryText: {flexShrink: 1},
+  categoryText: {flexShrink: 1, fontFamily: Font.medium, marginTop: 5},
 
   rightPane: {flex: 1, padding: 10},
   heading: {
@@ -288,12 +295,12 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 8,
     borderWidth: 1,
-    marginRight:5
+    marginRight: 5,
   },
   addedBtn: {backgroundColor: COLOR.primary, borderWidth: 0},
   bookNowBtn: {
     position: 'absolute',
-    bottom: 10,
+    bottom: 50,
     left: 20,
     right: 20,
     backgroundColor: COLOR.primary,

@@ -1,19 +1,19 @@
 export const COLOR = {
   // === Primary Brand Colors ===
-  primary: '#796FC3',         // Primary brand color
-  primaryLight: '#8880CA91',  // Used for backgrounds/buttons (HomeBtnBg)
-  primarySoft: '#796FC31A',   // Icon background (very soft primary)
+  primary: '#EE4E34', // Primary brand color
+  primaryLight: '#fac1b9ff', // Used for backgrounds/buttons (HomeBtnBg)
+  primarySoft: '#796FC31A', // Icon background (very soft primary)
 
   // === Neutral Colors ===
   black: '#000000',
   white: '#FFFFFF',
-  grey: '#A9A9A9',            // Placeholder, borders
-  lightGrey: '#c2c8d1',       // Inputs, dividers
-  extraLightGrey: '#F7F7F7',  // lightBlue: backgrounds, sections
+  grey: '#A9A9A9', // Placeholder, borders
+  lightGrey: '#c2c8d1', // Inputs, dividers
+  extraLightGrey: '#F7F7F7', // lightBlue: backgrounds, sections
 
   // === Text Colors ===
-  textPrimary: '#1C1C1E',     // Almost black for main text
-  textSecondary: '#6E6E73',   // Subtext
+  textPrimary: '#1C1C1E', // Almost black for main text
+  textSecondary: '#6E6E73', // Subtext
   textDisabled: '#A1A1A1',
 
   // === Semantic Colors ===
@@ -34,7 +34,7 @@ export const COLOR = {
   buttonDisabled: '#D1D1D6',
   buttonHover: '#5E57A4',
   buttonActive: '#4B478A',
-  buttonColor:'#665BBAFF',
+  buttonColor: '#EE4E34',
 
   // === Borders / Lines ===
   border: '#E5E5EA',

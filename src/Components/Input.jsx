@@ -1,8 +1,16 @@
 import React from 'react';
-import {TextInput, StyleSheet, View, Text, Image, TouchableOpacity} from 'react-native';
+import {
+  TextInput,
+  StyleSheet,
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
 import {COLOR} from '../Constants/Colors';
 import {ErrorBox} from './UI/ErrorBox';
-import { Typography } from './UI/Typography';
+import {Typography} from './UI/Typography';
+import {Font} from '../Constants/Font';
 
 const Input = ({
   label,
@@ -37,10 +45,20 @@ const Input = ({
       </View>
 
       {/* Input with icons */}
-      <View style={[styles.inputContainer,inputContainer]}>
+      <View style={[styles.inputContainer, inputContainer]}>
         {leftIcon && (
           <TouchableOpacity onPress={onLeftIconPress} activeOpacity={0.9}>
-            { text ? <Typography size={16} fontWeight={'500'} style={styles.text}>{text}</Typography> : <Image source={leftIcon} style={styles.icon} tintColor={leftTintColor} />}
+            {text ? (
+              <Typography size={16} font={Font.medium} style={styles.text}>
+                {text}
+              </Typography>
+            ) : (
+              <Image
+                source={leftIcon}
+                style={styles.icon}
+                tintColor={leftTintColor}
+              />
+            )}
           </TouchableOpacity>
         )}
 
@@ -64,7 +82,7 @@ const Input = ({
 
         {rightIcon && (
           <TouchableOpacity onPress={onRightIconPress}>
-            <Image source={rightIcon} style={[styles.icon,rightIconStyle]} />
+            <Image source={rightIcon} style={[styles.icon, rightIconStyle]} />
           </TouchableOpacity>
         )}
       </View>
@@ -103,7 +121,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     paddingVertical: 12,
     color: COLOR.black,
-    height: 52
+    height: 52,
+    fontFamily: Font.medium,
   },
   multilineInput: {
     paddingVertical: 10,
@@ -115,10 +134,11 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     marginHorizontal: 5,
   },
-  text:{
-    borderRightWidth:1,
+  text: {
+    borderRightWidth: 1,
     // borderRightColor: COLOR.lightGrey,
-    paddingRight:5,
-    marginRight:5
-  }
+    paddingRight: 5,
+    marginRight: 5,
+    fontFamily: Font.medium,
+  },
 });

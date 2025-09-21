@@ -3,6 +3,7 @@ import {View, StyleSheet, Image, ScrollView} from 'react-native';
 import HomeHeader from '../../../Components/HomeHeader';
 import {COLOR} from '../../../Constants/Colors';
 import {Typography} from '../../../Components/UI/Typography';
+import {Font} from '../../../Constants/Font';
 
 const notifications = [
   {
@@ -65,17 +66,21 @@ const NotificationsScreen = () => {
             </View>
             <View style={styles.cardRight}>
               <View style={styles.cardHeader}>
-                <Typography size={14} fontWeight="600" color={COLOR.black}>
+                <Typography size={14} font={Font.semibold} color={COLOR.black}>
                   {item.title}
                 </Typography>
                 {/* <Typography size={12} fontWeight="600" color={item.statusColor}>
                   {item.status}
                 </Typography> */}
               </View>
-              <Typography size={12} color="#555" style={{marginVertical: 4}}>
+              <Typography
+                size={12}
+                font={Font.medium}
+                color="#555"
+                style={{marginVertical: 4}}>
                 {item.message}
               </Typography>
-              <Typography size={11} color="#888">
+              <Typography size={11} font={Font.regular} color="#888">
                 {item.time}
               </Typography>
             </View>

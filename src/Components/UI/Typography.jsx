@@ -1,19 +1,20 @@
-import { StyleSheet, Text as RNText } from 'react-native';
+import {StyleSheet, Text as RNText} from 'react-native';
 import React from 'react';
-import { COLOR } from '../../Constants/Colors';
+import {COLOR} from '../../Constants/Colors';
+import {Font} from '../../Constants/Font';
 
 export const Typography = ({
   size = 14,
   children,
-  font = '',
+  font = Font.medium,
   color = COLOR?.black,
   textAlign = undefined,
   style = {},
   numberOfLines,
   lineHeight,
   fontWeight,
-  disabled=true,
-  onPress=()=>{},
+  disabled = true,
+  onPress = () => {},
   letterSpacing,
   ...props
 }) => {
@@ -28,10 +29,10 @@ export const Typography = ({
           fontSize: size,
           color: color,
           textAlign,
-          fontWeight: fontWeight,
+          // fontWeight: fontWeight,
           lineHeight: lineHeight,
-          // fontFamily: font,
-          letterSpacing: letterSpacing
+          fontFamily: font,
+          letterSpacing: letterSpacing,
         },
         style,
       ]}

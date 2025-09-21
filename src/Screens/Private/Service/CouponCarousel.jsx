@@ -8,7 +8,8 @@ import {
   Image,
   SafeAreaView,
 } from 'react-native';
-import { COLOR } from '../../../Constants/Colors';
+import {COLOR} from '../../../Constants/Colors';
+import {Font} from '../../../Constants/Font';
 
 const {width} = Dimensions.get('window');
 
@@ -107,11 +108,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     // paddingTop: 20,
-    marginBottom:5
+    marginBottom: 5,
   },
   header: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 17,
+    fontFamily: Font.semibold,
     marginHorizontal: 20,
     marginBottom: 5,
     color: '#000',
@@ -134,8 +135,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   icon: {
-    width: 36,
-    height: 36,
+    width: 32,
+    height: 32,
     resizeMode: 'contain',
     marginRight: 12,
   },
@@ -143,14 +144,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 15,
-    fontWeight: 'bold',
+    fontSize: 14,
     color: '#000',
+    fontFamily: Font.semibold,
   },
   description: {
     fontSize: 13,
     color: '#666',
     marginTop: 2,
+    fontFamily: Font.medium,
   },
   pageInfo: {
     alignItems: 'flex-end',
@@ -158,7 +160,7 @@ const styles = StyleSheet.create({
   pageText: {
     fontSize: 13,
     color: COLOR.primary,
-    fontWeight: '500',
+    fontFamily: Font.mediumd,
   },
   dots: {
     flexDirection: 'row',

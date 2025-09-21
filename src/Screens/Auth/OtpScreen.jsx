@@ -21,6 +21,8 @@ import {validators} from '../../Backend/Validator';
 import {ErrorBox} from '../../Components/UI/ErrorBox';
 import {isAuth, Token, userDetails} from '../../Redux/action';
 import {useDispatch} from 'react-redux';
+import {Font} from '../../Constants/Font';
+import Header from '../../Components/FeedHeader';
 
 const OtpScreen = ({navigation, route}) => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -74,6 +76,9 @@ const OtpScreen = ({navigation, route}) => {
   };
 
   const onSubmit = async () => {
+    // dispatch(Token('ABC'));
+    // dispatch(isAuth(true));
+    // return;
     // setLoading(true);
     const otpCode = otp.join('');
 
@@ -122,10 +127,10 @@ const OtpScreen = ({navigation, route}) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <HomeHeader
+    <View style={styles.container}>
+      <Header
         title="OTP Verification"
-        leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
+        showBack="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
         leftTint={COLOR.black}
       />
 
@@ -139,13 +144,14 @@ const OtpScreen = ({navigation, route}) => {
       <View style={{padding: 20, alignItems: 'center'}}>
         <Typography
           size={18}
-          fontWeight="800"
+          font={Font.semibold}
           color={COLOR.black}
           lineHeight={20}>
           OTP Verification
         </Typography>
 
         <Typography
+          font={Font.medium}
           size={14}
           color={COLOR.black}
           textAlign="center"
@@ -174,15 +180,17 @@ const OtpScreen = ({navigation, route}) => {
       {error?.otp && (
         <ErrorBox style={{marginTop: 0, marginBottom: 10}} error={error?.otp} />
       )}
-
-      <Button
-        title={'Verify'}
-        onPress={verifyOtp}
-        containerStyle={{
-          marginTop: windowHeight * 0.06,
-        }}
-        loading={loading}
-      />
+      <View style={{padding: 20}}>
+        <Button
+          title={'Verify'}
+          onPress={verifyOtp}
+          containerStyle={{
+            marginTop: windowHeight * 0.06,
+            padding: 20,
+          }}
+          loading={loading}
+        />
+      </View>
 
       <View
         style={{marginTop: 20, flexDirection: 'row', justifyContent: 'center'}}>
@@ -190,21 +198,21 @@ const OtpScreen = ({navigation, route}) => {
           Didn't receive the code?{' '}
         </Typography>
         {timer > 0 ? (
-          <Typography size={14} color={COLOR.gray}>
+          <Typography font={Font.medium} size={14} color={COLOR.gray}>
             Resend in {timer}s
           </Typography>
         ) : (
           <Typography
             size={14}
             color={COLOR.primary}
-            fontWeight="600"
+            font={Font.semibold}
             disabled={false}
             onPress={resend}>
             Resend OTP
           </Typography>
         )}
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -214,7 +222,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingHorizontal: 15,
+    // paddingHorizontal: 15,
   },
   image: {
     width: 80,
@@ -237,7 +245,7 @@ const styles = StyleSheet.create({
     height: 50,
     textAlign: 'center',
     fontSize: 18,
-    fontWeight: '500',
+    fontFamily: Font.semibold,
     backgroundColor: '#f9f9f9',
   },
 });

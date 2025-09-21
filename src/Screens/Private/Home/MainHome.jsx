@@ -20,6 +20,7 @@ import {useIsFocused} from '@react-navigation/native';
 import {useApi} from '../../../Backend/Api';
 import {AuthContext} from '../../../Backend/AuthContent';
 import {GET_PROFILE} from '../../../Constants/ApiRoute';
+import {Font} from '../../../Constants/Font';
 
 const {width} = Dimensions.get('window');
 
@@ -125,7 +126,7 @@ const MainHome = ({navigation}) => {
             leftIcon={images.search}
             placeholder="Search for services..."
             inputContainer={{borderColor: COLOR.lightGrey}}
-            style={{marginLeft: 5}}
+            style={{marginLeft: 5, fontFamily: Font.semibold}}
             rightIcon={search !== '' ? images.cross2 : ''}
             rightIconStyle={{height: 14, width: 14}}
             onRightIconPress={() => setSearch('')}
@@ -137,7 +138,7 @@ const MainHome = ({navigation}) => {
           <View>
             <Typography
               size={16}
-              fontWeight="600"
+              font={Font.semibold}
               style={[styles.sectionTitle, {marginLeft: 5}]}>
               My Bookings
             </Typography>
@@ -151,34 +152,49 @@ const MainHome = ({navigation}) => {
                   <View key={item.id} style={styles.bookingCard}>
                     <Typography
                       size={17}
-                      fontWeight="bold"
+                      font={Font.medium}
                       style={styles.bookingVendor}>
                       {item.vendor}
                     </Typography>
-                    <Typography size={13} style={styles.bookingText}>
+                    <Typography
+                      font={Font.medium}
+                      size={13}
+                      style={styles.bookingText}>
                       Services:{' '}
-                      <Typography fontWeight="600" color="#7b4ce0">
+                      <Typography font={Font.medium} color="#7b4ce0">
                         {item.services}
                       </Typography>
                     </Typography>
-                    <Typography size={13} style={styles.bookingText}>
+                    <Typography
+                      font={Font.medium}
+                      size={13}
+                      style={styles.bookingText}>
                       Price:{' '}
-                      <Typography fontWeight="600" color="#7b4ce0">
+                      <Typography font={Font.medium} color="#7b4ce0">
                         {item.price}
                       </Typography>
                     </Typography>
-                    <Typography size={13} style={styles.bookingText}>
+                    <Typography
+                      font={Font.medium}
+                      size={13}
+                      style={styles.bookingText}>
                       Date:{' '}
-                      <Typography fontWeight="600" color="#7b4ce0">
+                      <Typography font={Font.medium} color="#7b4ce0">
                         {item.date}
                       </Typography>
                     </Typography>
-                    <Typography size={13} style={styles.bookingText}>
+                    <Typography
+                      font={Font.medium}
+                      size={13}
+                      style={styles.bookingText}>
                       Address: {item.address}
                     </Typography>
-                    <Typography size={13} style={styles.bookingText}>
+                    <Typography
+                      font={Font.medium}
+                      size={13}
+                      style={styles.bookingText}>
                       Phone:{' '}
-                      <Typography fontWeight="600" color="#7b4ce0">
+                      <Typography font={Font.medium} color="#7b4ce0">
                         {item.phone}
                       </Typography>
                     </Typography>
@@ -214,7 +230,7 @@ const MainHome = ({navigation}) => {
         {/* Service Categories */}
         <Typography
           size={16}
-          fontWeight="600"
+          font={Font.semibold}
           style={[styles.sectionTitle, {marginLeft: 5}]}>
           Service Categories
         </Typography>
@@ -228,7 +244,10 @@ const MainHome = ({navigation}) => {
                 key={index}
                 style={styles.categoryCard}>
                 <Image source={{uri: item.icon}} style={styles.categoryIcon} />
-                <Typography size={14} style={styles.categoryText}>
+                <Typography
+                  font={Font.medium}
+                  size={14}
+                  style={styles.categoryText}>
                   {item.title}
                 </Typography>
               </TouchableOpacity>

@@ -2,7 +2,6 @@ import React from 'react';
 import {
   View,
   Text,
-  TextInput,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -12,7 +11,7 @@ import {COLOR} from '../../../Constants/Colors';
 import {useNavigation} from '@react-navigation/native';
 import {Typography} from '../../../Components/UI/Typography';
 import Input from '../../../Components/Input';
-import LinearGradient from 'react-native-linear-gradient';
+import {Font} from '../../../Constants/Font'; // <-- Assuming font constants
 
 const offers = [
   {
@@ -43,21 +42,22 @@ const offers = [
 
 export default function OffersScreen() {
   const navigation = useNavigation();
+
   return (
-    <View style={{flex: 1, backgroundColor: '#fff',
-    padding: 15,
-    paddingBottom:0
-    }}>
+    <View style={styles.mainContainer}>
       <HomeHeader
         title="Available Offers"
         leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
         leftTint={COLOR.primary}
       />
-      <ScrollView style={styles.container}>
-        <LinearGradient
-          colors={['#a1c4fd', '#c2e9fb']} // gradient colors
-          style={styles.container1}>
-          <Text style={styles.title}>How to avail the offer?</Text>
+
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false} // Hides scroll bar
+      >
+        {/* How to Avail Offer Section */}
+        <View style={styles.infoBox}>
+          <Text style={styles.infoTitle}>How to avail the offer?</Text>
 
           <View style={styles.steps}>
             <View style={styles.stepCard}>
@@ -77,20 +77,23 @@ export default function OffersScreen() {
             <View style={styles.stepCard}>
               <Text style={styles.stepTitle}>STEP 3</Text>
               <Text style={styles.stepText}>
-                Pay bill with This{'\n'}to avail the offer
+                Pay bill with app{'\n'}to avail the offer
               </Text>
             </View>
           </View>
-        </LinearGradient>
+        </View>
 
+        {/* Coupon Input */}
         <View style={{marginHorizontal: 5, marginBottom: 20}}>
           <Input
             label="Offers available for you"
             placeholder="Enter Coupon Code"
             style={{borderColor: COLOR.primary}}
+            labelStyle={{fontFamily: Font.semibold}}
           />
         </View>
 
+        {/* Offers List */}
         {offers.map((offer, index) => (
           <View key={index} style={styles.card}>
             <View style={styles.cardHeader}>
@@ -100,7 +103,7 @@ export default function OffersScreen() {
               </TouchableOpacity>
             </View>
 
-            <Typography style={styles.title}>{offer.title}</Typography>
+            <Typography style={styles.offerTitle}>{offer.title}</Typography>
             <Typography style={styles.discount}>{offer.discount}</Typography>
             <Typography style={styles.days}>{offer.days}</Typography>
             <Typography style={styles.description}>
@@ -112,35 +115,76 @@ export default function OffersScreen() {
             </TouchableOpacity>
           </View>
         ))}
-        <View style={{height: 50}}></View>
+
+        <View style={{height: 50}} />
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  /** MAIN LAYOUT */
+  mainContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+    padding: 15,
+    paddingBottom: 0,
+  },
   container: {
     backgroundColor: '#fff',
     flex: 1,
   },
-  heading: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
-  input: {
+
+  /** Info Box */
+  infoBox: {
+    backgroundColor: '#f1f6ff',
+    // padding: 20,
+    borderRadius: 16,
+    paddingVertical: 20,
+    margin: 16,
+    marginHorizontal: 5,
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 10,
+    borderColor: '#d8e4ff',
+  },
+  infoTitle: {
+    textAlign: 'center',
+    fontSize: 18,
+    fontFamily: Font.bold,
     marginBottom: 20,
+    color: '#222',
   },
-  subHeading: {
-    fontSize: 16,
-    marginBottom: 10,
-    fontWeight: '500',
-    marginTop: 10,
+  steps: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
+  stepCard: {
+    // flex: 1,
+    backgroundColor: '#fff',
+    marginHorizontal: 4,
+    paddingVertical: 16,
+    paddingHorizontal: 5,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e6e6e6',
+    elevation: 2,
+    width: '30%',
+  },
+  stepTitle: {
+    fontSize: 14,
+    fontFamily: Font.bold,
+    color: COLOR.primary,
+    marginBottom: 6,
+  },
+  stepText: {
+    fontSize: 13,
+    textAlign: 'center',
+    fontFamily: Font.regular,
+    color: '#333',
+    lineHeight: 18,
+  },
+
+  /** Offer Card */
   card: {
     borderWidth: 1,
     borderColor: '#e0e0e0',
@@ -160,74 +204,44 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 6,
-    fontWeight: '600',
+    fontFamily: Font.semibold,
     color: '#005fa3',
+    fontSize: 13,
   },
   apply: {
-    color: '#007BFF',
-    fontWeight: '600',
+    color: COLOR.primary,
+    fontFamily: Font.semibold,
+    fontSize: 14,
   },
-  title: {
-    fontWeight: '700',
+
+  /** Offer Details */
+  offerTitle: {
+    fontFamily: Font.bold,
     fontSize: 16,
     marginBottom: 4,
+    color: '#222',
   },
   discount: {
     color: 'green',
-    fontWeight: '600',
+    fontFamily: Font.semibold,
     marginBottom: 4,
+    fontSize: 14,
   },
   days: {
-    fontWeight: '500',
+    fontFamily: Font.semibold,
     color: '#555',
     marginBottom: 4,
+    fontSize: 13,
   },
   description: {
+    fontFamily: Font.regular,
     color: '#333',
     marginBottom: 6,
+    fontSize: 13,
   },
   tnc: {
-    color: '#007BFF',
-    fontWeight: '500',
-  },
-  container1: {
-    padding: 20,
-    borderRadius: 16,
-    margin: 16,
-    elevation: 4, // shadow for Android
-    shadowColor: '#000', // shadow for iOS
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-  },
-  title: {
-    textAlign: 'center',
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 16,
-    color: '#222',
-  },
-  steps: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  stepCard: {
-    flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    marginHorizontal: 6,
-    padding: 12,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  stepTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#0077ff',
-    marginBottom: 8,
-  },
-  stepText: {
+    color: COLOR.primary,
+    fontFamily: Font.medium,
     fontSize: 13,
-    textAlign: 'center',
-    color: '#333',
   },
 });

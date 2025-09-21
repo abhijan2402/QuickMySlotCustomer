@@ -12,6 +12,7 @@ import HomeHeader from '../../../Components/HomeHeader';
 import Button from '../../../Components/UI/Button';
 import ConfirmModal from '../../../Components/UI/ConfirmModel';
 import {Typography} from '../../../Components/UI/Typography';
+import {Font} from '../../../Constants/Font';
 
 const Account = ({navigation}) => {
   const {setUser} = useContext(AuthContext);
@@ -27,25 +28,25 @@ const Account = ({navigation}) => {
     {
       id: 1,
       title: 'Edit Profile',
-      icon: 'https://cdn-icons-png.flaticon.com/512/2922/2922561.png',
+      icon: 'https://cdn-icons-png.flaticon.com/128/1077/1077114.png',
       navigate: 'EditProfile',
     },
-    {
-      id: 2,
-      title: 'My Appointments',
-      icon: 'https://cdn-icons-png.flaticon.com/128/9411/9411437.png',
-      navigate: 'Appointment',
-    },
+    // {
+    //   id: 2,
+    //   title: 'My Appointments',
+    //   icon: 'https://cdn-icons-png.flaticon.com/128/9411/9411437.png',
+    //   navigate: 'Appointment',
+    // },
     {
       id: 7,
       title: 'QuickMySlot Wallet',
-      icon: 'https://cdn-icons-png.flaticon.com/128/3258/3258446.png',
+      icon: 'https://cdn-icons-png.flaticon.com/128/60/60484.png',
       navigate: 'Wallet',
     },
     {
       id: 3,
       title: 'Terms & Conditions',
-      icon: 'https://cdn-icons-png.flaticon.com/128/1458/1458279.png',
+      icon: 'https://cdn-icons-png.flaticon.com/128/10349/10349031.png',
       navigate: 'Cms',
       params: {
         title: `Terms & Conditions`,
@@ -55,7 +56,7 @@ const Account = ({navigation}) => {
     {
       id: 4,
       title: 'About Us',
-      icon: 'https://cdn-icons-png.flaticon.com/128/16343/16343680.png',
+      icon: 'https://cdn-icons-png.flaticon.com/128/1/1176.png',
       navigate: 'Cms',
       params: {
         title: `About Us`,
@@ -65,7 +66,7 @@ const Account = ({navigation}) => {
     {
       id: 5,
       title: 'Support',
-      icon: 'https://cdn-icons-png.flaticon.com/128/8898/8898827.png',
+      icon: 'https://cdn-icons-png.flaticon.com/128/4460/4460756.png',
       navigate: 'Support',
     },
     {
@@ -74,16 +75,16 @@ const Account = ({navigation}) => {
       icon: 'https://cdn-icons-png.flaticon.com/128/10206/10206656.png',
       navigate: 'Invite',
     },
-    {
-      id: 7,
-      title: 'Change Password',
-      icon: 'https://cdn-icons-png.flaticon.com/128/11135/11135307.png',
-      navigate: 'ForgotPassword',
-    },
+    // {
+    //   id: 7,
+    //   title: 'Change Password',
+    //   icon: 'https://cdn-icons-png.flaticon.com/128/11135/11135307.png',
+    //   navigate: 'ForgotPassword',
+    // },
     {
       id: 8,
       title: 'FAQ',
-      icon: 'https://cdn-icons-png.flaticon.com/128/4403/4403603.png',
+      icon: 'https://cdn-icons-png.flaticon.com/128/1660/1660165.png',
       navigate: 'Faq',
     },
   ];
@@ -103,10 +104,14 @@ const Account = ({navigation}) => {
             style={styles.profileImage}
           />
         </View>
-        <Typography size={20} fontWeight="bold" color={COLOR.black}>
+        <Typography size={20} font={Font.semibold} color={COLOR.black}>
           John Doe
         </Typography>
-        <Typography size={14} color={COLOR.GRAY} style={{marginTop: 4}}>
+        <Typography
+          size={14}
+          color={COLOR.GRAY}
+          font={Font.medium}
+          style={{marginTop: 4}}>
           john@example.com
         </Typography>
       </View>
@@ -124,7 +129,7 @@ const Account = ({navigation}) => {
               onPress={() => navigation.navigate(item.navigate, item.params)}>
               <View style={styles.tabLeft}>
                 <Image source={{uri: item.icon}} style={styles.leftIcon} />
-                <Typography size={16} color={COLOR.black}>
+                <Typography font={Font.semibold} size={16} color={COLOR.black}>
                   {item.title}
                 </Typography>
               </View>

@@ -5,13 +5,13 @@ import {
   View,
   Modal,
   ScrollView,
-  Image,
+  ImageBackground,
 } from 'react-native';
-import Button from '../../../Components/UI/Button';
 import HomeHeader from '../../../Components/HomeHeader';
 import CustomButton from '../../../Components/CustomButton';
 import {COLOR} from '../../../Constants/Colors';
 import {Typography} from '../../../Components/UI/Typography';
+import {Font} from '../../../Constants/Font';
 
 const PayBill = () => {
   const [appointments, setAppointments] = useState([
@@ -44,97 +44,115 @@ const PayBill = () => {
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
+  const calculateTotals = appointment => {
+    const selectedItems = services.filter(service =>
+      appointment.services.includes(service.id),
+    );
+    const subtotal = selectedItems.reduce((sum, s) => sum + s.price, 0);
+    const tax = subtotal * 0.1;
+    const platformFee = 2;
+    const total = subtotal + tax + platformFee;
+
+    return {subtotal, tax, platformFee, total};
+  };
+
   return (
-    <View style={{flex: 1, backgroundColor: 'white', padding: 20}}>
+    <View style={styles.container}>
+      {/* Header */}
       <HomeHeader
         title="Pending Payments"
         leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
         leftTint={COLOR.black}
       />
 
-      <ScrollView style={{marginTop:10}}>
+      <ScrollView showsVerticalScrollIndicator={false} style={{marginTop: 15}}>
         {appointments.map(appointment => {
-          const selectedItems = services.filter(service =>
-            appointment.services.includes(service.id),
-          );
-          const subtotal = selectedItems.reduce((sum, s) => sum + s.price, 0);
-          const tax = subtotal * 0.1;
-          const platformFee = 2;
-          const total = subtotal + tax + platformFee;
+          const {total} = calculateTotals(appointment);
 
           return (
             <View key={appointment.id} style={styles.bookingCard}>
-              {/* Salon Image */}
-              <Image
+              {/* Top Image */}
+              <ImageBackground
                 source={{
                   uri: 'https://im.whatshot.in/img/2019/May/shutterstock-653296774-cropped-1-1557311742.jpg',
                 }}
                 style={styles.salonImage}
-                resizeMode="cover"
-              />
-
-              {/* Salon Info */}
-              <Typography style={styles.salonName}>
-                Glamour Touch Salon
-              </Typography>
-              <Typography style={styles.salonRating}>⭐️⭐️⭐️ (3.5)</Typography>
-              <Typography style={styles.salonTagline}>
-                Luxury salon services
-              </Typography>
-
-              {/* Appointment Info */}
-              <Typography style={styles.bookingLabel}>
-                Appointment: {appointment.date} at {appointment.time}
-              </Typography>
-              <Typography style={styles.bookingLabel}>
-                Due Date: {appointment.dueDate}
-              </Typography>
-              <Typography style={styles.bookingLabel}>
-                Amount Due:{' '}
-                <Typography style={styles.amountDue}>
-                  ${total.toFixed(2)}
-                </Typography>
-              </Typography>
-
-              {/* Pay Now Button */}
-              <TouchableOpacity
-                style={styles.payButton}
-                onPress={() => {
-                  setSelectedAppointment(appointment);
-                  setModalVisible(true);
+                imageStyle={{
+                  borderTopLeftRadius: 14,
+                  borderTopRightRadius: 14,
                 }}>
-                <Typography style={styles.payButtonText}>Pay Now</Typography>
-              </TouchableOpacity>
+                {/* Floating Total Badge */}
+                <View style={styles.amountBadge}>
+                  <Typography style={styles.amountBadgeText}>
+                    ${total.toFixed(2)}
+                  </Typography>
+                </View>
+              </ImageBackground>
+
+              {/* Details */}
+              <View style={styles.detailsSection}>
+                <Typography style={styles.salonName}>
+                  Glamour Touch Salon
+                </Typography>
+                <Typography style={styles.salonRating}>
+                  ⭐️⭐️⭐️ (3.5)
+                </Typography>
+
+                <View style={{marginTop: 10}}>
+                  <Typography style={styles.detailText}>
+                    Appointment: {appointment.date} at {appointment.time}
+                  </Typography>
+                  <Typography style={styles.detailText}>
+                    Due Date: {appointment.dueDate}
+                  </Typography>
+                </View>
+
+                {/* Pay Now Button */}
+                <TouchableOpacity
+                  style={styles.payButton}
+                  onPress={() => {
+                    setSelectedAppointment(appointment);
+                    setModalVisible(true);
+                  }}>
+                  <Typography style={styles.payButtonText}>Pay Now</Typography>
+                </TouchableOpacity>
+              </View>
             </View>
           );
         })}
       </ScrollView>
 
-      {/* Modal for Payment Details */}
+      {/* Modal */}
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Typography style={styles.sheetTitle}>Payment Details</Typography>
-            <ScrollView style={styles.scrollView}>
+
+            <ScrollView
+              style={styles.scrollView}
+              showsVerticalScrollIndicator={false}>
               {selectedAppointment && (
                 <>
-                  <View style={styles.bookingInfo}>
-                    <Typography style={styles.bookingLabel}>
-                      Appointment ID:
+                  {/* Appointment Info */}
+                  <View style={styles.infoRow}>
+                    <Typography style={styles.infoLabel}>
+                      Appointment ID
                     </Typography>
-                    <Typography style={styles.bookingValue}>
+                    <Typography style={styles.infoValue}>
                       {selectedAppointment.id}
                     </Typography>
                   </View>
-                  <View style={styles.bookingInfo}>
-                    <Typography style={styles.bookingLabel}>
-                      Date & Time:
+                  <View style={styles.infoRow}>
+                    <Typography style={styles.infoLabel}>
+                      Date & Time
                     </Typography>
-                    <Typography style={styles.bookingValue}>
+                    <Typography style={styles.infoValue}>
                       {selectedAppointment.date} at {selectedAppointment.time}
                     </Typography>
                   </View>
 
+                  {/* Services */}
+                  <Typography style={styles.sectionTitle}>Services</Typography>
                   {selectedAppointment.services.map(serviceId => {
                     const service = services.find(s => s.id === serviceId);
                     return (
@@ -149,80 +167,66 @@ const PayBill = () => {
                     );
                   })}
 
-                  {/* Pricing Summary */}
+                  {/* Summary */}
                   {(() => {
-                    const selectedItems = services.filter(s =>
-                      selectedAppointment.services.includes(s.id),
-                    );
-                    const subtotal = selectedItems.reduce(
-                      (sum, s) => sum + s.price,
-                      0,
-                    );
-                    const tax = subtotal * 0.1;
-                    const platformFee = 2;
-                    const total = subtotal + tax + platformFee;
-
+                    const {subtotal, tax, platformFee, total} =
+                      calculateTotals(selectedAppointment);
                     return (
-                      <>
+                      <View style={styles.summaryBox}>
                         <View style={styles.billRow}>
-                          <Typography style={styles.billLabel}>
+                          <Typography style={styles.summaryLabel}>
                             Subtotal
                           </Typography>
-                          <Typography style={styles.billValue}>
+                          <Typography style={styles.summaryValue}>
                             ${subtotal.toFixed(2)}
                           </Typography>
                         </View>
                         <View style={styles.billRow}>
-                          <Typography style={styles.billLabel}>
+                          <Typography style={styles.summaryLabel}>
                             Taxes (10%)
                           </Typography>
-                          <Typography style={styles.billValue}>
+                          <Typography style={styles.summaryValue}>
                             ${tax.toFixed(2)}
                           </Typography>
                         </View>
                         <View style={styles.billRow}>
-                          <Typography style={styles.billLabel}>
+                          <Typography style={styles.summaryLabel}>
                             Platform Fee
                           </Typography>
-                          <Typography style={styles.billValue}>
+                          <Typography style={styles.summaryValue}>
                             ${platformFee.toFixed(2)}
                           </Typography>
                         </View>
-                        <View style={styles.amountDueContainer}>
-                          <Typography style={styles.amountLabel}>
-                            Total Due:
+
+                        <View style={styles.totalRow}>
+                          <Typography style={styles.totalLabel}>
+                            Total
                           </Typography>
-                          <Typography style={styles.amountValue}>
+                          <Typography style={styles.totalValue}>
                             ${total.toFixed(2)}
                           </Typography>
                         </View>
-                      </>
+                      </View>
                     );
                   })()}
                 </>
               )}
             </ScrollView>
+
+            {/* Modal Actions */}
             <CustomButton
-            style={{width: '100%'}}
+              style={{width: '100%', marginTop: 10}}
               onPress={() => {
                 console.log('Payment initiated for', selectedAppointment?.id);
                 setModalVisible(false);
               }}
-              title={'Pay Now'}
+              title="Confirm Payment"
             />
             <CustomButton
-              style={{
-                backgroundColor: 'white',
-                borderWidth: 1,
-                borderColor: 'gray',
-                marginTop: 10,
-                width: '100%'
-              }}
-              textStyle={{color: 'gray'}}
-              onPress={() => {
-                setModalVisible(false);
-              }}
-              title={'Cancel'}
+              style={styles.cancelButton}
+              textStyle={styles.cancelButtonText}
+              onPress={() => setModalVisible(false)}
+              title="Cancel"
             />
           </View>
         </View>
@@ -234,131 +238,193 @@ const PayBill = () => {
 export default PayBill;
 
 const styles = StyleSheet.create({
-  sheetTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: COLOR.primary,
-    textAlign: 'center',
+  container: {
+    flex: 1,
+    backgroundColor: COLOR.background || '#F8F8F8',
+    padding: 20,
   },
+
+  /** Appointment Card */
   bookingCard: {
+    backgroundColor: COLOR.white,
+    borderRadius: 14,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: {width: 0, height: 3},
+    shadowRadius: 6,
+    elevation: 2,
+    overflow: 'hidden',
+  },
+  salonImage: {
+    width: '100%',
+    height: 140,
+  },
+
+  /** Floating Total Badge */
+  amountBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: COLOR.primary,
+    paddingVertical: 5,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+  },
+  amountBadgeText: {
+    fontSize: 13,
+    fontFamily: Font.semibold,
+    color: COLOR.white,
+  },
+
+  /** Details Section */
+  detailsSection: {
     padding: 15,
-    backgroundColor: '#f9f9f9',
+  },
+  salonName: {
+    fontSize: 17,
+    fontFamily: Font.bold,
+    color: COLOR.black,
+  },
+  salonRating: {
+    fontSize: 13,
+    fontFamily: Font.medium,
+    color: COLOR.textSecondary,
+    marginTop: 2,
+  },
+  detailText: {
+    fontSize: 13,
+    color: COLOR.textSecondary,
+    fontFamily: Font.medium,
+    marginBottom: 4,
+  },
+
+  /** Pay Button */
+  payButton: {
+    backgroundColor: COLOR.primary,
+    paddingVertical: 12,
     borderRadius: 10,
-    marginBottom: 15,
-    borderColor: '#ddd',
-    borderWidth: 1,
+    alignItems: 'center',
+    marginTop: 12,
   },
-  bookingLabel: {
-    fontSize: 16,
-    color: 'gray',
-    marginBottom: 5,
+  payButtonText: {
+    color: COLOR.white,
+    fontSize: 15,
+    fontFamily: Font.bold,
   },
-  bookingValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+
+  /** Modal */
   modalContainer: {
     flex: 1,
     justifyContent: 'flex-end',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: COLOR.white,
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
     padding: 20,
-    minHeight: '50%',
     maxHeight: '80%',
   },
+  sheetTitle: {
+    fontSize: 20,
+    fontFamily: Font.bold,
+    color: COLOR.primary,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+
+  /** Modal ScrollView */
   scrollView: {
     marginVertical: 10,
   },
-  bookingInfo: {
+  infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    marginBottom: 12,
+  },
+  infoLabel: {
+    fontSize: 14,
+    fontFamily: Font.medium,
+    color: COLOR.textSecondary,
+  },
+  infoValue: {
+    fontSize: 14,
+    fontFamily: Font.semibold,
+    color: COLOR.black,
+  },
+
+  /** Services */
+  sectionTitle: {
+    fontSize: 15,
+    fontFamily: Font.semibold,
+    color: COLOR.black,
+    marginVertical: 10,
   },
   billRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   billLabel: {
-    fontSize: 14,
-    color: '#555',
+    fontSize: 13,
+    fontFamily: Font.medium,
+    color: COLOR.textSecondary,
   },
   billValue: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 13,
+    fontFamily: Font.semibold,
+    color: COLOR.black,
   },
-  amountDueContainer: {
+
+  /** Summary Box */
+  summaryBox: {
+    backgroundColor: '#F9F9F9',
+    padding: 12,
+    borderRadius: 10,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#EAEAEA',
+  },
+  summaryLabel: {
+    fontSize: 13,
+    fontFamily: Font.medium,
+    color: COLOR.textSecondary,
+  },
+  summaryValue: {
+    fontSize: 13,
+    fontFamily: Font.bold,
+    color: COLOR.black,
+  },
+  totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingTop: 15,
+    borderTopColor: '#EAEAEA',
+    paddingTop: 10,
     marginTop: 10,
   },
-  amountLabel: {
-    fontSize: 18,
-    color: 'gray',
-  },
-  amountValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
+  totalLabel: {
+    fontSize: 15,
+    fontFamily: Font.bold,
     color: COLOR.primary,
   },
-  payButton: {
-    backgroundColor: COLOR.primary,
-    padding: 15,
-    borderRadius: 10,
-    width: '100%',
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 5,
-  },
-  payButtonText: {
-    color: 'white',
+  totalValue: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: Font.bold,
+    color: COLOR.primary,
   },
+
+  /** Cancel Button */
   cancelButton: {
-    padding: 15,
-    borderRadius: 10,
-    width: '100%',
-    alignItems: 'center',
+    backgroundColor: COLOR.white,
     borderWidth: 1,
-    borderColor: 'gray',
+    borderColor: COLOR.textSecondary,
+    marginTop: 10,
+    width: '100%',
   },
   cancelButtonText: {
-    color: 'gray',
-    fontSize: 16,
-  },
-  salonImage: {
-    width: '100%',
-    height: 140,
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  salonName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLOR.primary,
-    marginBottom: 4,
-  },
-  salonRating: {
-    fontSize: 14,
     color: COLOR.textSecondary,
-    marginBottom: 2,
-  },
-  salonTagline: {
-    fontSize: 14,
-    color: COLOR.grey,
-    marginBottom: 8,
-  },
-  amountDue: {
-    color: COLOR.primary,
-    fontWeight: 'bold',
+    fontFamily: Font.medium,
   },
 });

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -7,74 +7,135 @@ import {
   Modal,
   TextInput,
   ScrollView,
+  Image,
+  ActivityIndicator,
 } from 'react-native';
 import HomeHeader from '../../../Components/HomeHeader';
 import {COLOR} from '../../../Constants/Colors';
 import CustomButton from '../../../Components/CustomButton';
-import { Typography } from '../../../Components/UI/Typography';
+import {Typography} from '../../../Components/UI/Typography';
 import Button from '../../../Components/UI/Button';
+import {useIsFocused} from '@react-navigation/native';
+import {GET_WITH_TOKEN, POST_FORM_DATA} from '../../../Backend/Api';
+import {SUPPORT} from '../../../Constants/ApiRoute';
+import {validators} from '../../../Backend/Validator';
+import ImageModal from '../../../Components/UI/ImageModal';
+import {images} from '../../../Components/UI/images';
+import {ErrorBox} from '../../../Components/UI/ErrorBox';
+import {windowWidth} from '../../../Constants/Dimensions';
+import Input from '../../../Components/Input';
+import { Font } from '../../../Constants/Font';
+import ImageUpload from '../../../Components/UI/ImageUpload';
+import { isValidForm } from '../../../Backend/Utility';
 
 const Support = () => {
-  const [tickets, setTickets] = useState([
-    {
-      id: '1',
-      title: 'Login Issue',
-      description: 'Unable to log into my account since yesterday.',
-      date: '2025-08-10',
-      time: '10:45 AM',
-      status: 'Open',
-    },
-    {
-      id: '2',
-      title: 'Payment Failed',
-      description: 'Transaction failed but amount was deducted.',
-      date: '2025-08-09',
-      time: '4:30 PM',
-      status: 'Resolved',
-    },
-  ]);
+  const [tickets, setTickets] = useState([]);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
+  const [error, setError] = useState('');
+  const [image, setImage] = useState('');
+  console.log(image);
 
-  const handleAddTicket = () => {
-    if (!newTitle.trim() || !newDesc.trim()) return;
-    const newTicket = {
-      id: Date.now().toString(),
-      title: newTitle,
-      description: newDesc,
-      date: new Date().toISOString().split('T')[0],
-      time: new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      status: 'Open',
-    };
-    setTickets([newTicket, ...tickets]);
-    setNewTitle('');
-    setNewDesc('');
-    setModalVisible(false);
+  const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const isFocus = useIsFocused();
+
+  useEffect(() => {
+    if (isFocus) {
+      getSupport();
+    }
+  }, [isFocus]);
+
+  const getSupport = () => {
+    setLoading(true);
+    GET_WITH_TOKEN(
+      SUPPORT,
+      success => {
+        setLoading(false);
+        console.log(success, 'dsdsdsdeeeeeeeeeeeeweewew-->>>');
+        setTickets(success?.data);
+      },
+      error => {
+        console.log(error, 'errorerrorerror>>');
+        setLoading(false);
+      },
+      fail => {
+        console.log(fail, 'errorerrorerror>>');
+
+        setLoading(false);
+      },
+    );
   };
+
+  const handleImageSelected = (response, type) => {
+    if (response) {
+      setImage(response);
+    }
+    setShowModal(false);
+  };
+
+  const handleUpdate = () => {
+    let validationErrors = {
+      title: validators.checkRequire('Title', newTitle),
+      description: validators.checkRequire('Description', newDesc),
+      image: validators.checkRequire('image', image),
+    };
+    setError(validationErrors);
+    if (isValidForm(validationErrors)) {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append('title', newTitle);
+      formData.append('description', newDesc);
+      if (image) {
+        formData.append('image', {
+          uri: image.path,
+          type: image.mime || 'image/jpeg',
+          name: image.filename || `photo_${Date.now()}.jpg`,
+        });
+      }
+      console.log('FormData ====>', formData);
+      POST_FORM_DATA(
+        SUPPORT,
+        formData,
+        success => {
+          setLoading(false);
+          console.log(success, 'dsdsdsdeeeeeeeeeeeeweewew-->>>');
+          setModalVisible(false);
+          getSupport();
+        },
+        error => {
+          console.log(error, 'errorerrorerror>>');
+          setLoading(false);
+        },
+        fail => {
+          console.log(fail, 'errorerrorerror>>');
+          setLoading(false);
+        },
+      );
+    }
+  };
+
+
 
   const renderTicket = ({item}) => (
     <View style={styles.ticketCard}>
-      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-        <Typography style={styles.ticketTitle}>{item.title}</Typography>
-        <Typography
-          style={[
-            styles.status,
-            item.status === 'Resolved'
-              ? styles.statusResolved
-              : styles.statusOpen,
-          ]}>
-          {item.status}
-        </Typography>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'flex-start',
+          alignItems: 'center',
+        }}>
+        <Image
+          source={{uri: item.image_url}}
+          style={{height: 50, width: 50, borderRadius: 6}}
+        />
+        <View style={{marginLeft: 12}}>
+          <Typography style={styles.ticketTitle}>{item.title}</Typography>
+          <Typography style={styles.ticketDesc}>{item.description}</Typography>
+        </View>
       </View>
-      <Typography style={styles.ticketDesc}>{item.description}</Typography>
-      <Typography style={styles.ticketDate}>
-        {item.date} • {item.time}
-      </Typography>
     </View>
   );
 
@@ -86,17 +147,20 @@ const Support = () => {
         leftTint={COLOR.black}
       />
 
-      <FlatList
+      {loading ? (
+        <ActivityIndicator
+          size="large"
+          color={COLOR.primary}
+          style={{marginTop: 10}}
+        />
+      ) :<FlatList
         data={tickets}
         renderItem={renderTicket}
         keyExtractor={item => item.id}
-        contentContainerStyle={{paddingVertical: 10,paddingHorizontal:10}}
-      />
+        contentContainerStyle={{paddingVertical: 10, paddingHorizontal: 10}}
+      />}
 
-      <Button
-        title="Raise Ticket"
-        onPress={() => setModalVisible(true)}
-      />
+      <Button title="Raise Ticket" onPress={() => setModalVisible(true)} />
 
       {/* Raise Ticket Modal */}
       <Modal
@@ -110,32 +174,83 @@ const Support = () => {
               <Typography style={styles.modalTitle}>
                 Raise a Support Ticket
               </Typography>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter Ticket Title"
+
+              <Input
+                label="Title"
+                placeholder=""
                 value={newTitle}
+                style={{borderColor: COLOR.primary}}
                 onChangeText={setNewTitle}
+                error={error.title}
               />
-              <TextInput
-                style={[styles.input, {height: 100}]}
-                placeholder="Enter Description"
+
+              <Input
+                label="Description"
+                placeholder=""
                 value={newDesc}
+                style={{borderColor: COLOR.primary}}
                 onChangeText={setNewDesc}
-                multiline
+                error={error.description}
+                multiline={true}
               />
-              <CustomButton
+              <Typography
+                size={14}
+                font={Font.semibold}
+                color="#333"
+                style={[styles.label, {marginTop: 20, marginBottom: 5}]}>
+                Image
+              </Typography>
+              {image ? (
+                <View style={styles.imgWrapper}>
+                  <Image
+                    source={{uri: image?.path ? image?.path : image?.uri}}
+                    style={styles.previewImg}
+                  />
+                  <TouchableOpacity
+                    style={styles.deleteBtn}
+                    onPress={() => setImage(null)}>
+                    <Image
+                      // source={images.cross}
+                      style={{height: 12, width: 12}}
+                      tintColor={'white'}
+                    />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <ImageUpload onPress={() => setShowModal(true)} />
+              )}
+              <Typography
+                size={12}
+                color="#777"
+                font={Font.semibold}
+                style={[styles.note, {marginBottom: 0, marginTop: 5}]}>
+                Max file size: 2MB. JPG, PNG allowed.
+              </Typography>
+              {/* show error below image */}
+              {error.image && <ErrorBox error={error.image} />}
+              <Button
+                loading={loading}
                 title="Submit Ticket"
-                onPress={handleAddTicket}
-                style={{marginTop: 10}}
+                onPress={handleUpdate}
+                containerStyle={{marginTop: 10}}
               />
-              <TouchableOpacity
+              <Button
+                title="Cancel"
                 onPress={() => setModalVisible(false)}
-                style={styles.cancelBtn}>
-                <Typography style={{color: COLOR.primary}}>
-                  Cancel
-                </Typography>
-              </TouchableOpacity>
+                titleColor={COLOR.primary}
+                containerStyle={{
+                  marginTop: 10,
+                  backgroundColor: 'white',
+                  borderWidth: 1,
+                  borderColor: COLOR.primary,
+                }}
+              />
             </ScrollView>
+            <ImageModal
+              showModal={showModal}
+              close={() => setShowModal(false)}
+              selected={handleImageSelected}
+            />
           </View>
         </View>
       </Modal>
@@ -226,5 +341,23 @@ const styles = StyleSheet.create({
   cancelBtn: {
     alignItems: 'center',
     marginTop: 10,
+  },
+  imgWrapper: {
+    position: 'relative',
+    marginBottom: 12,
+    alignSelf: 'flex-start',
+  },
+  previewImg: {
+    width: windowWidth * 0.83,
+    height: 180,
+    borderRadius: 8,
+  },
+  deleteBtn: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 12,
+    padding: 6,
   },
 });

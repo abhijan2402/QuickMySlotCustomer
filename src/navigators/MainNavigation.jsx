@@ -7,8 +7,8 @@ import {ToastProvider} from '../Constants/ToastContext';
 import {useSelector} from 'react-redux';
 
 const MainNavigation = () => {
-  const isAuth = useSelector(state => state.isAuth);
-  console.log(isAuth, 'isAuthisAuth');
+  const auth = useContext(AuthContext);
+  const isAuth = useSelector(store => store.isAuth);
 
   return (
     <SafeAreaView style={{flex: 1}}>

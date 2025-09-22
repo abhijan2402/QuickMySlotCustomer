@@ -147,7 +147,7 @@ export const Shadow = (elevation = 5) => {
 };
 export const DATE_FORMATE = 'YYYY-MM-DD';
 
-export const CURRENCY = '$';
+export const CURRENCY = '₹';
 
 export const getCountryDetails = addList => {
   if (addList) {

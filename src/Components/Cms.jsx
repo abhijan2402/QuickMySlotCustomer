@@ -11,39 +11,34 @@ import RenderHTML from 'react-native-render-html';
 import Header from './FeedHeader';
 import HomeHeader from './HomeHeader';
 import {COLOR} from '../Constants/Colors';
+import {CMS} from '../Constants/ApiRoute';
+import {GET_WITH_TOKEN} from '../Backend/Api';
 
 const Cms = ({route}) => {
   const navigation = useNavigation();
   const {width} = useWindowDimensions();
   const {title, slug} = route.params;
-
   const [htmlContent, setHtmlContent] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // Simulate fetching static CMS content
   useEffect(() => {
-    setTimeout(() => {
-      const staticHTML = `
-  <h2>About Our Service Platform</h2>
-  <p>Welcome to <strong>ServiceHub</strong>, your reliable partner for booking trusted professionals across a wide range of services — from beauty and wellness to home repairs and maintenance. We make it easy for you to find, book, and enjoy top-quality services right at your doorstep.</p>
+    GET_WITH_TOKEN(
+      CMS + slug,
+      success => {
+        console.log(success, 'successsuccesdsadaddsssuccess-->>>');
+        setLoading(false);
+        setHtmlContent(success?.data)
+      },
+      error => {
+        console.log(error, 'errorerrdsadsaorerror>>');
+        setLoading(false);
+      },
+      fail => {
+        console.log(fail, 'errorerrorerror>>');
 
-  <h3>Why Choose Us?</h3>
-  <ul>
-    <li>Verified and skilled professionals</li>
-    <li>Transparent pricing with no hidden charges</li>
-    <li>Convenient booking and secure payment options</li>
-    <li>Customer support available 7 days a week</li>
-  </ul>
-
-  <p>Whether you need a quick salon appointment, a deep cleaning session, or an emergency repair, we ensure that every service is delivered with professionalism, punctuality, and care. Your satisfaction is our priority.</p>
-
-  <h3>Contact Information</h3>
-  <p>Email: <a href="mailto:support@servicehub.com">support@servicehub.com</a></p>
-  <p>Phone: +91-9876543210</p>
-`;
-      setHtmlContent(staticHTML);
-      setLoading(false);
-    }, 1000);
+        setLoading(false);
+      },
+    );
   }, []);
 
   return (
@@ -60,7 +55,7 @@ const Cms = ({route}) => {
         ) : (
           <RenderHTML
             contentWidth={width}
-            source={{html: htmlContent}}
+            source={{html: htmlContent?.body}}
             tagsStyles={{
               h2: {
                 fontSize: 22,

@@ -18,11 +18,12 @@ import Input from '../../Components/Input';
 import {Typography} from '../../Components/UI/Typography';
 import {validators} from '../../Backend/Validator';
 import {SIGN_UP} from '../../Constants/ApiRoute';
-import {POST, useApi} from '../../Backend/Api';
+import {API, POST, useApi} from '../../Backend/Api';
 import useKeyboard from '../../Constants/Utility';
 import {images} from '../../Components/UI/images';
 import {isAuth, Token, userDetails} from '../../Redux/action';
 import {Font} from '../../Constants/Font';
+import axios from 'axios';
 
 const Login = ({navigation}) => {
   const [number, setNumber] = useState('');
@@ -41,10 +42,6 @@ const Login = ({navigation}) => {
   };
 
   const handleSignup = async () => {
-    // navigation.navigate('OtpScreen', {
-    //   // userId: success?.user_id,
-    //   // phone: number,
-    // });
     setLoading(true);
     const body = {
       phone_number: number,
@@ -53,7 +50,8 @@ const Login = ({navigation}) => {
       SIGN_UP,
       body,
       success => {
-        console.log(success, 'successsuccesssuccess-->>>');
+        console.log('Calling API:', success);
+
         setLoading(false);
         navigation.navigate('OtpScreen', {
           userId: success?.user_id,
@@ -61,9 +59,9 @@ const Login = ({navigation}) => {
         });
       },
       error => {
-        console.log(error, 'errorerrorerror>>');
+        console.log(error);
+
         setLoading(false);
-        ToastMsg(error?.message);
       },
       fail => {
         setLoading(false);

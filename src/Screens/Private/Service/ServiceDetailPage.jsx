@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -21,12 +21,22 @@ import {
 } from '../../../Constants/Utils';
 import SimpleModal from '../../../Components/UI/SimpleModal';
 import {Font} from '../../../Constants/Font';
+import {VENDOR_DETAIL} from '../../../Constants/ApiRoute';
+import {useIsFocused} from '@react-navigation/native';
+import {GET_WITH_TOKEN} from '../../../Backend/Api';
+import {Typography} from '../../../Components/UI/Typography';
 
-const ProviderDetails = ({navigation}) => {
+const ProviderDetails = ({navigation, route}) => {
   const [activeTab, setActiveTab] = useState('Services');
   const {width} = Dimensions.get('window');
   const [like, setLike] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [apiData, setApiData] = useState('');
+
+  const isFocused = useIsFocused();
+  const id = route?.params?.id;
+
   const daysData = [
     {day: 'Monday', time: '10:30 AM - 09:00 PM'},
     {day: 'Tuesday', time: '10:30 AM - 09:00 PM'},
@@ -46,6 +56,22 @@ const ProviderDetails = ({navigation}) => {
     {id: '4', name: 'Swimming Pool'},
     // Add more as needed
   ];
+
+  useEffect(() => {
+    if (isFocused) {
+      setLoading(true);
+      GET_WITH_TOKEN(
+        VENDOR_DETAIL + `${id}`,
+        success => {
+          console.log(success, 'dsadsadewrewretrefcbfdgdf');
+          setApiData(success?.data);
+          setLoading(false);
+        },
+        error => setLoading(false),
+        fail => setLoading(false),
+      );
+    }
+  }, [isFocused]);
 
   return (
     <View style={styles.container}>
@@ -70,9 +96,9 @@ const ProviderDetails = ({navigation}) => {
               justifyContent: 'space-between',
               marginTop: 10,
             }}>
-            <Text style={[styles.title, {width: '70%'}]}>
-              Glamour Touch Salon,Gurugram, Punjab
-            </Text>
+            <Typography style={[styles.title, {width: '70%'}]}>
+              {apiData?.business_name || apiData?.company_name}
+            </Typography>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity onPress={() => setLike(!like)}>
                 <Image

@@ -1,10 +1,11 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   StyleSheet,
   Image,
   TouchableOpacity,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
@@ -13,56 +14,48 @@ import {images} from '../../../Components/UI/images';
 import {windowHeight} from '../../../Constants/Dimensions';
 import {Font} from '../../../Constants/Font';
 import Input from '../../../Components/Input';
+import {GET_WITH_TOKEN} from '../../../Backend/Api';
+import {SERVICES} from '../../../Constants/ApiRoute';
+import {useIsFocused} from '@react-navigation/native';
 
-const SearchServices = ({navigation}) => {
+const SearchServices = ({navigation, route}) => {
   const [search, setSearch] = useState('');
-
-  const services = [
-    {
-      id: 1,
-      name: 'Glamour Touch Salon',
-      address: '123 Beauty Blvd, Anytown, CA 90210',
-      experience: '8 Years of Experience',
-      availability: 'Mon-Sat, 9 AM - 4 PM',
-      rating: 4.8,
-      image:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlJbFNhVA9DFsv-c9J73u3EKz0HnMb2iK4vA&s',
-    },
-    {
-      id: 2,
-      name: 'Luxury Spa Center',
-      address: '456 Relax St, Bliss City, CA 90211',
-      experience: '5 Years of Experience',
-      availability: 'Tue-Sun, 10 AM - 6 PM',
-      rating: 4.6,
-      image:
-        'https://www.shutterstock.com/image-photo/portrait-pretty-relaxed-young-woman-600nw-2478831041.jpg',
-    },
-    {
-      id: 3,
-      name: 'Hair & Beauty Studio',
-      address: '789 Style Ave, Fashion Town, CA 90212',
-      experience: '10 Years of Experience',
-      availability: 'Mon-Fri, 8 AM - 5 PM',
-      rating: 4.9,
-      image:
-        'https://images.pexels.com/photos/3065206/pexels-photo-3065206.jpeg',
-    },
-  ];
+  const [services, setServices] = useState([]);
+  console.log(services);
+  const id = route?.params?.id;
+  const isFocused = useIsFocused();
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (isFocused) {
+      setLoading(true);
+      GET_WITH_TOKEN(
+        SERVICES + `?service_category=${id}`,
+        success => {
+          console.log(success, 'dssadadddsadasdasdadadaewaeqe');
+          setServices(success?.data);
+          setLoading(false);
+        },
+        error => setLoading(false),
+        fail => setLoading(false),
+      );
+    }
+  }, [isFocused]);
 
   const renderCard = ({item}) => (
     <TouchableOpacity
       activeOpacity={0.85}
-      onPress={() => navigation.navigate('ProviderDetails')}
+      onPress={() => navigation.navigate('ProviderDetails', {id: item?.id})}
       style={styles.card}>
       {/* Image with Rating Badge */}
       <View>
-        <Image source={{uri: item.image}} style={styles.cardImage} />
-        <View style={styles.ratingBadge}>
-          <Typography size={12} font={Font.medium} color={COLOR.white}>
-            ⭐ {item.rating}
-          </Typography>
-        </View>
+        <Image source={{uri: item?.image}} style={styles.cardImage} />
+        {item?.rating && (
+          <View style={styles.ratingBadge}>
+            <Typography size={12} font={Font.medium} color={COLOR.white}>
+              ⭐ {item?.rating}
+            </Typography>
+          </View>
+        )}
       </View>
 
       {/* Card Content */}
@@ -72,32 +65,89 @@ const SearchServices = ({navigation}) => {
           font={Font.semibold}
           color={COLOR.black}
           style={styles.cardTitle}>
-          {item.name}
+          {item?.business_name}
         </Typography>
+        {item?.business_description && (
+          <Typography
+            size={16}
+            font={Font.regular}
+            color={COLOR.black}
+            style={styles.cardTitle}>
+            {item?.business_description}
+          </Typography>
+        )}
 
-        <Typography
-          size={13}
-          color="#666"
-          font={Font.medium}
-          style={styles.textRow}>
-          📍 {item.address}
-        </Typography>
+        {item?.exact_location && (
+          <Typography
+            size={13}
+            color="#666"
+            font={Font.medium}
+            style={styles.textRow}>
+            address:📍 {item?.exact_location}
+          </Typography>
+        )}
+        {item?.location_area_served && (
+          <Typography
+            size={13}
+            color="#666"
+            font={Font.medium}
+            style={styles.textRow}>
+            locationAreaServed:📍 {item?.location_area_served}
+          </Typography>
+        )}
 
-        <Typography
-          size={13}
-          color="#666"
-          font={Font.medium}
-          style={styles.textRow}>
-          💼 {item.experience}
-        </Typography>
+        {item?.years_of_experience && (
+          <Typography
+            size={13}
+            color="#666"
+            font={Font.medium}
+            style={styles.textRow}>
+            experience: 💼 {item?.years_of_experience}
+          </Typography>
+        )}
+        {item?.gender && (
+          <Typography
+            size={13}
+            color="#666"
+            font={Font.medium}
+            style={styles.textRow}>
+            gender: {item?.gender}
+          </Typography>
+        )}
+        {item?.phone_number && (
+          <Typography
+            size={13}
+            color="#666"
+            font={Font.medium}
+            style={styles.textRow}>
+            phone: +91 {item?.phone_number}
+          </Typography>
+        )}
 
         <Typography
           font={Font.semibold}
           size={13}
           color="#666"
           style={styles.availability}>
-          ⏰ {item.availability}
+          open: ⏰ {item?.daily_start_time} AM : {item?.daily_end_time} PM
         </Typography>
+        {item?.working_days && (
+          <View style={{flexDirection: 'row', flexWrap: 'wrap', marginTop: 5}}>
+            <Typography size={13} color="#666" font={Font.medium}>
+              Working days:{' '}
+            </Typography>
+            {item?.working_days?.map((day, index) => (
+              <Typography
+                key={index}
+                size={12}
+                color="#444"
+                font={Font.medium}
+                style={{marginRight: 8}}>
+                {day},
+              </Typography>
+            ))}
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -139,14 +189,22 @@ const SearchServices = ({navigation}) => {
       </View>
 
       {/* Services List */}
-      <FlatList
-        data={services}
-        keyExtractor={item => item.id.toString()}
-        renderItem={renderCard}
-        contentContainerStyle={{paddingBottom: 120, paddingHorizontal: 5}}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={renderEmpty}
-      />
+      {loading ? (
+        <ActivityIndicator
+          size="large"
+          color={COLOR.primary}
+          style={{marginTop: 10}}
+        />
+      ) : (
+        <FlatList
+          data={services}
+          keyExtractor={item => item.id.toString()}
+          renderItem={renderCard}
+          contentContainerStyle={{paddingBottom: 120, paddingHorizontal: 5}}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={renderEmpty}
+        />
+      )}
     </View>
   );
 };

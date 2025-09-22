@@ -10,7 +10,7 @@ const errorHandling = {
 };
 
 export const API =
-  'https://lemonchiffon-walrus-503913.hostingersite.com/public/api/';
+  'http://lemonchiffon-walrus-503913.hostingersite.com/public/api/';
 export const token = store.getState().Token;
 export const statusMessage = {
   400: 'Invalid request format.',
@@ -81,14 +81,12 @@ export const GET_WITH_TOKEN = async (
   status = () => {},
 ) => {
   const tokenVal = store.getState().Token;
-  console.log(tokenVal, 'TOKENNNN');
-
   try {
     await axios({
       method: 'get',
       url: `${API}${route}`,
       headers: {
-        authorization: `Bearer ${tokenVal}`,
+        Authorization: `Bearer ${tokenVal}`,
         ...headers,
       },
       ...errorHandling,
@@ -128,28 +126,34 @@ export const POST = async (
   },
 ) => {
   try {
-    const res = await axios({
+    axios({
       method: 'post',
       url: `${API}${route}`,
       data: body,
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
+        'x-device-id': '4984748',
       },
-      validateStatus: status => status >= 200 && status <= 999,
-    });
-
-    if (res.status === 200) {
-      onSuccess(res.data);
-    } else {
-      onError(res.data);
-    }
+      validateStatus: function (status) {
+        return status >= 200 && status <= 999; // default
+      },
+    })
+      .then(res => {
+        if (res?.status == 200) {
+          onSuccess(res?.data);
+        } else {
+          onError(res?.data);
+        }
+      })
+      .catch(err => {
+        onError(err);
+      });
   } catch (error) {
-    console.log(error, 'POST ERROR');
     onFail({data: null, msg: 'Network Error', status: 'error'});
+    return {data: null, msg: 'Network Error', status: 'error'};
   }
 };
-
 export const POST_FORM_DATA = async (
   route,
   body,
@@ -163,11 +167,12 @@ export const POST_FORM_DATA = async (
   try {
     await axios({
       method: 'post',
-      url: `${BASE_URL2}${route}`,
+      url: `${API}${route}`,
       data: body,
       headers: {
+        Authorization: `Bearer ${tokenVal}`,
+        Accept: 'application/json',
         'Content-Type': 'multipart/form-data',
-        authorization: `Bearer ${tokenVal}`,
       },
       validateStatus: function (status) {
         return status >= 200 && status <= 999; // default
@@ -287,7 +292,7 @@ export const DELETE_WITH_TOKEN = async (
       url: `${API}${route}`,
       data: body,
       headers: {
-        authorization: `Bearer ${tokenVal}`,
+        Authorization: `Bearer ${tokenVal}`,
         ...headers,
       },
       ...errorHandling,
@@ -328,7 +333,7 @@ export const PUT_FORM_DATA = async (
       data: body,
       headers: {
         'Content-Type': 'multipart/form-data',
-        authorization: `Bearer ${tokenVal}`,
+        Authorization: `Bearer ${tokenVal}`,
       },
       ...errorHandling,
     })

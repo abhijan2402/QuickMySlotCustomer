@@ -20,6 +20,7 @@ import ServiceList from '../Screens/Private/Home/ServiceList';
 import ProviderDetails from '../Screens/Private/Service/ServiceDetailPage';
 import OffersScreen from '../Screens/Private/AppointmentSection/OffersScreen';
 import EditProfile from '../Screens/Private/Account/EditProfile';
+import AddAmount from '../Screens/Private/Account/AddAmount';
 const Stack = createNativeStackNavigator();
 
 const RootNavigation = () => {
@@ -55,6 +56,7 @@ const RootNavigation = () => {
           name="BookingConfirmation"
           component={BookingConfirmation}
         />
+        <Stack.Screen name="AddAmount" component={AddAmount} />
         <Stack.Screen name="OffersScreen" component={OffersScreen} />
         <Stack.Screen name="EditProfile" component={EditProfile} />
       </Stack.Navigator>

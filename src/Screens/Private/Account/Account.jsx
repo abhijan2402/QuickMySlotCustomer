@@ -13,17 +13,22 @@ import Button from '../../../Components/UI/Button';
 import ConfirmModal from '../../../Components/UI/ConfirmModel';
 import {Typography} from '../../../Components/UI/Typography';
 import {Font} from '../../../Constants/Font';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {isAuth, Token, userDetails} from '../../../Redux/action';
+import { DELETE_ACCOUNT } from '../../../Constants/ApiRoute';
+import { POST_WITH_TOKEN } from '../../../Backend/Api';
 
 const Account = ({navigation}) => {
   const {setUser} = useContext(AuthContext);
-  const [profileImage, setProfileImage] = React.useState({
-    uri: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
-  });
+
   const [visible, setVisible] = useState(false);
   const [deleteAccount, setDeleteAccount] = useState(false);
   const dispatch = useDispatch();
+  const userdata = useSelector(store => store.userDetails);
+
+  const profileImage = userdata?.image
+    ? userdata?.image
+    : 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
 
   const arrowIcon = 'https://cdn-icons-png.flaticon.com/512/271/271228.png'; // right arrow icon
 
@@ -99,6 +104,27 @@ const Account = ({navigation}) => {
     setVisible(false);
     console.log('User logged out');
   };
+
+  
+  const handleDeleteAccount = () => {
+    setLoading(true);
+    POST_WITH_TOKEN(
+      DELETE_ACCOUNT,
+      success => {
+        console.log(success, 'successsuccesssuccess-->>>');
+        handleLogout();
+        setLoading(false);
+      },
+      error => {
+        console.log(error, 'errorerrorerror>>');
+        setLoading(false);
+      },
+      fail => {
+        console.log(fail, 'errorerrorerror>>');
+        setLoading(false);
+      },
+    );
+  };
   return (
     <View style={styles.container}>
       <HomeHeader
@@ -108,21 +134,12 @@ const Account = ({navigation}) => {
       />
       {/* Profile Section */}
       <View style={styles.profileSection}>
-        <View>
-          <Image
-            source={{uri: profileImage?.uri}}
-            style={styles.profileImage}
-          />
-        </View>
-        <Typography size={20} font={Font.semibold} color={COLOR.black}>
-          John Doe
+        <Image source={{uri: profileImage}} style={styles.profileImage} />
+        <Typography font={Font.semibold} variant="h2" color={COLOR.black}>
+          {userdata?.name}
         </Typography>
-        <Typography
-          size={14}
-          color={COLOR.GRAY}
-          font={Font.medium}
-          style={{marginTop: 4}}>
-          john@example.com
+        <Typography font={Font.semibold} variant="body2" color={COLOR.GRAY}>
+          {userdata?.email || userdata?.phone_number}
         </Typography>
       </View>
 
@@ -182,7 +199,9 @@ const Account = ({navigation}) => {
         description="Are you sure you want to Delete Account?"
         yesTitle="Yes"
         noTitle="No"
-        onPressYes={() => {}}
+        onPressYes={() => {
+          handleDeleteAccount()
+        }}
         onPressNo={() => setDeleteAccount(false)}
       />
     </View>

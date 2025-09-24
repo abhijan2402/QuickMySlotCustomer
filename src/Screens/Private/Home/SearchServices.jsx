@@ -86,7 +86,7 @@ const SearchServices = ({navigation, route}) => {
             address:📍 {item?.exact_location}
           </Typography>
         )}
-        {item?.location_area_served && (
+        {/* {item?.location_area_served && (
           <Typography
             size={13}
             color="#666"
@@ -94,7 +94,7 @@ const SearchServices = ({navigation, route}) => {
             style={styles.textRow}>
             locationAreaServed:📍 {item?.location_area_served}
           </Typography>
-        )}
+        )} */}
 
         {item?.years_of_experience && (
           <Typography

@@ -274,10 +274,22 @@ const MainHome = ({navigation}) => {
               keyExtractor={item => item.id.toString()}
               renderItem={({item}) => (
                 <View style={{width: width - 30}}>
-                  <Image
-                    source={{uri: item.image}}
-                    style={styles.bannerImage}
-                  />
+                  {item.extensions === 'video' ? (
+                    <Video
+                      source={{uri: item.image}}
+                      style={styles.bannerImage}
+                      resizeMode="cover"
+                      repeat={false}
+                      paused={index != currentTopIndex}
+                      muted={false}
+                      onEnd={() => handleVideoEnd(index)}
+                    />
+                  ) : (
+                    <Image
+                      source={{uri: item.image}}
+                      style={styles.bannerImage}
+                    />
+                  )}
                 </View>
               )}
             />

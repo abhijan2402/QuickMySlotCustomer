@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -7,132 +7,123 @@ import {
   Image,
   ScrollView,
   Animated,
+  ActivityIndicator,
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
 import {Typography} from '../../../Components/UI/Typography';
 import {Font} from '../../../Constants/Font';
+import {
+  ADD_TO_CART,
+  GET_CART,
+  REMOVE_TO_CART,
+} from '../../../Constants/ApiRoute';
+import {GET_WITH_TOKEN, POST_FORM_DATA} from '../../../Backend/Api';
 
-const categories = [
-  {
-    id: '1',
-    name: 'Hair Care',
-    image:
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTr88iVv4J4OEb6CTMGBchPNqH8vBPtxRID3A&s',
-  },
-  {
-    id: '2',
-    name: 'Hair Colour',
-    image:
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTr88iVv4J4OEb6CTMGBchPNqH8vBPtxRID3A&s',
-  },
-  {
-    id: '3',
-    name: 'Nail Bar',
-    image:
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTr88iVv4J4OEb6CTMGBchPNqH8vBPtxRID3A&s',
-  },
-  {
-    id: '4',
-    name: 'Face',
-    image:
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTr88iVv4J4OEb6CTMGBchPNqH8vBPtxRID3A&s',
-  },
-  {
-    id: '5',
-    name: 'Treatments',
-    image:
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTr88iVv4J4OEb6CTMGBchPNqH8vBPtxRID3A&s',
-  },
-  {
-    id: '6',
-    name: 'Massage & Spa',
-    image:
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTr88iVv4J4OEb6CTMGBchPNqH8vBPtxRID3A&s',
-  },
-  {
-    id: '7',
-    name: "Men's Grooming",
-    image:
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTr88iVv4J4OEb6CTMGBchPNqH8vBPtxRID3A&s',
-  },
-];
-
-const services = {
-  'Hair Care': [
-    {
-      id: 'h1',
-      category: 'Haircut',
-      services: [
-        {id: 's1', name: 'Basic Haircut', price: 200},
-        {id: 's2', name: 'Layer Cut', price: 350},
-      ],
-    },
-    {
-      id: 'h2',
-      category: 'Wash OR Dry',
-      services: [
-        {id: 's3', name: 'Hair Wash', price: 150},
-        {id: 's4', name: 'Blow Dry', price: 250},
-      ],
-    },
-    {
-      id: 'h3',
-      category: 'Styling',
-      services: [
-        {id: 's5', name: 'Straightening', price: 500},
-        {id: 's6', name: 'Curls', price: 450},
-      ],
-    },
-  ],
-};
-
-const ServiceList = ({navigation}) => {
-  const [selectedCategory, setSelectedCategory] = useState('Hair Care');
+const ServiceList = ({navigation, route}) => {
+  const [selectedCategory, setSelectedCategory] = useState(
+    route.params?.subServices?.[0]?.id || null,
+  ); // default first category
   const [expanded, setExpanded] = useState({});
   const [selectedServices, setSelectedServices] = useState([]);
+  console.log(selectedServices, 'awdhjhjdhjh');
+
   const rotationValues = useRef({}).current;
 
-  const addService = service => {
-    if (!selectedServices.find(s => s.id === service.id)) {
-      setSelectedServices([...selectedServices, service]);
-    }
+  const subServices = route.params?.subServices || [];
+  const services = route.params?.services || [];
+  const [loading, setLoading] = useState(null);
+
+  useEffect(() => {
+    getCart();
+  }),
+    [];
+
+  const getCart = () => {
+    GET_WITH_TOKEN(
+      GET_CART,
+      success => {
+        console.log('Cart data:', success);
+        if (success?.data?.items && success.data.items.length > 0) {
+          const cartItems = success.data.items.map(item => ({
+            id: item.service.id,
+            name: item.service.name,
+            cart_id: item.cart_id,
+            price: parseFloat(item.item_price),
+          }));
+          setSelectedServices(cartItems);
+        } else {
+          setSelectedServices([]);
+        }
+
+        setLoading(null);
+      },
+      error => {
+        console.log('Cart fetch error:', error);
+        setSelectedServices([]);
+        setLoading(null);
+      },
+      fail => {
+        console.log('Cart fetch fail:', fail);
+        setSelectedServices([]);
+        setLoading(null);
+      },
+    );
   };
 
   const isAdded = serviceId => {
     return selectedServices.some(s => s.id === serviceId);
   };
 
-  const toggleExpand = catId => {
-    if (!rotationValues[catId]) {
-      rotationValues[catId] = new Animated.Value(0);
-    }
+  const handleCart = async service => {
+    setLoading(service.id);
 
-    const isExpanded = expanded[catId];
-    Animated.timing(rotationValues[catId], {
-      toValue: isExpanded ? 0 : 1,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
+    const formData = new FormData();
+    formData.append('service_id', service.id);
+    formData.append('price', service.price);
 
-    setExpanded(prev => ({...prev, [catId]: !isExpanded}));
-  };
+    const cartItem = selectedServices.find(
+      s => String(s.id) === String(service.id),
+    );
+    const cartId = cartItem?.cart_id;
 
-  const getRotationStyle = catId => {
-    if (!rotationValues[catId]) {
-      rotationValues[catId] = new Animated.Value(0);
-    }
-
-    return {
-      transform: [
-        {
-          rotate: rotationValues[catId].interpolate({
-            inputRange: [0, 1],
-            outputRange: ['0deg', '180deg'],
-          }),
+    if (isAdded(service.id)) {
+      POST_FORM_DATA(
+        REMOVE_TO_CART + cartId,
+        success => {
+          console.log('Removed from cart:', success);
+          setSelectedServices(prev => prev.filter(s => s.id !== service.id));
+          setLoading(null);
         },
-      ],
-    };
+        error => {
+          console.log('Remove cart error:', error);
+          setLoading(null);
+        },
+        fail => {
+          console.log('Remove cart fail:', fail);
+          setLoading(null);
+        },
+      );
+    } else {
+      POST_FORM_DATA(
+        ADD_TO_CART,
+        formData,
+        success => {
+          console.log('Added to cart:', success);
+          setSelectedServices(prev => [...prev, service]);
+          setLoading(null);
+          getCart();
+        },
+        error => {
+          console.log('Add cart error:', error);
+          setLoading(null);
+        },
+        fail => {
+          console.log('Add cart fail:', fail);
+          setLoading(null);
+        },
+      );
+    }
   };
 
   return (
@@ -149,24 +140,24 @@ const ServiceList = ({navigation}) => {
         {/* Left Side Category */}
         <View style={styles.leftPane}>
           <FlatList
-            data={categories}
-            keyExtractor={item => item.id}
+            data={subServices}
+            keyExtractor={item => item.id.toString()}
             renderItem={({item}) => (
               <TouchableOpacity
                 style={[
                   styles.categoryItem,
-                  selectedCategory === item.name && styles.activeCategory,
+                  selectedCategory === item.id && styles.activeCategory,
                 ]}
-                onPress={() => setSelectedCategory(item.name)}>
+                onPress={() => setSelectedCategory(item.id)}>
                 <Image
-                  source={{uri: item.image}}
+                  source={{uri: item.image_url}}
                   style={styles.categoryImage}
                 />
                 <Typography
                   size={13}
                   style={[
                     styles.categoryText,
-                    selectedCategory === item.name && {fontWeight: 'bold'},
+                    selectedCategory === item.id && {fontWeight: 'bold'},
                   ]}>
                   {item.name}
                 </Typography>
@@ -178,67 +169,49 @@ const ServiceList = ({navigation}) => {
         {/* Right Side Services */}
         <View style={styles.rightPane}>
           <Typography size={17} font={Font.semibold} style={styles.heading}>
-            {selectedCategory}
+            {subServices.find(s => s.id === selectedCategory)?.name ||
+              'Services'}
           </Typography>
 
           <ScrollView>
-            {services[selectedCategory]?.map(cat => (
-              <View key={cat.id} style={styles.serviceCategory}>
-                <TouchableOpacity
-                  onPress={() => toggleExpand(cat.id)}
-                  style={styles.serviceHeader}>
-                  <Typography size={14} font={Font.medium}>
-                    {cat.category} ({cat.services.length})
+            {services
+              .filter(
+                serv => String(serv.service_id) === String(selectedCategory),
+              )
+              .map(srv => (
+                <View key={srv.id} style={styles.serviceRow}>
+                  <Typography
+                    size={14}
+                    style={styles.serviceName}
+                    font={Font.semibold}>
+                    {srv.name} -{' '}
+                    <Typography
+                      size={14}
+                      font={Font.medium}
+                      color={COLOR.primary}>
+                      ₹{srv.price}
+                    </Typography>
                   </Typography>
-                  <Animated.Image
-                    source={{
-                      uri: 'https://cdn-icons-png.flaticon.com/128/2985/2985150.png',
-                    }}
-                    style={[
-                      {width: 20, height: 20, marginRight: 10},
-                      getRotationStyle(cat.id),
-                    ]}
-                  />
-                </TouchableOpacity>
-
-                {expanded[cat.id] &&
-                  cat.services.map(srv => (
-                    <View key={srv.id} style={styles.serviceRow}>
+                  <TouchableOpacity
+                    style={[styles.addBtn, isAdded(srv.id) && styles.addedBtn]}
+                    onPress={() => handleCart(srv)}>
+                    {loading === srv.id ? (
+                      <ActivityIndicator size={'small'} color={COLOR.primary} />
+                    ) : (
                       <Typography
-                        size={14}
-                        style={styles.serviceName}
-                        font={Font.semibold}>
-                        {srv.name} -{' '}
-                        <Typography
-                          size={14}
-                          font={Font.medium}
-                          color={COLOR.primary}>
-                          ₹{srv.price}
-                        </Typography>
+                        size={13}
+                        font={Font.semibold}
+                        color={isAdded(srv.id) ? COLOR.white : COLOR.black}>
+                        {isAdded(srv.id) ? 'Added' : 'Add'}
                       </Typography>
-                      <TouchableOpacity
-                        style={[
-                          styles.addBtn,
-                          isAdded(srv.id) && styles.addedBtn,
-                        ]}
-                        disabled={isAdded(srv.id)}
-                        onPress={() => addService(srv)}>
-                        <Typography
-                          size={13}
-                          font={Font.semibold}
-                          color={isAdded(srv.id) ? COLOR.white : COLOR.black}>
-                          {isAdded(srv.id) ? 'Added' : 'Add'}
-                        </Typography>
-                      </TouchableOpacity>
-                    </View>
-                  ))}
-              </View>
-            ))}
+                    )}
+                  </TouchableOpacity>
+                </View>
+              ))}
           </ScrollView>
         </View>
       </View>
 
-      {/* Floating Book Now Button */}
       {selectedServices.length > 0 && (
         <TouchableOpacity
           onPress={() => navigation.navigate('BookingScreen')}

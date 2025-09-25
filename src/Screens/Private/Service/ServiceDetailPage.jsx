@@ -21,10 +21,11 @@ import {
 } from '../../../Constants/Utils';
 import SimpleModal from '../../../Components/UI/SimpleModal';
 import {Font} from '../../../Constants/Font';
-import {VENDOR_DETAIL} from '../../../Constants/ApiRoute';
+import {ADD_TO_WISHLIST, VENDOR_DETAIL} from '../../../Constants/ApiRoute';
 import {useIsFocused} from '@react-navigation/native';
-import {GET_WITH_TOKEN} from '../../../Backend/Api';
+import {GET_WITH_TOKEN, POST_FORM_DATA} from '../../../Backend/Api';
 import {Typography} from '../../../Components/UI/Typography';
+import moment from 'moment';
 
 const ProviderDetails = ({navigation, route}) => {
   const [activeTab, setActiveTab] = useState('Services');
@@ -32,20 +33,58 @@ const ProviderDetails = ({navigation, route}) => {
   const [like, setLike] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
-  const [apiData, setApiData] = useState('');
+  const [apiData, setApiData] = useState([]);
+  console.log('apidata', apiData);
 
   const isFocused = useIsFocused();
   const id = route?.params?.id;
 
-  const daysData = [
-    {day: 'Monday', time: '10:30 AM - 09:00 PM'},
-    {day: 'Tuesday', time: '10:30 AM - 09:00 PM'},
-    {day: 'Wednesday', time: '10:30 AM - 09:00 PM'},
-    {day: 'Thursday', time: '10:30 AM - 09:00 PM'},
-    {day: 'Friday', time: '10:30 AM - 09:00 PM'},
-    {day: 'Saturday', time: '10:30 AM - 09:00 PM'},
-    {day: 'Sunday', time: '10:30 AM - 09:00 PM'},
+  const allDays = [
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday',
+    'sunday',
   ];
+
+  const handleWishList = async () => {
+    const formData = new FormData();
+    formData.append('vendorId', id);
+    console.log(formData);
+
+    POST_FORM_DATA(
+      ADD_TO_WISHLIST,
+      formData,
+      success => {
+        console.log('Calling API:', success);
+        setLike(true);
+        setLoading(null);
+      },
+      error => {
+        console.log(error);
+
+        setLoading(null);
+      },
+      fail => {
+        console.log('Calling API:', fail);
+        setLoading(null);
+      },
+    );
+  };
+
+  const daysData = allDays.map(day => {
+    const isWorking = apiData?.working_days?.includes(day);
+    return {
+      day: day.charAt(0).toUpperCase() + day.slice(1),
+      time: isWorking
+        ? `${apiData?.daily_start_time || '09:00'} - ${
+            apiData?.daily_end_time || '18:00'
+          }`
+        : 'Closed',
+    };
+  });
   const currentDayIndex = new Date().getDay();
   const adjustedDayIndex = (currentDayIndex + 6) % 7;
 
@@ -72,6 +111,49 @@ const ProviderDetails = ({navigation, route}) => {
       );
     }
   }, [isFocused]);
+  const [statusText, setStatusText] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (
+      apiData?.working_days &&
+      apiData?.daily_start_time &&
+      apiData?.daily_end_time
+    ) {
+      const today = moment().format('dddd').toLowerCase(); // e.g. 'monday'
+      const isWorkingDay = apiData.working_days.includes(today);
+
+      const start = moment(apiData.daily_start_time, 'HH:mm');
+      const end = moment(apiData.daily_end_time, 'HH:mm');
+      const now = moment();
+
+      if (isWorkingDay && now.isBetween(start, end)) {
+        // ✅ OPEN
+        setIsOpen(true);
+        setStatusText(`Open Now · Closes at ${end.format('hh:mm A')}`);
+      } else {
+        // ❌ CLOSED → find next working day
+        setIsOpen(false);
+
+        let nextDay = null;
+        for (let i = 1; i <= 7; i++) {
+          const checkDay = moment().add(i, 'days').format('dddd').toLowerCase();
+          if (apiData.working_days.includes(checkDay)) {
+            nextDay = moment().add(i, 'days').format('dddd'); // Capitalized name
+            break;
+          }
+        }
+
+        if (nextDay) {
+          setStatusText(
+            `Closed Now · Opens ${nextDay} at ${start.format('hh:mm A')}`,
+          );
+        } else {
+          setStatusText('Closed Now');
+        }
+      }
+    }
+  }, [apiData]);
 
   return (
     <View style={styles.container}>
@@ -100,7 +182,7 @@ const ProviderDetails = ({navigation, route}) => {
               {apiData?.business_name || apiData?.company_name}
             </Typography>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity onPress={() => setLike(!like)}>
+              <TouchableOpacity onPress={() => handleWishList()}>
                 <Image
                   source={
                     like
@@ -153,41 +235,30 @@ const ProviderDetails = ({navigation, route}) => {
               borderRadius: 6,
               alignSelf: 'flex-start',
             }}>
-            <Image
-              source={require('../../../assets/Images/close.png')}
-              style={{height: 16, width: 16}}
-            />
+            {!isOpen && (
+              <Image
+                source={require('../../../assets/Images/close.png')}
+                style={{
+                  height: 16,
+                  width: 16,
+                  marginRight: 5,
+                }}
+              />
+            )}
             <Text
               style={{
                 fontSize: 13,
-                marginLeft: 5,
-                // marginBottom: 2,
                 fontFamily: Font.regular,
+                color: isOpen ? 'green' : 'red',
               }}>
-              Closed Now
-            </Text>
-            <View
-              style={{
-                width: 1.5,
-                height: 15,
-                marginHorizontal: 5,
-                backgroundColor: 'black',
-              }}
-            />
-            <Text
-              style={{
-                fontSize: 13,
-                marginRight: 5,
-                // marginBottom: 2,
-                fontFamily: Font.regular,
-              }}>
-              Opens Today at 10:00 AM
+              {statusText}
             </Text>
             <Image
               source={require('../../../assets/Images/down-arrow.png')}
-              style={{height: 18, width: 10}}
+              style={{height: 18, width: 10, marginLeft: 6}}
             />
           </TouchableOpacity>
+
           <View
             style={{
               flexDirection: 'row',
@@ -308,9 +379,7 @@ const ProviderDetails = ({navigation, route}) => {
         <View style={[styles.section, {marginTop: 0}]}>
           <Text style={styles.sectionTitle}>About</Text>
           <Text style={styles.sectionText}>
-            Glamour Touch Salon is a premium beauty destination offering top
-            quality services. Our team of experts ensures you feel confident and
-            refreshed every time you visit.
+            {apiData?.business_description}
           </Text>
         </View>
         <CouponCarousel />
@@ -358,49 +427,30 @@ const ProviderDetails = ({navigation, route}) => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Categories</Text>
             <View style={styles.categoryWrap}>
-              {[
-                {
-                  id: 1,
-                  name: 'Haircut',
-                  image:
-                    'https://cdn-icons-png.flaticon.com/128/809/809957.png',
-                },
-                {
-                  id: 2,
-                  name: 'Makeup',
-                  image:
-                    'https://cdn-icons-png.flaticon.com/128/1585/1585141.png',
-                },
-                {
-                  id: 3,
-                  name: 'Spa',
-                  image:
-                    'https://cdn-icons-png.flaticon.com/128/2995/2995370.png',
-                },
-                {
-                  id: 4,
-                  name: 'Massage',
-                  image:
-                    'https://cdn-icons-png.flaticon.com/128/2645/2645880.png',
-                },
-                {
-                  id: 5,
-                  name: 'Nails',
-                  image:
-                    'https://cdn-icons-png.flaticon.com/128/1843/1843410.png',
-                },
-              ].map(cat => (
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('ServiceList')}
-                  key={cat.id}
-                  style={styles.categoryCard}>
-                  <Image
-                    source={{uri: cat.image}}
-                    style={styles.categoryImage}
-                  />
-                  <Text style={styles.categoryText}>{cat.name}</Text>
-                </TouchableOpacity>
-              ))}
+              {apiData?.sub_services?.length > 0 ? (
+                apiData.sub_services.map(sub => (
+                  <TouchableOpacity
+                    key={sub.id}
+                    onPress={() =>
+                      navigation.navigate('ServiceList', {
+                        subServices: apiData.sub_services,
+                        services: apiData.services,
+                        subServicesId: sub.id,
+                      })
+                    }
+                    style={styles.categoryCard}>
+                    <Image
+                      source={{uri: sub.image_url}}
+                      style={styles.categoryImage}
+                    />
+                    <Text style={styles.categoryText}>{sub.name}</Text>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <Text style={styles.sectionText}>
+                  No Sub Services available
+                </Text>
+              )}
             </View>
           </View>
         )}
@@ -535,15 +585,19 @@ const ProviderDetails = ({navigation, route}) => {
               renderItem={({item, index}) => (
                 <View style={[styles.row]}>
                   <Text
-                    style={
-                      index === adjustedDayIndex && styles.highlightedText
-                    }>
+                    style={[
+                      index === adjustedDayIndex && styles.highlightedText,
+                    ]}>
                     {item.day}
                   </Text>
                   <Text
-                    style={
-                      index === adjustedDayIndex && styles.highlightedText
-                    }>
+                    style={[
+                      index === adjustedDayIndex && styles.highlightedText,
+                      item.time === 'Closed' && {
+                        color: 'red',
+                        fontWeight: 'bold',
+                      },
+                    ]}>
                     {item.time}
                   </Text>
                 </View>

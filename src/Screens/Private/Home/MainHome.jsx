@@ -26,6 +26,8 @@ const MainHome = ({navigation}) => {
   const isFocused = useIsFocused();
   const [loading, setLoading] = useState(false);
   const [topBanners, setTopBanners] = useState([]);
+  console.log(JSON.stringify(topBanners),'topBanners----->');
+  
   const [bottomBanners, setBottomBanners] = useState([]);
   const [myBookings, setMyBookings] = useState([]);
   const [categories, setCategories] = useState([]);

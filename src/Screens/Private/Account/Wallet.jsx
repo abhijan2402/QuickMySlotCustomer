@@ -21,6 +21,8 @@ import EmptyView from '../../../Components/UI/EmptyView';
 
 const Wallet = ({navigation}) => {
   const [balance, setBalance] = useState();
+  console.log(balance);
+  
   const [transaction, setTransaction] = useState([]);
   const isFocus = useIsFocused();
   const [loading, setLoading] = useState(false);

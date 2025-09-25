@@ -47,7 +47,6 @@ const ImageSwiper = () => {
     progressAnim.current.start(({ finished }) => {
       if (finished) {
         let nextIndex = (currentIndex + 1) % originalImages.length;
-        console.log(nextIndex,'kkk');
         (nextIndex)
         
         if (flatListRef.current) {

@@ -169,10 +169,8 @@ const SearchServices = ({navigation, route}) => {
       <HomeHeader
         title="Services"
         leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
-        rightIcon="https://cdn-icons-png.flaticon.com/128/17446/17446833.png"
         leftTint={COLOR.black}
       />
-
       {/* Search Box (Kept Same) */}
       <View style={{paddingHorizontal: 5, marginTop: -10, marginBottom: 10}}>
         <Input

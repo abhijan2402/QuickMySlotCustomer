@@ -15,6 +15,7 @@ export const ADD_TO_CART = 'customer/cart/add';
 export const REMOVE_TO_CART = 'customer/cart-remove/';
 export const ADD_TO_WISHLIST = 'customer/wishlist-add';
 export const GET_CART = 'customer/cart';
+export const CUSTOMER_BOOKINGS = 'customer/bookings';
 
 
 

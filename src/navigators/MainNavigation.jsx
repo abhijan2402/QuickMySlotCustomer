@@ -11,11 +11,11 @@ const MainNavigation = () => {
   const isAuth = useSelector(store => store.isAuth);
 
   return (
-    <SafeAreaView style={{flex: 1}}>
+    // <SafeAreaView style={{flex: 1}}>
       <ToastProvider>
         {isAuth ? <RootNavigation /> : <AuthStack />}
       </ToastProvider>
-    </SafeAreaView>
+    // </SafeAreaView>
   );
 };
 

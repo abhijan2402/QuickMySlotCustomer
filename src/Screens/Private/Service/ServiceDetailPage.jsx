@@ -436,6 +436,7 @@ const ProviderDetails = ({navigation, route}) => {
                         subServices: apiData.sub_services,
                         services: apiData.services,
                         subServicesId: sub.id,
+                        apiData: apiData,
                       })
                     }
                     style={styles.categoryCard}>

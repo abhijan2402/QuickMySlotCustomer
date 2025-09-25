@@ -7,6 +7,8 @@ import {
   ScrollView,
   Dimensions,
   FlatList,
+  SafeAreaView,
+  StatusBar,
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
 import {Typography} from '../../../Components/UI/Typography';
@@ -26,8 +28,8 @@ const MainHome = ({navigation}) => {
   const isFocused = useIsFocused();
   const [loading, setLoading] = useState(false);
   const [topBanners, setTopBanners] = useState([]);
-  console.log(JSON.stringify(topBanners),'topBanners----->');
-  
+  console.log(JSON.stringify(topBanners), 'topBanners----->');
+
   const [bottomBanners, setBottomBanners] = useState([]);
   const [myBookings, setMyBookings] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -93,8 +95,7 @@ const MainHome = ({navigation}) => {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
+    <View style={[styles.container, {paddingTop: StatusBar.currentHeight}]}>
       <MainHomeHeader />
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Search Bar */}

@@ -80,6 +80,8 @@ export const GET_WITH_TOKEN = async (
   status = () => {},
 ) => {
   const tokenVal = store.getState().Token;
+  console.log(tokenVal , 'tokenVal->>>');
+  
   try {
     await axios({
       method: 'get',

@@ -13,6 +13,7 @@ import Button from '../../../Components/UI/Button';
 import ConfirmModal from '../../../Components/UI/ConfirmModel';
 import {Typography} from '../../../Components/UI/Typography';
 import {Font} from '../../../Constants/Font';
+import { useDispatch } from 'react-redux';
 
 const Account = ({navigation}) => {
   const {setUser} = useContext(AuthContext);
@@ -21,6 +22,7 @@ const Account = ({navigation}) => {
   });
   const [visible, setVisible] = useState(false);
   const [deleteAccount, setDeleteAccount] = useState(false);
+  const dispatch = useDispatch()
 
   const arrowIcon = 'https://cdn-icons-png.flaticon.com/512/271/271228.png'; // right arrow icon
 
@@ -162,7 +164,9 @@ const Account = ({navigation}) => {
         description="Are you sure you want to logout?"
         yesTitle="Yes"
         noTitle="No"
-        onPressYes={() => {}}
+        onPressYes={() => {
+          
+        }}
         onPressNo={() => setVisible(false)}
       />
       <ConfirmModal

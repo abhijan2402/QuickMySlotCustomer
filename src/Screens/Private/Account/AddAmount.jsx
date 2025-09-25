@@ -102,6 +102,7 @@ const AddAmount = ({navigation, route}) => {
           placeholder="Enter Amount"
           value={amount}
           onChangeText={setAmount}
+          keyboardType='numeric'
           style={{borderColor: COLOR.primary}}
           error={error.amount}
         />

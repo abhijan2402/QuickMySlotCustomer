@@ -1,4 +1,4 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Login from '../Screens/Auth/Login';
 import OtpScreen from '../Screens/Auth/OtpScreen';
 import MainHome from '../Screens/Private/Home/MainHome';
@@ -34,7 +34,6 @@ const AuthStack = () => {
       }}>
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="OtpScreen" component={OtpScreen} />
-      <Stack.Screen name="BottomNavigation" component={BottomNavigation} />
     </Stack.Navigator>
   );
 };

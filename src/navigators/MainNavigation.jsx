@@ -9,6 +9,8 @@ import {useSelector} from 'react-redux';
 const MainNavigation = () => {
   const auth = useContext(AuthContext);
   const isAuth = useSelector(store => store.isAuth);
+  console.log(isAuth);
+  
 
   return (
     // <SafeAreaView style={{flex: 1}}>

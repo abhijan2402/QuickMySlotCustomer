@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   TouchableOpacity,
@@ -10,10 +10,42 @@ import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
 import {Typography} from '../../../Components/UI/Typography';
 import {Font} from '../../../Constants/Font';
+import {useIsFocused} from '@react-navigation/native';
+import {GET_ANALYTICS} from '../../../Constants/ApiRoute';
+import {GET_WITH_TOKEN} from '../../../Backend/Api';
 
 const {width} = Dimensions.get('window');
 
 const MyAnalytics = ({navigation}) => {
+  const [data, setData] = useState();
+  const isFocused = useIsFocused();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isFocused) {
+      getBookingList();
+    }
+  }, [isFocused]);
+
+  const getBookingList = () => {
+    setLoading(true);
+    GET_WITH_TOKEN(
+      GET_ANALYTICS,
+      success => {
+        console.log(success);
+        setData(success?.data);
+        setLoading(false);
+      },
+      error => {
+        setLoading(false);
+        console.log(success);
+      },
+      fail => {
+        setLoading(false);
+        console.log(fail);
+      },
+    );
+  };
   return (
     <View style={styles.container}>
       <HomeHeader
@@ -32,19 +64,19 @@ const MyAnalytics = ({navigation}) => {
 
           <View style={styles.grid}>
             <View style={styles.box}>
-              <Typography style={styles.amount}>$245.00</Typography>
+              <Typography style={styles.amount}>${data?.spend_this_month}</Typography>
               <Typography style={styles.label}>Spent This Month</Typography>
             </View>
             <View style={styles.box}>
-              <Typography style={styles.amount}>$45.00</Typography>
+              <Typography style={styles.amount}>${data?.spend_this_month}</Typography>
               <Typography style={styles.label}>Saved This Month</Typography>
             </View>
             <View style={styles.box}>
-              <Typography style={styles.amount}>5</Typography>
+              <Typography style={styles.amount}>{data?.total_bookings}</Typography>
               <Typography style={styles.label}>Total Bookings</Typography>
             </View>
             <View style={styles.box}>
-              <Typography style={styles.amount}>3</Typography>
+              <Typography style={styles.amount}>{data?.favorite_providers}</Typography>
               <Typography style={styles.label}>Favorite Providers</Typography>
             </View>
           </View>
@@ -52,7 +84,7 @@ const MyAnalytics = ({navigation}) => {
 
         {/* Cashback Banner */}
         <View style={styles.cashbackCard}>
-          <Typography style={styles.cashbackAmount}>$12.50</Typography>
+          <Typography style={styles.cashbackAmount}>${data?.cashback_earned}</Typography>
           <Typography style={styles.cashbackText}>
             Cashback Earned This Month{'\n'}from wallet recharges and bookings!
           </Typography>

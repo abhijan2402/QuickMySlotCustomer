@@ -21,7 +21,7 @@ import {
 } from '../../../Constants/Utils';
 import SimpleModal from '../../../Components/UI/SimpleModal';
 import {Font} from '../../../Constants/Font';
-import {ADD_TO_WISHLIST, VENDOR_DETAIL} from '../../../Constants/ApiRoute';
+import {ADD_TO_WISHLIST, PROMO_VENDOR, VENDOR_DETAIL} from '../../../Constants/ApiRoute';
 import {useIsFocused} from '@react-navigation/native';
 import {GET_WITH_TOKEN, POST_FORM_DATA} from '../../../Backend/Api';
 import {Typography} from '../../../Components/UI/Typography';
@@ -35,9 +35,40 @@ const ProviderDetails = ({navigation, route}) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [apiData, setApiData] = useState([]);
   console.log('apidata', apiData);
+    const [promoData, setPromoData] = useState([]);
+
 
   const isFocused = useIsFocused();
   const id = route?.params?.id;
+  console.log(id);
+  
+
+  
+    useEffect(() => {
+      if (isFocused) {
+        getPromo();
+      }
+    }, [isFocused]);
+  
+    const getPromo = () => {
+      setLoading(true);
+      GET_WITH_TOKEN(
+        PROMO_VENDOR + id,
+        success => {
+          console.log(success);
+          setPromoData(success?.data)
+          setLoading(false);
+        },
+        error => {
+          setLoading(false);
+          console.log(success);
+        },
+        fail => {
+          setLoading(false);
+          console.log(fail);
+        },
+      );
+    };
 
   const allDays = [
     'monday',
@@ -268,7 +299,7 @@ const ProviderDetails = ({navigation, route}) => {
             }}>
             <TouchableOpacity
               onPress={() =>
-                handleOpenMap('1600 Amphitheatre Parkway, Mountain View, CA')
+                handleOpenMap(apiData?.exact_location)
               }
               style={{
                 flexDirection: 'row',
@@ -318,7 +349,7 @@ const ProviderDetails = ({navigation, route}) => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => handleCall('1234567890')}
+              onPress={() => handleCall(apiData?.phone_number)}
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -354,7 +385,7 @@ const ProviderDetails = ({navigation, route}) => {
             style={{flexDirection: 'row', alignItems: 'center', marginTop: 5}}
             onPress={() =>
               openMapWithDirections(
-                'Shop no.36, Ground Floor, AIPL JOY STREET, Badshahpur, Sector 66, Gurugram, Haryana 122018',
+                apiData?.exact_location,
               )
             }>
             <Image
@@ -382,7 +413,7 @@ const ProviderDetails = ({navigation, route}) => {
             {apiData?.business_description}
           </Text>
         </View>
-        <CouponCarousel />
+        <CouponCarousel promoData={promoData} />
         {/* Tabs */}
         <View style={{paddingHorizontal: 20}}>
           <Text style={styles.title}>Amenities</Text>

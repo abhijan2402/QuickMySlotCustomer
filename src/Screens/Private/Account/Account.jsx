@@ -14,7 +14,7 @@ import ConfirmModal from '../../../Components/UI/ConfirmModel';
 import {Typography} from '../../../Components/UI/Typography';
 import {Font} from '../../../Constants/Font';
 import {useDispatch, useSelector} from 'react-redux';
-import {isAuth, Token, userDetails} from '../../../Redux/action';
+import {isAuth, logOut, Token, userDetails} from '../../../Redux/action';
 import { DELETE_ACCOUNT } from '../../../Constants/ApiRoute';
 import { POST_WITH_TOKEN } from '../../../Backend/Api';
 
@@ -25,6 +25,11 @@ const Account = ({navigation}) => {
   const [deleteAccount, setDeleteAccount] = useState(false);
   const dispatch = useDispatch();
   const userdata = useSelector(store => store.userDetails);
+    const [loading, setLoading] = useState(false);
+  const token = useSelector(store => store.Token);
+  console.log(token);
+  
+
 
   const profileImage = userdata?.image
     ? userdata?.image
@@ -98,10 +103,10 @@ const Account = ({navigation}) => {
   ];
 
   const handleLogout = () => {
+    setVisible(false);
+    dispatch(isAuth(false));
     dispatch(Token(''));
     dispatch(userDetails({}));
-    dispatch(isAuth(false));
-    setVisible(false);
     console.log('User logged out');
   };
 
@@ -189,7 +194,7 @@ const Account = ({navigation}) => {
         description="Are you sure you want to logout?"
         yesTitle="Yes"
         noTitle="No"
-        onPressYes={handleLogout}
+        onPressYes={() => handleLogout()}
         onPressNo={() => setVisible(false)}
       />
       <ConfirmModal

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -13,9 +13,68 @@ import {Typography} from '../../../Components/UI/Typography';
 import ConfirmModal from '../../../Components/UI/ConfirmModel';
 import Button from '../../../Components/UI/Button';
 import {Font} from '../../../Constants/Font';
+import {useIsFocused} from '@react-navigation/native';
+import {GET_WITH_TOKEN, POST_WITH_TOKEN} from '../../../Backend/Api';
+import {CANCEL_BOOKING, GET_BOOKING_DETAILS} from '../../../Constants/ApiRoute';
 
 const AppointmentDetail = ({route, navigation}) => {
   const [cancelAppointment, setCancelAppointment] = useState(false);
+  const isFocused = useIsFocused();
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState(false);
+
+  useEffect(() => {
+    if (isFocused) {
+      getBookingList();
+    }
+  }, [isFocused]);
+
+  const getBookingList = () => {
+    setLoading(true);
+    GET_WITH_TOKEN(
+      GET_BOOKING_DETAILS + 27,
+      success => {
+        console.log(success);
+        setData(success?.data);
+        setLoading(false);
+      },
+      error => {
+        setLoading(false);
+        console.log(success);
+      },
+      fail => {
+        setLoading(false);
+        console.log(fail);
+      },
+    );
+  };
+
+    const CancelBooking = () => {
+    setLoading(true);
+    POST_WITH_TOKEN(
+      CANCEL_BOOKING + 27,
+      success => {
+        console.log(success);
+        setLoading(false);
+      },
+      error => {
+        setLoading(false);
+        console.log(error);
+         setCancelAppointment(false)
+        navigation.goBack()
+      },
+      fail => {
+        setLoading(false);
+        console.log(fail);
+      },
+    );
+  };
+
+const [time, date] = Object.entries(data?.schedule_time ?? {})[0] || [];
+  const amount = Number(data?.amount) || 0;
+  const tax = Number(data?.tax) || 0;
+  const platformFee = Number(data?.platform_fee) || 0;
+  const grandTotal = amount + tax + platformFee;
 
   const appointment = route?.params?.appointment || {
     id: '1',
@@ -53,18 +112,18 @@ const AppointmentDetail = ({route, navigation}) => {
         {/* Shop Info */}
         <View style={styles.card}>
           <Typography style={styles.sectionTitle}>Shop Details</Typography>
-          <Image source={{uri: appointment.shopImage}} style={styles.shopImg} />
+          <Image source={{uri: data?.vendor?.image}} style={styles.shopImg} />
           <Typography style={styles.shopName}>
-            {appointment.shopName}
+            {data?.vendor?.business_name}
           </Typography>
           <TouchableOpacity onPress={() => handleOpenMap('')}>
             <Typography style={[styles.text, {marginTop: 3}]}>
-              📍{appointment.shopAddress}
+              📍{data?.vendor?.address}
             </Typography>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handleCall('9876367898')}>
             <Typography style={[styles.text, {marginTop: 5}]}>
-              📞 {appointment.shopContact}
+              📞 +91 {data?.vendor?.phone_number}
             </Typography>
           </TouchableOpacity>
           {/* <TouchableOpacity style={styles.chatBtn}>
@@ -87,17 +146,15 @@ const AppointmentDetail = ({route, navigation}) => {
         {/* Customer Info */}
         <View style={styles.card}>
           <Typography style={styles.sectionTitle}>Customer Details</Typography>
-          <Typography style={styles.text}>
-            👤 {appointment.customerName}
-          </Typography>
+          <Typography style={styles.text}>👤 {data?.customer?.name}</Typography>
           <TouchableOpacity onPress={() => handleCall('9876367898')}>
             <Typography style={[styles.text, {marginTop: 5}]}>
-              📞 {appointment.customerPhone}
+              📞 +91 {data?.customer?.phone_number}
             </Typography>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handleOpenMap('')}>
             <Typography style={[styles.text, {marginTop: 5}]}>
-              📍 {appointment.customerAddress}
+              📍 {data?.customer?.address}
             </Typography>
           </TouchableOpacity>
         </View>
@@ -106,22 +163,22 @@ const AppointmentDetail = ({route, navigation}) => {
         <View style={styles.card}>
           <Typography style={styles.sectionTitle}>Service Schedule</Typography>
           <Typography style={[styles.text, {marginTop: 5}]}>
-            📅 {appointment.date}
+            📅 {date}
           </Typography>
           <Typography style={[styles.text, {marginTop: 5}]}>
-            ⏰ {appointment.time}
+            ⏰ {time}
           </Typography>
         </View>
 
         {/* Services Breakdown */}
         <View style={styles.card}>
           <Typography style={styles.sectionTitle}>Services</Typography>
-          {appointment.services.map((service, index) => (
-            <View key={index} style={styles.serviceRow}>
-              <Typography style={styles.text}>{service.name}</Typography>
-              <Typography style={styles.text}>₹{service.price}</Typography>
+          {/* {appointment.services.map((service, index) => ( */}
+            <View style={styles.serviceRow}>
+              <Typography style={styles.text}>{data?.service?.name}</Typography>
+              <Typography style={styles.text}>₹{data?.service?.price}</Typography>
             </View>
-          ))}
+          {/* ))} */}
         </View>
 
         {/* Price Details */}
@@ -129,24 +186,20 @@ const AppointmentDetail = ({route, navigation}) => {
           <Typography style={styles.priceTitle}>Price Details</Typography>
           <View style={styles.serviceRow}>
             <Typography style={styles.text}>Sub Total</Typography>
-            <Typography style={styles.text}>₹{appointment.subTotal}</Typography>
+            <Typography style={styles.text}>₹{data?.amount}</Typography>
           </View>
           <View style={styles.serviceRow}>
             <Typography style={styles.text}>Taxes (GST)</Typography>
-            <Typography style={styles.text}>₹{appointment.tax}</Typography>
+            <Typography style={styles.text}>₹{data?.tax}</Typography>
           </View>
           <View style={styles.serviceRow}>
-            <Typography style={styles.text}>Discount</Typography>
-            <Typography style={styles.text}>
-              -₹{appointment.discount}
-            </Typography>
+            <Typography style={styles.text}>Platform Fee</Typography>
+            <Typography style={styles.text}>₹{data.platform_fee}</Typography>
           </View>
           <View style={styles.divider} />
           <View style={styles.serviceRow}>
             <Typography style={styles.grandTotal}>Grand Total</Typography>
-            <Typography style={styles.grandTotal}>
-              ₹{appointment.total}
-            </Typography>
+            <Typography style={styles.grandTotal}>₹{grandTotal}</Typography>
           </View>
         </View>
 
@@ -179,7 +232,7 @@ const AppointmentDetail = ({route, navigation}) => {
         description="Are you sure you want to Cancel Appointment?"
         yesTitle="Yes"
         noTitle="No"
-        onPressYes={() => {}}
+        onPressYes={() => CancelBooking()}
         onPressNo={() => setCancelAppointment(false)}
       />
     </View>

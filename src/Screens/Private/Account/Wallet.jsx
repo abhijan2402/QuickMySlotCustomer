@@ -1,39 +1,58 @@
-import React, {useState} from 'react';
-import {StyleSheet, View, FlatList} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  StyleSheet,
+  View,
+  FlatList,
+  ActivityIndicator,
+  RefreshControl,
+  TouchableOpacity,
+  Clipboard,
+} from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
 import CustomButton from '../../../Components/CustomButton';
 import {Typography} from '../../../Components/UI/Typography'; // ✅ Import Typography
+import {useIsFocused} from '@react-navigation/native';
+import {GET_WITH_TOKEN} from '../../../Backend/Api';
+import {ADD_WALLET} from '../../../Constants/ApiRoute';
+import {windowWidth} from '../../../Constants/Dimensions';
+import {Font} from '../../../Constants/Font';
+import EmptyView from '../../../Components/UI/EmptyView';
 
-const Wallet = () => {
-  const [balance, setBalance] = useState(1250.75); // Example balance
+const Wallet = ({navigation}) => {
+  const [balance, setBalance] = useState();
+  console.log(balance);
+  
+  const [transaction, setTransaction] = useState([]);
+  const isFocus = useIsFocused();
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (isFocus) {
+      fetchWallet();
+    }
+  }, [isFocus]);
 
-  const transactions = [
-    {
-      id: 'TXN12345',
-      amount: 500,
-      type: 'Credit',
-      date: '2025-08-12T10:30:00',
-    },
-    {
-      id: 'TXN12346',
-      amount: 200,
-      type: 'Debit',
-      date: '2025-08-11T14:15:00',
-    },
-    {
-      id: 'TXN12347',
-      amount: 150,
-      type: 'Debit',
-      date: '2025-08-10T09:05:00',
-    },
-    {
-      id: 'TXN12348',
-      amount: 1000,
-      type: 'Credit',
-      date: '2025-08-09T18:45:00',
-    },
-  ];
+  const fetchWallet = () => {
+    setLoading(true);
+    GET_WITH_TOKEN(
+      ADD_WALLET,
+      success => {
+        console.log(success, 'successsuccesssuccess-->>>');
+        setLoading(false);
+        setTransaction(success?.data?.transactions);
+        setBalance(success?.data?.total_amount);
+      },
+      error => {
+        console.log(error, 'errorerrorerror>>');
+        setLoading(false);
+      },
+      fail => {
+        console.log(fail, 'errorerrorerror>>');
+
+        setLoading(false);
+      },
+    );
+  };
 
   const formatDate = dateString => {
     const dateObj = new Date(dateString);
@@ -47,23 +66,36 @@ const Wallet = () => {
     return `${datePart}, ${timePart}`;
   };
 
+  const copyToClipboard = item => {
+    Clipboard.setString(item.transaction_id);
+  };
+
   const renderTransaction = ({item}) => (
     <View style={styles.transactionItem}>
-      <View>
-        <Typography size={14} color={COLOR.black}>
-          Transaction ID: {item.id}
+      <TouchableOpacity onPress={copyToClipboard}>
+        <View>
+          <Typography
+            size={13}
+            color={COLOR.black}
+            font={Font.medium}
+            style={{width: windowWidth * 0.6}}>
+            Txn ID: {item.transaction_id}
+          </Typography>
+          <Typography
+            size={12}
+            color="#999"
+            style={{marginTop: 5}}
+            font={Font.medium}>
+            {formatDate(item.created_at)}
+          </Typography>
+        </View>
+        <Typography
+          size={16}
+          font={Font.semibold}
+          color={'green'}>
+          { '+ '}₹{item.amount}
         </Typography>
-        {/* <Typography size={13} color="#777">{item.type}</Typography> */}
-        <Typography size={12} color="#999" style={{marginTop: 1}}>
-          {formatDate(item.date)}
-        </Typography>
-      </View>
-      <Typography
-        size={16}
-        fontWeight="600"
-        color={item.type === 'Credit' ? 'green' : 'red'}>
-        {item.type === 'Credit' ? '+' : '-'}₹{item.amount}
-      </Typography>
+      </TouchableOpacity>
     </View>
   );
 
@@ -74,36 +106,52 @@ const Wallet = () => {
         leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
         leftTint={COLOR.black}
       />
-
-      <View style={{paddingHorizontal: 10}}>
-        {/* Balance Card */}
-        <View style={styles.balanceCard}>
-          <Typography size={14} color="#555">
-            Current Balance
+      {loading ? (
+        <ActivityIndicator size="large" color={COLOR.primary} />
+      ) : (
+        <View style={{paddingHorizontal: 10}}>
+          {/* Balance Card */}
+          <View style={styles.balanceCard}>
+            <Typography size={14} color="#555" font={Font.medium}>
+              Current Balance
+            </Typography>
+            <Typography
+              size={28}
+              font={Font.semibold}
+              color={COLOR.black}
+              style={{marginTop: 5}}>
+              ₹{balance > 0 ? Number(balance).toFixed(2) : ' 00.00'}
+            </Typography>
+          </View>
+          {/* Add Amount Button */}
+          <CustomButton
+            title="Add Amount"
+            onPress={() => navigation.navigate('AddAmount')}
+            style={{marginVertical: 15}}
+          />
+          {/* Transaction History */}
+          <Typography
+            size={16}
+            font={Font.medium}
+            color={COLOR.black}
+            style={{marginTop: 10, marginBottom: 8}}>
+            Transaction History
           </Typography>
-          <Typography size={28} fontWeight="700" color={COLOR.black} style={{marginTop: 5}}>
-            ₹{balance.toFixed(2)}
-          </Typography>
+          <FlatList
+            data={transaction}
+            keyExtractor={item => item.id?.toString()}
+            renderItem={renderTransaction}
+            contentContainerStyle={{paddingBottom: 30}}
+            refreshControl={
+              <RefreshControl refreshing={loading} onRefresh={fetchWallet} />
+            }
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={() => {
+              return <EmptyView title="No Wallet Transaction" />;
+            }}
+          />
         </View>
-
-        {/* Add Amount Button */}
-        <CustomButton
-          title="Add Amount"
-          onPress={() => console.log('Add Amount Pressed')}
-          style={{marginVertical: 15}}
-        />
-
-        {/* Transaction History */}
-        <Typography size={16} fontWeight="700" color={COLOR.black} style={{marginTop: 10, marginBottom: 8}}>
-          Transaction History
-        </Typography>
-        <FlatList
-          data={transactions}
-          keyExtractor={item => item.id}
-          renderItem={renderTransaction}
-          contentContainerStyle={{paddingBottom: 20}}
-        />
-      </View>
+      )}
     </View>
   );
 };
@@ -124,13 +172,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   transactionItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     padding: 12,
     borderRadius: 6,
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#e0e0e0',
-    marginBottom: 8,
+    marginBottom: 10,
   },
 });

@@ -13,7 +13,7 @@ import {Font} from '../../../Constants/Font';
 
 const {width} = Dimensions.get('window');
 
-const CouponCarousel = () => {
+const CouponCarousel = ({promoData}) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollViewRef = useRef(null);
 
@@ -66,7 +66,7 @@ const CouponCarousel = () => {
           );
           setCurrentIndex(newIndex);
         }}>
-        {coupons.map((coupon, index) => (
+        {promoData.map((coupon, index) => (
           <View key={coupon.id} style={styles.card}>
             <View style={styles.contentRow}>
               <Image
@@ -74,17 +74,17 @@ const CouponCarousel = () => {
                 style={styles.icon}
               />
               <View style={styles.textContainer}>
-                <Text style={styles.title}>{coupon.title}</Text>
-                <Text style={styles.description}>{coupon.description}</Text>
+                <Text style={styles.title}>{coupon.promo_code}</Text>
+                <Text style={styles.description}>{coupon?.type}{' '}₹{coupon.amount}</Text>
               </View>
 
               {/* Pagination section */}
-              <View style={styles.pageInfo}>
+             {promoData.length > 1 &&  <View style={styles.pageInfo}>
                 <Text style={styles.pageText}>
-                  {currentIndex + 1}/{coupons.length}
+                  {currentIndex + 1}/{promoData.length}
                 </Text>
                 <View style={styles.dots}>
-                  {coupons.map((_, dotIndex) => (
+                  {promoData.map((_, dotIndex) => (
                     <View
                       key={dotIndex}
                       style={[
@@ -94,7 +94,7 @@ const CouponCarousel = () => {
                     />
                   ))}
                 </View>
-              </View>
+              </View>}
             </View>
           </View>
         ))}

@@ -1,14 +1,11 @@
-import React, {useRef, useEffect, useState, useContext} from 'react';
+import React, {useRef, useEffect, useState} from 'react';
 import {
   Image,
   StyleSheet,
-  TextInput,
   View,
   TouchableOpacity,
   ScrollView,
   Dimensions,
-  Animated,
-  Platform,
   FlatList,
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
@@ -17,8 +14,7 @@ import MainHomeHeader from './MainHomeHeader';
 import {images} from '../../../Components/UI/images';
 import Input from '../../../Components/Input';
 import {useIsFocused} from '@react-navigation/native';
-import {GET_WITH_TOKEN, useApi} from '../../../Backend/Api';
-import {AuthContext} from '../../../Backend/AuthContent';
+import {GET_WITH_TOKEN} from '../../../Backend/Api';
 import {GET_PROFILE, HOME} from '../../../Constants/ApiRoute';
 import {Font} from '../../../Constants/Font';
 import Video from 'react-native-video';
@@ -30,10 +26,14 @@ const MainHome = ({navigation}) => {
   const isFocused = useIsFocused();
   const [loading, setLoading] = useState(false);
   const [topBanners, setTopBanners] = useState([]);
+  console.log(JSON.stringify(topBanners),'topBanners----->');
+  
   const [bottomBanners, setBottomBanners] = useState([]);
   const [myBookings, setMyBookings] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [paused, setPaused] = useState(false);
+  const [currentTopIndex, setCurrentTopIndex] = useState(0);
+
+  const topBannerRef = useRef(null);
 
   useEffect(() => {
     if (isFocused) {
@@ -42,12 +42,11 @@ const MainHome = ({navigation}) => {
       GET_WITH_TOKEN(
         HOME,
         success => {
-          console.log(success);
           const allBanners = success?.data?.banners || [];
           setBottomBanners(allBanners.filter(b => b.position === 'bottom'));
           setTopBanners(allBanners.filter(b => b.position === 'top'));
-          setMyBookings(success?.data?.self_bookings);
-          setCategories(success?.data?.categories);
+          setMyBookings(success?.data?.self_bookings || []);
+          setCategories(success?.data?.categories || []);
           setLoading(false);
         },
         error => setLoading(false),
@@ -56,23 +55,22 @@ const MainHome = ({navigation}) => {
     }
   }, [isFocused]);
 
-  const scrollX = useRef(new Animated.Value(0)).current;
-  const scrollRef = useRef(null);
+  // Handle video end (only manual swipe to next)
+  const handleVideoEnd = index => {
+    if (topBanners.length <= 1) return;
+    const nextIndex = (index + 1) % topBanners.length;
+    setCurrentTopIndex(nextIndex);
+  };
 
-  useEffect(() => {
-    if (bottomBanners.length === 0) return;
-
-    let index = 0;
-    const interval = setInterval(() => {
-      index = (index + 1) % bottomBanners.length;
-      scrollRef.current?.scrollToOffset({
-        offset: index * width,
-        animated: true,
-      });
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [bottomBanners]);
+  // Handle scroll for top banners
+  const handleTopScroll = event => {
+    const contentOffset = event.nativeEvent.contentOffset;
+    const viewSize = event.nativeEvent.layoutMeasurement;
+    const newIndex = Math.floor(contentOffset.x / viewSize.width);
+    if (newIndex !== currentTopIndex) {
+      setCurrentTopIndex(newIndex);
+    }
+  };
 
   global.fetchUserProfile = () => {
     GET_WITH_TOKEN(
@@ -86,6 +84,14 @@ const MainHome = ({navigation}) => {
       fail => {},
     );
   };
+
+  const formatScheduleTime = scheduleTime => {
+    if (!scheduleTime) return 'Not scheduled';
+    const timeKey = Object.keys(scheduleTime)[0];
+    const date = scheduleTime[timeKey];
+    return `${timeKey} on ${date}`;
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -120,86 +126,95 @@ const MainHome = ({navigation}) => {
               horizontal
               contentContainerStyle={{marginHorizontal: 5}}
               showsHorizontalScrollIndicator={false}
-              renderItem={({item, index}) => {
-                return (
-                  <View key={item.id} style={styles.bookingCard}>
-                    <Typography
-                      size={17}
-                      font={Font.medium}
-                      style={styles.bookingVendor}>
-                      {/* {item.vendor} */}
+              renderItem={({item}) => (
+                <View key={item.id} style={styles.bookingCard}>
+                  <Typography
+                    size={17}
+                    font={Font.medium}
+                    style={styles.bookingVendor}>
+                    {item.service?.name || 'Service'}
+                  </Typography>
+                  <Typography
+                    font={Font.medium}
+                    size={13}
+                    style={styles.bookingText}>
+                    Vendor:{' '}
+                    <Typography font={Font.medium} color="#7b4ce0">
+                      {item.vendor?.name || 'N/A'}
                     </Typography>
-                    <Typography
-                      font={Font.medium}
-                      size={13}
-                      style={styles.bookingText}>
-                      Services:{' '}
-                      <Typography font={Font.medium} color="#7b4ce0">
-                        {/* {item.services} */}
-                      </Typography>
+                  </Typography>
+                  <Typography
+                    font={Font.medium}
+                    size={13}
+                    style={styles.bookingText}>
+                    Price:{' '}
+                    <Typography font={Font.medium} color="#7b4ce0">
+                      ₹{item.amount}
                     </Typography>
-                    <Typography
-                      font={Font.medium}
-                      size={13}
-                      style={styles.bookingText}>
-                      Price:{' '}
-                      <Typography font={Font.medium} color="#7b4ce0">
-                        {/* {item.price} */}
-                      </Typography>
+                  </Typography>
+                  <Typography
+                    font={Font.medium}
+                    size={13}
+                    style={styles.bookingText}>
+                    Scheduled:{' '}
+                    <Typography font={Font.medium} color="#7b4ce0">
+                      {formatScheduleTime(item.schedule_time)}
                     </Typography>
-                    <Typography
-                      font={Font.medium}
-                      size={13}
-                      style={styles.bookingText}>
-                      Date:{' '}
-                      <Typography font={Font.medium} color="#7b4ce0">
-                        {/* {item.date} */}
-                      </Typography>
-                    </Typography>
-                    <Typography
-                      font={Font.medium}
-                      size={13}
-                      style={styles.bookingText}>
-                      Address:
-                      {/* {item.address} */}
-                    </Typography>
+                  </Typography>
+                  <Typography
+                    font={Font.medium}
+                    size={13}
+                    style={styles.bookingText}>
+                    Status:{' '}
                     <Typography
                       font={Font.medium}
-                      size={13}
-                      style={styles.bookingText}>
-                      Phone:{' '}
-                      <Typography font={Font.medium} color="#7b4ce0">
-                        {/* {item.phone} */}
-                      </Typography>
+                      color={
+                        item.status === 'completed'
+                          ? 'green'
+                          : item.status === 'pending'
+                          ? 'orange'
+                          : 'red'
+                      }>
+                      {item.status}
                     </Typography>
-                  </View>
-                );
-              }}
+                  </Typography>
+                </View>
+              )}
             />
           </View>
         )}
 
-        {/* Auto-scroll Banner */}
+        {/* Top Banner (Manual scroll only) */}
         <View style={{marginVertical: 20}}>
           {topBanners.length > 0 && (
             <FlatList
-              ref={scrollRef}
+              ref={topBannerRef}
               data={topBanners}
               horizontal
               pagingEnabled
-              keyExtractor={item => item.id.toString()}
+              onScroll={handleTopScroll}
+              scrollEventThrottle={16}
               showsHorizontalScrollIndicator={false}
-              renderItem={({item}) => (
-                <TouchableOpacity onPress={() => setPaused(!paused)}>
-                  <Video
-                    source={{uri}}
-                    style={styles.bannerImage}
-                    resizeMode="cover"
-                    repeat
-                    paused={paused}
-                    muted
-                  />
-                </TouchableOpacity>
+              keyExtractor={item => item.id.toString()}
+              renderItem={({item, index}) => (
+                <View style={{width: width - 30}}>
+                  {item.extensions === 'video' ? (
+                    <Video
+                      source={{uri: item.image}}
+                      style={styles.bannerImage}
+                      resizeMode="cover"
+                      repeat={false}
+                      paused={index != currentTopIndex}
+                      muted={false}
+                      onEnd={() => handleVideoEnd(index)}
+                    />
+                  ) : (
+                    <Image
+                      source={{uri: item.image}}
+                      style={styles.bannerImage}
+                    />
+                  )}
+                </View>
               )}
             />
           )}
@@ -215,47 +230,68 @@ const MainHome = ({navigation}) => {
         <FlatList
           data={categories}
           numColumns={2}
-          renderItem={({item, index}) => {
-            return (
-              <TouchableOpacity
-                onPress={() =>
-                  navigation.navigate('SearchServices', {
-                    id: item?.id,
-                  })
-                }
-                key={index}
-                style={styles.categoryCard}>
-                <Image
-                  source={{uri: item?.image}}
-                  style={styles.categoryIcon}
-                />
-                <Typography
-                  font={Font.medium}
-                  size={14}
-                  style={styles.categoryText}>
-                  {item?.name}
-                </Typography>
-              </TouchableOpacity>
-            );
-          }}
+          contentContainerStyle={styles.categories}
+          renderItem={({item, index}) => (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('SearchServices', {id: item?.id})
+              }
+              key={index}
+              style={styles.categoryCard}>
+              {item.image ? (
+                <Image source={{uri: item.image}} style={styles.categoryIcon} />
+              ) : (
+                <View
+                  style={[
+                    styles.categoryIcon,
+                    {
+                      backgroundColor: '#e0e0e0',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    },
+                  ]}>
+                  <Typography size={12} color="#666">
+                    No Image
+                  </Typography>
+                </View>
+              )}
+              <Typography
+                font={Font.medium}
+                size={14}
+                style={styles.categoryText}>
+                {item?.name}
+              </Typography>
+            </TouchableOpacity>
+          )}
         />
 
-        {/* Another Banner */}
+        {/* Bottom Banner (Manual scroll only) */}
         <View style={{marginVertical: 20}}>
           {bottomBanners.length > 0 && (
             <FlatList
-              ref={scrollRef}
               data={bottomBanners}
               horizontal
               pagingEnabled
-              keyExtractor={item => item.id.toString()}
               showsHorizontalScrollIndicator={false}
+              keyExtractor={item => item.id.toString()}
               renderItem={({item}) => (
-                <View style={{width}}>
-                  <Image
-                    source={{uri: item?.image}}
-                    style={styles.bannerImage}
-                  />
+                <View style={{width: width - 30}}>
+                  {item.extensions === 'video' ? (
+                    <Video
+                      source={{uri: item.image}}
+                      style={styles.bannerImage}
+                      resizeMode="cover"
+                      repeat={false}
+                      paused={index != currentTopIndex}
+                      muted={false}
+                      onEnd={() => handleVideoEnd(index)}
+                    />
+                  ) : (
+                    <Image
+                      source={{uri: item.image}}
+                      style={styles.bannerImage}
+                    />
+                  )}
                 </View>
               )}
             />
@@ -271,44 +307,42 @@ export default MainHome;
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: COLOR.white, paddingHorizontal: 15},
 
-  // Search
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLOR.white,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    marginBottom: 15,
-    marginTop: 15,
-    borderWidth: 1,
-    borderColor: '#EBEBEA',
-    marginHorizontal: 5,
-  },
-  searchIcon: {width: 20, height: 20, marginRight: 8},
-  searchInput: {flex: 1, color: 'black'},
-
   // My Bookings
   bookingCard: {
-    width: width * 0.7,
-    backgroundColor: '#f0ebf8',
-    borderRadius: 10,
+    width: width * 0.75,
+    borderRadius: 15,
     padding: 15,
-    marginRight: 12,
+    marginRight: 16,
     shadowColor: '#000',
     shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
+    shadowRadius: 6,
+    elevation: 4,
+    backgroundColor: '#fff',
+    borderLeftWidth: 6,
+    borderWidth: 1,
+    borderColor: COLOR.primary,
+    borderLeftColor: '#7b4ce0',
   },
-  bookingVendor: {fontSize: 16, fontWeight: 'bold', marginBottom: 5},
-  bookingText: {fontSize: 13, marginBottom: 2, color: '#333'},
+  bookingVendor: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#222',
+    marginBottom: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: COLOR.primary,
+  },
+  bookingText: {
+    fontSize: 13,
+    marginBottom: 4,
+    color: '#444',
+  },
 
   // Banner
   bannerImage: {
-    width: width - 30,
+    width: '100%',
     height: 150,
-    borderRadius: 10,
-    marginRight: 10,
+    borderRadius: 20,
+    overflow: 'hidden',
   },
 
   // Categories
@@ -328,113 +362,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     marginHorizontal: 5,
   },
-  categoryIcon: {width: 40, height: 40},
-  categoryText: {marginTop: 5},
-
-  // My Bookings
-  bookingCard: {
-    width: width * 0.75,
-    borderRadius: 15,
-    padding: 15,
-    marginRight: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
-    backgroundColor: '#fff',
-    borderLeftWidth: 6,
-    borderWidth: 1,
-    borderColor: COLOR.primary,
-    borderLeftColor: '#7b4ce0', // accent stripe
-  },
-  bookingVendor: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: '#222',
-    marginBottom: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: COLOR.primary,
-  },
-  bookingText: {
-    fontSize: 13,
-    marginBottom: 4,
-    color: '#444',
-  },
-  bookingHighlight: {
-    fontWeight: '600',
-    color: '#7b4ce0',
-  },
-
-  // Banner
-  bannerWrapper: {
-    marginVertical: 20,
-    borderRadius: 15,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  bannerImage: {
-    width: width - 30,
-    height: 160,
-    borderRadius: 15,
-  },
-  bannerOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 12,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
-  bannerText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  bannerSub: {
-    color: '#f5d742',
-    fontSize: 14,
-    marginTop: 2,
-  },
-  fab: {
-    position: 'absolute',
-    right: 30,
-    bottom: 30,
-    backgroundColor: COLOR.primary,
-    borderRadius: 20,
-    width: 65,
-    height: 65,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 8,
-    zIndex: 1000,
-  },
-  fabIcon: {
-    width: 40,
-    height: 35,
-    // tintColor: '#fff',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    // paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 5 : 0,
-    paddingTop: Platform.OS === 'android' ? 10 : 0,
-  },
-  icon: {
-    width: 30,
-    height: 30,
-    resizeMode: 'contain',
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLOR.black,
-  },
+  categoryIcon: {width: 40, height: 40, marginBottom: 8},
+  categoryText: {textAlign: 'center'},
 });

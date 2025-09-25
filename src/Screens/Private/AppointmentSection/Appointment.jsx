@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -12,9 +12,40 @@ import {Typography} from '../../../Components/UI/Typography';
 import {images} from '../../../Components/UI/images';
 import {windowHeight} from '../../../Constants/Dimensions';
 import {Font} from '../../../Constants/Font';
+import {useIsFocused} from '@react-navigation/native';
+import {GET_WITH_TOKEN} from '../../../Backend/Api';
+import {GET_BOOKING_LIST} from '../../../Constants/ApiRoute';
 
 const Appointment = ({navigation}) => {
   const [selectedFilter, setSelectedFilter] = useState('All');
+  const isFocused = useIsFocused();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isFocused) {
+      getBookingList();
+    }
+  }, [isFocused]);
+
+  const getBookingList = () => {
+    setLoading(true);
+    GET_WITH_TOKEN(
+      GET_BOOKING_LIST,
+      success => {
+        console.log(success);
+
+        setLoading(false);
+      },
+      error => {
+        setLoading(false);
+        console.log(success);
+      },
+      fail => {
+        setLoading(false);
+        console.log(fail);
+      },
+    );
+  };
 
   const filters = [
     {label: 'All'},

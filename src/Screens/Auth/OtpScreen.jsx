@@ -28,7 +28,7 @@ const OtpScreen = ({navigation, route}) => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const inputs = useRef([]);
   const user_id = route?.params?.userId;
-  
+
   const phone = route?.params?.phone;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -99,7 +99,8 @@ const OtpScreen = ({navigation, route}) => {
       error => {
         console.log(error, 'errorerrorerror>>');
         setLoading(false);
-        ToastMsg(error?.message);
+        setError({otp: error?.error});
+        // ToastMsg(error?.message);
       },
       fail => {
         console.log(fail, 'failfailfailfail');
@@ -180,7 +181,10 @@ const OtpScreen = ({navigation, route}) => {
         ))}
       </View>
       {error?.otp && (
-        <ErrorBox style={{marginTop: 0, marginBottom: 10}} error={error?.otp} />
+        <ErrorBox
+          style={{marginTop: 0, marginBottom: 10, marginHorizontal: 20}}
+          error={error?.otp}
+        />
       )}
       <View style={{padding: 20}}>
         <Button

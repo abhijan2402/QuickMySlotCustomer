@@ -1,50 +1,65 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   View,
   TouchableOpacity,
   ScrollView,
   Image,
+  ActivityIndicator,
+  SectionList,
 } from 'react-native';
 import HomeHeader from '../../../Components/HomeHeader';
 import {COLOR} from '../../../Constants/Colors';
 import {Typography} from '../../../Components/UI/Typography'; // ✅ Import Typography
+import { useIsFocused } from '@react-navigation/native';
+import { GET_WITH_TOKEN } from '../../../Backend/Api';
+import { ADD_FAQ } from '../../../Constants/ApiRoute';
+import { images } from '../../../Components/UI/images';
 
-const faqData = [
-  {
-    title: 'Account Management',
-    items: [
-      'How do I update my profile information?',
-      'I forgot my password, what should I do?',
-      'How do I delete my account?',
-    ],
-  },
-  {
-    title: 'Bookings and Appointments',
-    items: [
-      'How do I book a service?',
-      'Can I reschedule or cancel a booking?',
-      'What happens if a provider cancels my booking?',
-    ],
-  },
-  {
-    title: 'Payments and Refunds',
-    items: [
-      'What payment methods are accepted?',
-      'How long do refunds take to process?',
-    ],
-  },
-  {
-    title: 'Provider Support',
-    items: ['How do I set my availability?', 'How do I receive payments?'],
-  },
-];
+
 
 const Faq = () => {
-  const [expandedIndex, setExpandedIndex] = useState(null);
+   const isFocus = useIsFocused();
+  const [loading, setLoading] = useState(false);
+  const [faq, setFaq] = useState([]);
+  const [expandedId, setExpandedId] = useState(null);
 
-  const toggleExpand = index => {
-    setExpandedIndex(expandedIndex === index ? null : index);
+  useEffect(() => {
+    if (isFocus) {
+      setLoading(true);
+      GET_WITH_TOKEN(
+        ADD_FAQ,
+        success => {
+          console.log(success);
+          setLoading(false);
+          const grouped = success?.data?.reduce((acc, item) => {
+            console.log(acc);
+            const existing = acc.find(sec => sec.title === item.category);
+            console.log(existing);
+            if (existing) {
+              existing.data.push(item);
+            } else {
+              acc.push({title: item.category, data: [item]});
+            }
+            return acc;
+          }, []);
+
+          setFaq(grouped);
+        },
+        error => {
+          console.log(error, 'error>>');
+          setLoading(false);
+        },
+        fail => {
+          console.log(fail, 'fail>>');
+          setLoading(false);
+        },
+      );
+    }
+  }, [isFocus]);
+
+  const toggleExpand = id => {
+    setExpandedId(prev => (prev === id ? null : id));
   };
 
   return (
@@ -54,52 +69,50 @@ const Faq = () => {
         leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
         leftTint={COLOR.black}
       />
-      <ScrollView
-        contentContainerStyle={{
-          paddingHorizontal: 10,
-        }}
-        showsVerticalScrollIndicator={false}>
-        {faqData.map((section, sectionIndex) => (
-          <View key={sectionIndex}>
-            {/* Section Title */}
-            <Typography size={16} fontWeight="700" style={styles.sectionTitle}>
-              {section.title}
+      {loading ? (
+        <ActivityIndicator
+          size="large"
+          color="#007bff"
+          style={{marginTop: 20}}
+        />
+      ) : (
+        <SectionList
+          sections={faq}
+          keyExtractor={(item, index) => item.id.toString() + index}
+          renderSectionHeader={({section: {title}}) => (
+            <Typography style={styles.sectionTitle} size={16} fontWeight="700">
+              {title}
             </Typography>
+          )}
+          renderItem={({item}) => (
+            <View style={styles.faqItem}>
+              <TouchableOpacity
+                style={styles.faqHeader}
+                onPress={() => toggleExpand(item.id)}>
+                <Typography style={styles.faqQuestion} fontWeight="600">
+                  {item.question}
+                </Typography>
+                <TouchableOpacity
+                  onPress={() =>
+                    setExpandedId(expandedId === item.id ? null : item.id)
+                  }>
+                  <Image
+                    source={
+                      expandedId === item.id ? images.ArrowDown : images.ArrowDown
+                    }
+                    style={{width: 16, height: 16, tintColor: '#555',transform:[{rotate: expandedId === item.id ? '180deg' : '0deg'}]}}
+                    resizeMode="contain"
+                  />
+                </TouchableOpacity>
+              </TouchableOpacity>
 
-            {/* Section Items */}
-            {section.items.map((item, itemIndex) => {
-              const indexKey = `${sectionIndex}-${itemIndex}`;
-              const isExpanded = expandedIndex === indexKey;
-
-              return (
-                <View key={indexKey} style={styles.faqItem}>
-                  <TouchableOpacity
-                    style={styles.faqHeader}
-                    onPress={() => toggleExpand(indexKey)}>
-                    <Typography size={14} style={styles.faqQuestion}>
-                      {item}
-                    </Typography>
-                    <Image
-                      source={{
-                        uri: isExpanded
-                          ? 'https://cdn-icons-png.flaticon.com/128/271/271228.png' // up arrow
-                          : 'https://cdn-icons-png.flaticon.com/128/271/271210.png', // down arrow
-                      }}
-                      style={styles.arrowIcon}
-                    />
-                  </TouchableOpacity>
-                  {isExpanded && (
-                    <Typography size={13} style={styles.faqAnswer}>
-                      This is where the answer for "{item}" will go.
-                    </Typography>
-                  )}
-                </View>
-              );
-            })}
-          </View>
-        ))}
-      </ScrollView>
-      <View style={{height: 50}} />
+              {expandedId === item.id && (
+                <Typography style={styles.faqAnswer}>{item.answer}</Typography>
+              )}
+            </View>
+          )}
+        />
+      )}
     </View>
   );
 };
@@ -136,15 +149,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingRight: 10,
   },
-  arrowIcon: {
-    width: 15,
-    height: 15,
-    tintColor: '#555',
-  },
   faqAnswer: {
     paddingHorizontal: 12,
     paddingBottom: 12,
     color: '#555',
     lineHeight: 18,
   },
+  
 });

@@ -23,17 +23,15 @@ const SearchServices = ({navigation, route}) => {
   const [services, setServices] = useState([]);
   console.log(services);
   const id = route?.params?.id;
-
   const isFocused = useIsFocused();
   const [loading, setLoading] = useState(false);
-
   useEffect(() => {
     if (isFocused) {
       setLoading(true);
       GET_WITH_TOKEN(
         SERVICES + `?service_category=${id}`,
         success => {
-          console.log(success);
+          console.log(success, 'dssadadddsadasdasdadadaewaeqe');
           setServices(success?.data);
           setLoading(false);
         },
@@ -46,7 +44,7 @@ const SearchServices = ({navigation, route}) => {
   const renderCard = ({item}) => (
     <TouchableOpacity
       activeOpacity={0.85}
-      onPress={() => navigation.navigate('ProviderDetails')}
+      onPress={() => navigation.navigate('ProviderDetails', {id: item?.id})}
       style={styles.card}>
       {/* Image with Rating Badge */}
       <View>
@@ -88,7 +86,7 @@ const SearchServices = ({navigation, route}) => {
             address:📍 {item?.exact_location}
           </Typography>
         )}
-        {item?.location_area_served && (
+        {/* {item?.location_area_served && (
           <Typography
             size={13}
             color="#666"
@@ -96,7 +94,7 @@ const SearchServices = ({navigation, route}) => {
             style={styles.textRow}>
             locationAreaServed:📍 {item?.location_area_served}
           </Typography>
-        )}
+        )} */}
 
         {item?.years_of_experience && (
           <Typography

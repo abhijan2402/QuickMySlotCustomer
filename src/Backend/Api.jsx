@@ -80,14 +80,12 @@ export const GET_WITH_TOKEN = async (
   status = () => {},
 ) => {
   const tokenVal = store.getState().Token;
-  console.log(tokenVal,"TOKENNNN");
-  
   try {
     await axios({
       method: 'get',
       url: `${API}${route}`,
       headers: {
-        authorization: `Bearer ${tokenVal}`,
+        Authorization: `Bearer ${tokenVal}`,
         ...headers,
       },
       ...errorHandling,
@@ -134,13 +132,13 @@ export const POST = async (
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
+        'x-device-id': '4984748',
       },
       validateStatus: function (status) {
         return status >= 200 && status <= 999; // default
       },
     })
       .then(res => {
-        console.log(res,'resresresresresadas');
         if (res?.status == 200) {
           onSuccess(res?.data);
         } else {
@@ -148,7 +146,6 @@ export const POST = async (
         }
       })
       .catch(err => {
-        console.log(err,'fadaerrerrerr');
         onError(err);
       });
   } catch (error) {
@@ -172,8 +169,9 @@ export const POST_FORM_DATA = async (
       url: `${API}${route}`,
       data: body,
       headers: {
+        Authorization: `Bearer ${tokenVal}`,
+        Accept: 'application/json',
         'Content-Type': 'multipart/form-data',
-        authorization: `Bearer ${tokenVal}`,
       },
       validateStatus: function (status) {
         return status >= 200 && status <= 999; // default
@@ -207,7 +205,7 @@ export const POST_WITH_TOKEN = async (
     SimpleToast.show('Check Network, Try Again.', SimpleToast.SHORT);
   },
 ) => {
-  const tokenVal = store.getState().Token;  
+  const tokenVal = store.getState().Token;
   try {
     await axios({
       method: 'post',
@@ -231,7 +229,6 @@ export const POST_WITH_TOKEN = async (
         }
       })
       .catch(err => {
-        
         onError(err);
       });
   } catch (error) {
@@ -287,19 +284,19 @@ export const DELETE_WITH_TOKEN = async (
   headers = {},
 ) => {
   const tokenVal = store.getState().Token;
-  
+
   try {
     axios({
       method: 'delete',
       url: `${API}${route}`,
       data: body,
       headers: {
-        authorization: `Bearer ${tokenVal}`,
+        Authorization: `Bearer ${tokenVal}`,
         ...headers,
       },
       ...errorHandling,
     })
-      .then(res => {        
+      .then(res => {
         if (res?.status == 200) {
           onSuccess(res?.data);
         } else {
@@ -335,7 +332,7 @@ export const PUT_FORM_DATA = async (
       data: body,
       headers: {
         'Content-Type': 'multipart/form-data',
-        authorization: `Bearer ${tokenVal}`,
+        Authorization: `Bearer ${tokenVal}`,
       },
       ...errorHandling,
     })

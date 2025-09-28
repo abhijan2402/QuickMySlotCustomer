@@ -158,19 +158,15 @@ const BookingScreen = ({navigation, route}) => {
       ToastMsg('Please select at least one time slot.');
       return;
     }
-    // Proceed with booking logic
     console.log('Booking with times:', selectedTimes);
-    handleSubmit(); // Call the API function
+    handleSubmit();
   };
-
   const handleSubmit = async () => {
     setLoading(true);
-
     const formattedTimes = selectedTimes.map(time => {
       return time.includes(':') ? `${time}:00` : `${time}:00:00`;
     });
     const body = new FormData();
-
     body.append('order_id', cartItems[0]?.cart_id);
     body.append('customer_id', userDetail?.id);
     body.append('vendor_id', businessData?.id);
@@ -193,15 +189,16 @@ const BookingScreen = ({navigation, route}) => {
       success => {
         console.log('Booking API Success:', success);
         setLoading(false);
-
-        // Navigate to confirmation screen with all selected times
+        ToastMsg(success?.message || 'Booking successful!');
         navigation.navigate('BookingConfirmation', {
-          selectedServices: cartItems,
-          total: totalPrice || total,
-          note,
-          selectedTimes,
-          bookingData: success,
-          businessData,
+          data: {
+            selectedServices: cartItems,
+            total: totalPrice || total,
+            note,
+            selectedTimes,
+            bookingData: success,
+            businessData,
+          },
         });
       },
       error => {

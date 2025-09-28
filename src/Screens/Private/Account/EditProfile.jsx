@@ -13,7 +13,7 @@ import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
 import ImageModal from '../../../Components/UI/ImageModal';
 import useKeyboard from '../../../Constants/Utility';
-import {isValidForm, ToastMsg} from '../../../Backend/Utility';
+import {cleanImageUrl, isValidForm, ToastMsg} from '../../../Backend/Utility';
 import {validators} from '../../../Backend/Validator';
 import Button from '../../../Components/UI/Button';
 import {AuthContext} from '../../../Backend/AuthContent';
@@ -28,7 +28,7 @@ const EditProfile = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [profileImage, setProfileImage] = useState({});
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
   const {isKeyboardVisible} = useKeyboard();
   const isFocus = useIsFocused();
   const {user} = useContext(AuthContext);
@@ -41,7 +41,7 @@ const EditProfile = ({navigation}) => {
       setFirstName(userdata?.name || '');
       setEmail(userdata?.email || '');
       setPhone(userdata?.phone_number);
-      setProfileImage({path: userdata?.image});
+      setProfileImage({path: cleanImageUrl(userdata?.image)});
       // setCity(userdata?.city || '');
       // setAddress(userdata?.exact_location || '');
       // setPinCode(userdata?.zip_code);
@@ -75,12 +75,11 @@ const EditProfile = ({navigation}) => {
   // };
 
   const handleImageSelected = response => {
-    console.log(response , 'das59eqw8669ed74wqa648de97w');
+    console.log(response, 'das59eqw8669ed74wqa648de97w');
     if (response) {
       setProfileImage(response);
     }
   };
-
 
   const handleUpdate = () => {
     let validationErrors = {

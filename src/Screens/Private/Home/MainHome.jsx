@@ -9,6 +9,7 @@ import {
   FlatList,
   SafeAreaView,
   StatusBar,
+  BackHandler,
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
 import {Typography} from '../../../Components/UI/Typography';
@@ -20,6 +21,7 @@ import {GET_WITH_TOKEN} from '../../../Backend/Api';
 import {GET_PROFILE, HOME} from '../../../Constants/ApiRoute';
 import {Font} from '../../../Constants/Font';
 import Video from 'react-native-video';
+import { cleanImageUrl } from '../../../Backend/Utility';
 
 const {width} = Dimensions.get('window');
 
@@ -44,6 +46,7 @@ const MainHome = ({navigation}) => {
       GET_WITH_TOKEN(
         HOME,
         success => {
+          console.log(success, 'home--->>>');
           const allBanners = success?.data?.banners || [];
           setBottomBanners(allBanners.filter(b => b.position === 'bottom'));
           setTopBanners(allBanners.filter(b => b.position === 'top'));
@@ -94,8 +97,22 @@ const MainHome = ({navigation}) => {
     return `${timeKey} on ${date}`;
   };
 
+  useEffect(() => {
+    if (isFocused) {
+      const backAction = () => {
+        BackHandler.exitApp();
+        return true;
+      };
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        backAction,
+      );
+      return () => backHandler.remove();
+    }
+  }, [isFocused]);
+
   return (
-    <View style={[styles.container, {paddingTop: StatusBar.currentHeight}]}>
+    <View style={[styles.container, {}]}>
       <MainHomeHeader />
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Search Bar */}
@@ -112,7 +129,6 @@ const MainHome = ({navigation}) => {
             onRightIconPress={() => setSearch('')}
           />
         </View>
-
         {/* My Bookings */}
         {myBookings.length > 0 && (
           <View>
@@ -123,7 +139,7 @@ const MainHome = ({navigation}) => {
               My Bookings
             </Typography>
             <FlatList
-              data={myBookings}
+              data={myBookings.slice(0, 3)}
               horizontal
               contentContainerStyle={{marginHorizontal: 5}}
               showsHorizontalScrollIndicator={false}
@@ -211,7 +227,7 @@ const MainHome = ({navigation}) => {
                     />
                   ) : (
                     <Image
-                      source={{uri: item.image}}
+                      source={{uri: cleanImageUrl(item.image)}}
                       style={styles.bannerImage}
                     />
                   )}
@@ -232,38 +248,45 @@ const MainHome = ({navigation}) => {
           data={categories}
           numColumns={2}
           contentContainerStyle={styles.categories}
-          renderItem={({item, index}) => (
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate('SearchServices', {id: item?.id})
-              }
-              key={index}
-              style={styles.categoryCard}>
-              {item.image ? (
-                <Image source={{uri: item.image}} style={styles.categoryIcon} />
-              ) : (
-                <View
-                  style={[
-                    styles.categoryIcon,
-                    {
-                      backgroundColor: '#e0e0e0',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    },
-                  ]}>
-                  <Typography size={12} color="#666">
-                    No Image
-                  </Typography>
-                </View>
-              )}
-              <Typography
-                font={Font.medium}
-                size={14}
-                style={styles.categoryText}>
-                {item?.name}
-              </Typography>
-            </TouchableOpacity>
-          )}
+          renderItem={({item, index}) => {
+            console.log(item?.image, 'categoryitem--->');
+
+            return (
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate('SearchServices', {id: item?.id})
+                }
+                key={index}
+                style={styles.categoryCard}>
+                {item.image ? (
+                  <Image
+                    source={{uri: cleanImageUrl(item.image)}}
+                    style={styles.categoryIcon}
+                  />
+                ) : (
+                  <View
+                    style={[
+                      styles.categoryIcon,
+                      {
+                        backgroundColor: '#e0e0e0',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      },
+                    ]}>
+                    <Typography size={12} color="#666">
+                      No Image
+                    </Typography>
+                  </View>
+                )}
+                <Typography
+                  font={Font.medium}
+                  size={14}
+                  style={styles.categoryText}>
+                  {item?.name}
+                </Typography>
+              </TouchableOpacity>
+            );
+          }}
         />
 
         {/* Bottom Banner (Manual scroll only) */}
@@ -344,6 +367,7 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 20,
     overflow: 'hidden',
+    backgroundColor: '#e0e0e0',
   },
 
   // Categories
@@ -355,7 +379,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   categoryCard: {
-    width: '48%',
+    width: width / 2 - 30,
     backgroundColor: '#f7f5fa',
     padding: 15,
     borderRadius: 8,
@@ -363,6 +387,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     marginHorizontal: 5,
   },
-  categoryIcon: {width: 40, height: 40, marginBottom: 8},
+  categoryIcon: {
+    width: 80,
+    height: 80,
+    marginBottom: 8,
+    // backgroundColor: '#e0e0e0',
+    borderRadius: 20,
+  },
   categoryText: {textAlign: 'center'},
 });

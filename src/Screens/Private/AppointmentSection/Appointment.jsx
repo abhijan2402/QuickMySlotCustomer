@@ -15,11 +15,14 @@ import {Font} from '../../../Constants/Font';
 import {useIsFocused} from '@react-navigation/native';
 import {GET_WITH_TOKEN} from '../../../Backend/Api';
 import {GET_BOOKING_LIST} from '../../../Constants/ApiRoute';
+import moment from 'moment';
+import {cleanImageUrl} from '../../../Backend/Utility';
 
 const Appointment = ({navigation}) => {
   const [selectedFilter, setSelectedFilter] = useState('All');
   const isFocused = useIsFocused();
   const [loading, setLoading] = useState(false);
+  const [appointments, setAppointments] = useState([]); // State to store API data
 
   useEffect(() => {
     if (isFocused) {
@@ -32,90 +35,40 @@ const Appointment = ({navigation}) => {
     GET_WITH_TOKEN(
       GET_BOOKING_LIST,
       success => {
-        console.log(success);
-
+        console.log(success, 'GET_BOOKING_LIST-->>>');
+        setAppointments(success?.data || []); // Set the API data
         setLoading(false);
       },
       error => {
         setLoading(false);
-        console.log(success);
+        console.log(error, 'Error in booking list');
       },
       fail => {
         setLoading(false);
-        console.log(fail);
+        console.log(fail, 'Failed to get booking list');
       },
     );
   };
 
+
+  const getStatus = item => {
+    return item.status || 'Pending';
+  };
+
   const filters = [
     {label: 'All'},
-    {label: 'Pending'},
-    {label: 'Completed'},
-    {label: 'Declined'},
-  ];
-
-  const appointments = [
-    {
-      id: '1',
-      title: 'Haircut',
-      date: 'June 10, 2025, 2 PM',
-      status: 'Pending',
-      salon: 'Glamour Touch Salon',
-      service: 'Luxury salon services',
-      image:
-        'https://im.whatshot.in/img/2019/May/shutterstock-653296774-cropped-1-1557311742.jpg',
-      address: '123 Main Street, New Delhi',
-      contact: '+91 9876543210',
-      amount: '₹500',
-    },
-    {
-      id: '2',
-      title: 'Facial',
-      date: 'June 11, 2025, 4 PM',
-      status: 'Completed',
-      salon: 'Elite Spa Center',
-      service: 'Premium facial treatment',
-      image:
-        'https://www.architectmagazine.com/wp-content/uploads/sites/5/2020/95ad8aa6ba5c41399fbca1f1458e7ff1.jpg',
-      address: '56 Park Lane, Mumbai',
-      contact: '+91 9123456780',
-      amount: '₹1200',
-    },
-    {
-      id: '3',
-      title: 'Massage',
-      date: 'June 12, 2025, 6 PM',
-      status: 'Declined',
-      salon: 'Relax & Heal',
-      service: 'Full body massage therapy',
-      image:
-        'https://jaipurspacenter.in/wp-content/uploads/2024/12/Spa-in-Vishwakarma-Industrial-Area-Jaipur.jpg',
-      address: '88 Wellness Road, Bangalore',
-      contact: '+91 9988776655',
-      amount: '₹1500',
-    },
+    {label: 'pending'},
+    {label: 'accepted'},
+    {label: 'cancelled'},
   ];
 
   const getStatusColor = status => {
     switch (status) {
-      case 'Pending':
+      case 'pending':
         return '#FFD700';
-      case 'Completed':
+      case 'accepted':
         return '#4CAF50';
-      case 'Declined':
-        return '#E53935';
-      default:
-        return '#555';
-    }
-  };
-
-  const getBackgroundStatusColor = status => {
-    switch (status) {
-      case 'Pending':
-        return '#FFD700';
-      case 'Completed':
-        return '#4CAF50';
-      case 'Declined':
+      case 'cancelled':
         return '#E53935';
       default:
         return '#555';
@@ -123,60 +76,117 @@ const Appointment = ({navigation}) => {
   };
 
   const renderAppointment = ({item}) => {
+    const status = getStatus(item);
+    const timeKeys = Object.keys(item?.schedule_time);
+    const dateKeys = moment(
+      Object.values(item?.schedule_time || {})[0],
+      'DD/MM/YYYY',
+    ).format('DD MMM, YYYY');
+
     return (
       <TouchableOpacity
-        onPress={() => navigation.navigate('AppointmentDetail')}
+        onPress={() =>
+          navigation.navigate('AppointmentDetail', {appointment: item})
+        }
         style={styles.card}>
         <View style={styles.topRow}>
           <View style={styles.leftSection}>
-            <Image source={{uri: item.image}} style={styles.serviceImage} />
+            <Image
+              source={{
+                uri:
+                  cleanImageUrl(item?.vendor?.image) ||
+                  'https://via.placeholder.com/55',
+              }}
+              style={styles.serviceImage}
+            />
             <View style={{marginLeft: 12, flex: 1}}>
               <Typography
                 font={Font.medium}
                 style={styles.title}
                 numberOfLines={1}>
-                {item.title}
+                {item?.service?.name || 'Service'}
               </Typography>
-              <Typography style={styles.salonName}>{item.salon}</Typography>
+              <Typography style={styles.salonName}>
+                {item?.vendor?.name || 'Vendor'}
+              </Typography>
             </View>
           </View>
-          <Typography
-            style={[
-              styles.status,
-              {
-                color: getStatusColor(item.status),
-                backgroundColor: getBackgroundStatusColor(item.status) + '25',
-              },
-            ]}>
-            {item.status}
-          </Typography>
+          <View
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'row',
+            }}>
+            <View
+              style={{
+                height: 5,
+                width: 5,
+                borderRadius: 3,
+                backgroundColor: getStatusColor(status),
+              }}></View>
+            <Typography
+              style={[
+                styles.status,
+                {
+                  color: getStatusColor(status),
+                  textTransform: 'capitalize',
+                  // backgroundColor: getBackgroundStatusColor(status) + '25',
+                },
+              ]}>
+              {status}
+            </Typography>
+          </View>
         </View>
 
         <View style={styles.divider} />
         <View style={styles.bottomRow}>
-          <Typography style={styles.salonService}>{item.service}</Typography>
-          <Typography style={styles.amount}>{item.amount}</Typography>
+          <Typography style={styles.salonService}>
+            {item.service_description || 'Service description'}
+          </Typography>
+          <Typography style={styles.amount}>₹{item.amount || '0'}</Typography>
         </View>
         <View style={styles.infoRow}>
           <Image source={images.calendar} style={{height: 16, width: 16}} />
-          <Typography style={styles.dateText}>{item.date}</Typography>
+          <Typography style={styles.dateText}>{dateKeys}</Typography>
+        </View>
+        <View style={styles.infoRow}>
+          <Image source={images.clock} style={{height: 16, width: 16}} />
+          <Typography style={styles.dateText}>
+            {timeKeys?.map((v, index) => {
+              return (
+                moment(v, 'HH:mm').format('hh:mm A') +
+                (index == timeKeys?.length - 1 ? '' : ', ')
+              );
+            })}
+          </Typography>
         </View>
         <View style={styles.infoSection}>
-          <View style={styles.infoRow}>
-            <Image source={images.mark} style={{height: 16, width: 16}} />
-            <Typography style={styles.details} numberOfLines={1}>
-              {item.address}
-            </Typography>
-          </View>
-
-          <View style={styles.infoRow}>
-            <Image source={images.call} style={{height: 14, width: 14}} />
-            <Typography style={styles.details}>{item.contact}</Typography>
-          </View>
+          {item.vendor?.exact_location && (
+            <View style={styles.infoRow}>
+              <Image source={images.mark} style={{height: 16, width: 16}} />
+              <Typography style={styles.details} numberOfLines={2}>
+                {item.vendor?.exact_location || 'Address not available'}
+              </Typography>
+            </View>
+          )}
+          {item.vendor?.phone_number && (
+            <View style={styles.infoRow}>
+              <Image source={images.call} style={{height: 14, width: 14}} />
+              <Typography style={styles.details}>
+                {item.vendor?.phone_number || 'Contact not available'}
+              </Typography>
+            </View>
+          )}
         </View>
       </TouchableOpacity>
     );
   };
+
+  // Filter appointments based on selected filter
+  const filteredAppointments =
+    selectedFilter === 'All'
+      ? appointments
+      : appointments.filter(item => getStatus(item) === selectedFilter);
 
   return (
     <View style={styles.container}>
@@ -185,7 +195,6 @@ const Appointment = ({navigation}) => {
         leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
         leftTint={COLOR.black}
       />
-      <View></View>
 
       <View style={styles.filterRow}>
         {filters.map(filter => {
@@ -204,7 +213,10 @@ const Appointment = ({navigation}) => {
               <Typography
                 style={[
                   styles.filterText,
-                  {color: isSelected ? COLOR.white : COLOR.black},
+                  {
+                    color: isSelected ? COLOR.white : COLOR.black,
+                    textTransform: 'capitalize',
+                  },
                 ]}>
                 {filter.label}
               </Typography>
@@ -215,11 +227,25 @@ const Appointment = ({navigation}) => {
 
       <FlatList
         showsVerticalScrollIndicator={false}
-        data={appointments}
-        keyExtractor={item => item.id}
+        data={filteredAppointments}
+        keyExtractor={item => item.id.toString()}
         renderItem={renderAppointment}
         contentContainerStyle={{paddingBottom: 20}}
+        refreshing={loading}
+        onRefresh={getBookingList}
         ListEmptyComponent={() => {
+          if (loading) {
+            return (
+              <View
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginTop: windowHeight * 0.3,
+                }}>
+                <Typography>Loading appointments...</Typography>
+              </View>
+            );
+          }
           return (
             <View
               style={{
@@ -304,15 +330,15 @@ const styles = StyleSheet.create({
   status: {
     fontSize: 12,
     fontFamily: Font.semibold,
-    paddingVertical: 3,
+    // paddingVertical: 3,
     paddingHorizontal: 12,
     borderRadius: 20,
     overflow: 'hidden',
+    paddingStart: 5,
   },
   dateText: {
     fontSize: 13,
     fontFamily: Font.semibold,
-
     color: '#444',
     marginLeft: 10,
   },
@@ -340,10 +366,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 4,
   },
-  icon: {
-    fontSize: 13,
-    marginRight: 6,
-  },
   details: {
     fontSize: 13,
     color: '#555',
@@ -354,8 +376,7 @@ const styles = StyleSheet.create({
   },
   amount: {
     fontSize: 15,
-    // fontWeight: '700',
-    color: COLOR.primary,
     fontFamily: Font.semibold,
+    color: COLOR.primary,
   },
 });

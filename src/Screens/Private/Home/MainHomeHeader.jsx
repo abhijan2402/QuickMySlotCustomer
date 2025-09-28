@@ -16,6 +16,7 @@ import {COLOR} from '../../../Constants/Colors';
 import {images} from '../../../Components/UI/images';
 import {Typography} from '../../../Components/UI/Typography';
 import {Font} from '../../../Constants/Font';
+import { GOOGLE_API } from '../../../Backend/Utility';
 
 const MainHomeHeader = () => {
   const navigation = useNavigation();
@@ -62,10 +63,9 @@ const MainHomeHeader = () => {
   const getAddressFromCoordinates = async (lat, lng) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=YOUR_GOOGLE_MAPS_API_KEY`,
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_API}`,
       );
       const data = await response.json();
-
       if (data.results && data.results.length > 0) {
         return data.results[0].formatted_address;
       }
@@ -81,16 +81,12 @@ const MainHomeHeader = () => {
       setIsLoading(true);
       const locationData = await getCurrentLocation();
       setCurrentLocation(locationData);
-
-      // Get address from coordinates
       const address = await getAddressFromCoordinates(
         locationData.coords.latitude,
         locationData.coords.longitude,
       );
-
       setLocation(address);
     } catch (error) {
-      // Alert.alert('Location Error', error.message);
       setLocation('Location unavailable');
     } finally {
       setIsLoading(false);

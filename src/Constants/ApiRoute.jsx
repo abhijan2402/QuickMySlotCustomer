@@ -21,7 +21,11 @@ export const GET_BOOKING_DETAILS = 'customer/booking/';
 export const CANCEL_BOOKING = 'customer/booking-remove/';
 export const GET_ANALYTICS = 'analytics';
 export const PROMO_VENDOR = 'customer/promo-codes/';
-
+export const SERVICES_CATEGORY = 'customer/service/category/';
+export const WALLET_VERIFY = 'wallet/verify';
+export const GET_MEMBERSHIP_LIST = 'subscriptions?type=customer';
+export const MEMBERSHIP_VERIFY_PAYMENT = 'subscription/verify-payment';
+export const MEMBERSHIP_CREATE_ORDER = 'subscription/create-order';
 
 
 

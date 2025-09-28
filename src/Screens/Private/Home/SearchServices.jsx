@@ -17,63 +17,141 @@ import Input from '../../../Components/Input';
 import {GET_WITH_TOKEN} from '../../../Backend/Api';
 import {SERVICES} from '../../../Constants/ApiRoute';
 import {useIsFocused} from '@react-navigation/native';
+import {cleanImageUrl} from '../../../Backend/Utility';
 
 const SearchServices = ({navigation, route}) => {
   const [search, setSearch] = useState('');
   const [services, setServices] = useState([]);
-  console.log(services);
+  const [filteredServices, setFilteredServices] = useState([]);
   const id = route?.params?.id;
   const isFocused = useIsFocused();
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const buildApiUrl = (page = 1, searchTerm = '') => {
+    let url = `${SERVICES}?service_category=${id}&page=${page}&per_page=${perPage}`;
+    if (searchTerm.trim() !== '') {
+      url += `&name=${encodeURIComponent(searchTerm.trim())}`;
+    }
+    return url;
+  };
+  const fetchServices = (page = 1, searchTerm = '', shouldAppend = false) => {
+    setLoading(true);
+    GET_WITH_TOKEN(
+      buildApiUrl(page, searchTerm),
+      success => {
+        const responseData = success?.data?.data || [];
+        const paginationInfo = success?.data?.last_page || {};
+        if (shouldAppend) {
+          setServices(prevServices => [...prevServices, ...responseData]);
+        } else {
+          setServices(responseData);
+        }
+        setFilteredServices(responseData);
+        setCurrentPage(page);
+        setTotalPages(paginationInfo || 1);
+        setHasMore(page < (paginationInfo || 1));
+        setLoading(false);
+        setRefreshing(false);
+      },
+      error => {
+        console.error('Error fetching services:', error);
+        setLoading(false);
+        setRefreshing(false);
+      },
+      fail => {
+        setLoading(false);
+        setRefreshing(false);
+      },
+    );
+  };
   useEffect(() => {
     if (isFocused) {
-      setLoading(true);
-      GET_WITH_TOKEN(
-        SERVICES + `?service_category=${id}`,
-        success => {
-          console.log(success, 'dssadadddsadasdasdadadaewaeqe');
-          setServices(success?.data);
-          setLoading(false);
-        },
-        error => setLoading(false),
-        fail => setLoading(false),
-      );
+      setCurrentPage(1);
+      fetchServices(1, '');
     }
-  }, [isFocused]);
+  }, [isFocused, id]);
+
+  useEffect(() => {
+    const searchTimeout = setTimeout(() => {
+      setCurrentPage(1);
+      fetchServices(1, search);
+    }, 500);
+    return () => clearTimeout(searchTimeout);
+  }, [search]);
+
+  const loadMore = () => {
+    if (!loading && hasMore) {
+      fetchServices(currentPage + 1, search, true);
+    }
+  };
+  const onRefresh = () => {
+    setRefreshing(true);
+    setCurrentPage(1);
+    fetchServices(1, search);
+  };
+  const renderFooter = () => {
+    if (!loading || !hasMore) return null;
+
+    return (
+      <View style={styles.footerLoader}>
+        <ActivityIndicator size="small" color={COLOR.primary} />
+        <Typography size={12} color={COLOR.grey} style={{marginLeft: 10}}>
+          Loading more...
+        </Typography>
+      </View>
+    );
+  };
 
   const renderCard = ({item}) => (
     <TouchableOpacity
       activeOpacity={0.85}
       onPress={() => navigation.navigate('ProviderDetails', {id: item?.id})}
       style={styles.card}>
-      {/* Image with Rating Badge */}
-      <View>
-        <Image source={{uri: item?.image}} style={styles.cardImage} />
+      {console.log('Rendering item:', item.image)}
+
+      <View style={styles.imageContainer}>
+        {item?.image ? (
+          <Image
+            source={{uri: cleanImageUrl(item.image)}}
+            style={styles.cardImage}
+            defaultSource={images.placeholder}
+            onError={() => console.log('Image failed to load:', item.image)}
+          />
+        ) : (
+          <View style={styles.placeholderImage}>
+            <Typography color={COLOR.grey}>No Image</Typography>
+          </View>
+        )}
+
         {item?.rating && (
           <View style={styles.ratingBadge}>
             <Typography size={12} font={Font.medium} color={COLOR.white}>
-              ⭐ {item?.rating}
+              ⭐ {item.rating}
             </Typography>
           </View>
         )}
       </View>
 
-      {/* Card Content */}
       <View style={styles.cardContent}>
         <Typography
           size={16}
           font={Font.semibold}
           color={COLOR.black}
           style={styles.cardTitle}>
-          {item?.business_name}
+          {item?.business_name || 'Unknown Business'}
         </Typography>
+
         {item?.business_description && (
           <Typography
-            size={16}
+            size={14}
             font={Font.regular}
-            color={COLOR.black}
-            style={styles.cardTitle}>
-            {item?.business_description}
+            color={COLOR.darkGrey}
+            style={styles.description}>
+            {item.business_description}
           </Typography>
         )}
 
@@ -83,18 +161,9 @@ const SearchServices = ({navigation, route}) => {
             color="#666"
             font={Font.medium}
             style={styles.textRow}>
-            address:📍 {item?.exact_location}
+            📍 {item.exact_location}
           </Typography>
         )}
-        {/* {item?.location_area_served && (
-          <Typography
-            size={13}
-            color="#666"
-            font={Font.medium}
-            style={styles.textRow}>
-            locationAreaServed:📍 {item?.location_area_served}
-          </Typography>
-        )} */}
 
         {item?.years_of_experience && (
           <Typography
@@ -102,25 +171,27 @@ const SearchServices = ({navigation, route}) => {
             color="#666"
             font={Font.medium}
             style={styles.textRow}>
-            experience: 💼 {item?.years_of_experience}
+            💼 {item.years_of_experience} years experience
           </Typography>
         )}
+
         {item?.gender && (
           <Typography
             size={13}
             color="#666"
             font={Font.medium}
             style={styles.textRow}>
-            gender: {item?.gender}
+            👤 {item.gender}
           </Typography>
         )}
+
         {item?.phone_number && (
           <Typography
             size={13}
             color="#666"
             font={Font.medium}
             style={styles.textRow}>
-            phone: +91 {item?.phone_number}
+            📞 +91 {item.phone_number}
           </Typography>
         )}
 
@@ -129,23 +200,27 @@ const SearchServices = ({navigation, route}) => {
           size={13}
           color="#666"
           style={styles.availability}>
-          open: ⏰ {item?.daily_start_time} AM : {item?.daily_end_time} PM
+          ⏰ {item?.daily_start_time || 'N/A'} - {item?.daily_end_time || 'N/A'}
         </Typography>
-        {item?.working_days && (
-          <View style={{flexDirection: 'row', flexWrap: 'wrap', marginTop: 5}}>
+
+        {item?.working_days && item.working_days.length > 0 && (
+          <View style={styles.workingDaysContainer}>
             <Typography size={13} color="#666" font={Font.medium}>
               Working days:{' '}
             </Typography>
-            {item?.working_days?.map((day, index) => (
-              <Typography
-                key={index}
-                size={12}
-                color="#444"
-                font={Font.medium}
-                style={{marginRight: 8}}>
-                {day},
-              </Typography>
-            ))}
+            <View style={styles.daysList}>
+              {item.working_days.map((day, index) => (
+                <Typography
+                  key={index}
+                  size={12}
+                  color="#444"
+                  font={Font.medium}
+                  style={styles.dayText}>
+                  {day}
+                  {index < item.working_days.length - 1 ? ',' : ''}
+                </Typography>
+              ))}
+            </View>
           </View>
         )}
       </View>
@@ -156,10 +231,12 @@ const SearchServices = ({navigation, route}) => {
     <View style={styles.emptyContainer}>
       <Image source={images.noData} style={styles.emptyImage} />
       <Typography size={18} font={Font.medium} style={styles.emptyText}>
-        No services found
+        {search ? 'No services found' : 'No services available'}
       </Typography>
       <Typography size={14} color={COLOR.grey} style={{marginTop: 4}}>
-        Try searching with a different keyword.
+        {search
+          ? 'Try searching with a different keyword.'
+          : 'Check back later for new services.'}
       </Typography>
     </View>
   );
@@ -171,11 +248,11 @@ const SearchServices = ({navigation, route}) => {
         leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
         leftTint={COLOR.black}
       />
-      {/* Search Box (Kept Same) */}
-      <View style={{paddingHorizontal: 5, marginTop: -10, marginBottom: 10}}>
+
+      <View style={styles.searchContainer}>
         <Input
           value={search}
-          onChangeText={v => setSearch(v)}
+          onChangeText={setSearch}
           leftIcon={images.search}
           placeholder="Search for services..."
           inputContainer={{borderColor: COLOR.lightGrey}}
@@ -186,22 +263,27 @@ const SearchServices = ({navigation, route}) => {
         />
       </View>
 
-      {/* Services List */}
-      {loading ? (
-        <ActivityIndicator
-          size="large"
-          color={COLOR.primary}
-          style={{marginTop: 10}}
-        />
-      ) : (
-        <FlatList
-          data={services}
-          keyExtractor={item => item.id.toString()}
-          renderItem={renderCard}
-          contentContainerStyle={{paddingBottom: 120, paddingHorizontal: 5}}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={renderEmpty}
-        />
+      <FlatList
+        data={services}
+        keyExtractor={(item, index) => `${item.id}_${index}`}
+        renderItem={renderCard}
+        contentContainerStyle={styles.listContainer}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={!loading ? renderEmpty : null}
+        ListFooterComponent={renderFooter}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.5}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+      />
+
+      {loading && services.length === 0 && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={COLOR.primary} />
+          <Typography size={14} color={COLOR.grey} style={{marginTop: 10}}>
+            Loading services...
+          </Typography>
+        </View>
       )}
     </View>
   );
@@ -215,12 +297,26 @@ const styles = StyleSheet.create({
     backgroundColor: COLOR.white,
     paddingHorizontal: 10,
   },
+  searchContainer: {
+    paddingHorizontal: 5,
+    marginTop: -10,
+    marginBottom: 10,
+  },
+  listContainer: {
+    paddingBottom: 120,
+    paddingHorizontal: 5,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 50,
+  },
 
-  /* Card Styles */
   card: {
     backgroundColor: COLOR.white,
     borderRadius: 16,
-    marginVertical: 12,
+    marginVertical: 8,
     overflow: 'hidden',
     elevation: 3,
     shadowColor: '#000',
@@ -228,9 +324,21 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     shadowOffset: {width: 0, height: 2},
   },
+  imageContainer: {
+    position: 'relative',
+  },
   cardImage: {
     width: '100%',
     height: 190,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  placeholderImage: {
+    width: '100%',
+    height: 190,
+    backgroundColor: COLOR.lightGrey,
+    justifyContent: 'center',
+    alignItems: 'center',
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
   },
@@ -250,6 +358,10 @@ const styles = StyleSheet.create({
   cardTitle: {
     marginBottom: 6,
   },
+  description: {
+    marginBottom: 8,
+    lineHeight: 18,
+  },
   textRow: {
     marginBottom: 4,
   },
@@ -257,8 +369,25 @@ const styles = StyleSheet.create({
     marginTop: 6,
     color: COLOR.primary,
   },
+  workingDaysContainer: {
+    marginTop: 8,
+  },
+  daysList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 4,
+  },
+  dayText: {
+    marginRight: 6,
+  },
 
-  /* Empty State */
+  footerLoader: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
+  },
+
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',

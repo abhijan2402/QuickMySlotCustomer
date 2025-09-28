@@ -13,7 +13,6 @@ import {windowWidth} from '../Constants/Dimensions';
 
 const Tab = createBottomTabNavigator();
 
-const CustomTabBarButton = ({children, onPress}) => <CustomBarButton />;
 
 const BottomNavigation = () => {
   const insets = useSafeAreaInsets();
@@ -73,7 +72,6 @@ const BottomNavigation = () => {
         },
         tabBarStyle: {
           paddingVertical: 8,
-          height: 60,
           position: 'relative',
           height: 60 + insets.bottom, // dynamically add safe area
           paddingBottom: insets.bottom, // ensures icons/labels are above gesture bar
@@ -88,8 +86,8 @@ const BottomNavigation = () => {
             <Image
               source={{uri: iconUri}}
               style={{
-                width: 24,
-                height: 24,
+                width: 22,
+                height: 22,
                 tintColor: focused ? COLOR.primary : 'gray',
               }}
               resizeMode="contain"
@@ -105,7 +103,7 @@ const BottomNavigation = () => {
             <Text
               style={{
                 color,
-                fontSize: 11,
+                fontSize: 10,
                 marginTop: 4,
                 fontFamily: Font.medium,
                 textAlign: 'center',

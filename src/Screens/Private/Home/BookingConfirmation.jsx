@@ -13,9 +13,14 @@ import Button from '../../../Components/UI/Button';
 import {images} from '../../../Components/UI/images';
 import ConfirmModal from '../../../Components/UI/ConfirmModel';
 import {handleCall, openMapWithDirections} from '../../../Constants/Utils';
+import moment from 'moment';
 
-const BookingConfirmation = ({navigation}) => {
+const BookingConfirmation = ({navigation, route}) => {
   const [cancelBooking, setCancelBooking] = useState(false);
+  const data = route?.params?.data;
+  console.log('Booking Data:--->>>>', data);
+  const timeKeys = Object.keys(data?.bookingData?.data?.schedule_time);
+  console.log('Time keys:', timeKeys); // Output: ["10:00", "10:30"]
 
   return (
     <View style={styles.container}>
@@ -71,13 +76,12 @@ const BookingConfirmation = ({navigation}) => {
             <View style={styles.section}>
               <Typography style={styles.sectionTitle}>Salon Details</Typography>
               <Typography style={styles.salonName}>
-                Abc Hairdressing, Sector 5 Vidhyadhar nagar, Jaipur
+                {data?.businessData?.business_name}
               </Typography>
               <View style={styles.salonRow}>
                 <Image source={images.logo} style={styles.salonLogo} />
                 <Typography style={styles.salonAddress}>
-                  Shop No 112, 113 & 105, 1st floor, Good Earth City Center,
-                  Sohna Rd, Sector 50, Gurugram, Haryana 122018
+                  {data?.businessData?.exact_location}
                 </Typography>
               </View>
 
@@ -85,16 +89,14 @@ const BookingConfirmation = ({navigation}) => {
               <View style={styles.actionRow}>
                 <TouchableOpacity
                   style={styles.actionBtn}
-                  onPress={() => handleCall('1234567890')}>
+                  onPress={() => handleCall(data?.businessData?.phone_number)}>
                   <Image source={images.call} style={styles.actionIcon} />
                   <Typography style={styles.actionText}>Timings</Typography>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.actionBtn}
                   onPress={() =>
-                    openMapWithDirections(
-                      'Shop no.36, Ground Floor, AIPL JOY STREET, Badshahpur, Sector 66, Gurugram, Haryana 122018',
-                    )
+                    openMapWithDirections(data?.businessData?.exact_location)
                   }>
                   <Image source={images.mark} style={styles.actionIcon} />
                   <Typography style={styles.actionText}>
@@ -123,12 +125,23 @@ const BookingConfirmation = ({navigation}) => {
                 Appointment Details
               </Typography>
               <Typography style={styles.detailText}>
-                Appointment Id: 293037
+                Appointment Id: {data?.bookingData?.data?.order_id}
               </Typography>
               <Typography style={styles.detailText}>
-                Date: 12th July, 2025
+                Date:{' '}
+                {moment(
+                  Object.values(
+                    data?.bookingData?.data?.schedule_time || {},
+                  )[0],
+                  'DD/MM/YYYY',
+                ).format('DD MMM, YYYY')}
               </Typography>
-              <Typography style={styles.detailText}>Time: 12:30 PM</Typography>
+              <Typography style={styles.detailText}>
+                Time:{' '}
+                {timeKeys?.map(v => {
+                  return moment(v, 'HH:mm').format('hh:mm A') + ', ';
+                })}
+              </Typography>
             </View>
 
             {/* Services Booked */}
@@ -136,20 +149,24 @@ const BookingConfirmation = ({navigation}) => {
               <Typography style={styles.sectionTitle}>
                 Services Booked
               </Typography>
-              <View style={styles.serviceRow}>
-                <Image
-                  source={{
-                    uri: 'https://cdn-icons-png.flaticon.com/128/3004/3004613.png',
-                  }}
-                  style={styles.serviceIcon}
-                />
-                <View>
-                  <Typography style={styles.serviceName}>Haircut</Typography>
-                  <Typography style={styles.serviceSubText}>
-                    Includes wash and blast dry
-                  </Typography>
+              {data?.selectedServices?.map((service, index) => (
+                <View style={styles.serviceRow}>
+                  <Image
+                    source={{
+                      uri: 'https://cdn-icons-png.flaticon.com/128/3004/3004613.png',
+                    }}
+                    style={styles.serviceIcon}
+                  />
+                  <View>
+                    <Typography style={styles.serviceName}>
+                      {service?.name}
+                    </Typography>
+                    <Typography style={styles.serviceSubText}>
+                      Includes wash and blast dry
+                    </Typography>
+                  </View>
                 </View>
-              </View>
+              ))}
             </View>
 
             {/* Cancel & Reschedule */}
@@ -176,6 +193,9 @@ const BookingConfirmation = ({navigation}) => {
                 title={'⏰ Reschedule'}
                 leftImgStyle={{height: 16, width: 16, marginRight: 10}}
                 containerStyle={{width: '45%'}}
+                onPress={() =>
+                  navigation.navigate('BottomNavigation')
+                }
               />
             </View>
           </>

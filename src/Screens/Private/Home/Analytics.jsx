@@ -32,7 +32,7 @@ const MyAnalytics = ({navigation}) => {
     GET_WITH_TOKEN(
       GET_ANALYTICS,
       success => {
-        console.log(success);
+        console.log(success ,'analytics--->>');
         setData(success?.data);
         setLoading(false);
       },
@@ -68,7 +68,7 @@ const MyAnalytics = ({navigation}) => {
               <Typography style={styles.label}>Spent This Month</Typography>
             </View>
             <View style={styles.box}>
-              <Typography style={styles.amount}>${data?.spend_this_month}</Typography>
+              <Typography style={styles.amount}>${data?.saved_this_month}</Typography>
               <Typography style={styles.label}>Saved This Month</Typography>
             </View>
             <View style={styles.box}>

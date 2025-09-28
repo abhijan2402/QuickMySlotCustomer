@@ -8,19 +8,37 @@ import Geolocation from '@react-native-community/geolocation';
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import SimpleToast from 'react-native-simple-toast';
 
-export const RFV = e => {
-  return e;
-};
 export const windowWidth = Dimensions.get('window').width;
 export const windowHeight = Dimensions.get('window').height;
+export const DATE_FORMATE = 'YYYY-MM-DD';
+export const isIos = Platform.OS === 'ios';
+
+export const CURRENCY = '₹';
+
+export const GOOGLE_API = 'AIzaSyDsRXO8vkZFS6TnnNs6i0MD_d_De7d5xqo';
+
+export const razorpay_payment_id = 'pay_RMH4qyovNwBBqL';
+export const razorpay_order_id = 'order_RMH4OwCW1KAScJ';
+export const razorpay_signature = '2f1d5372d9853398655d94a9ddd21f289c2e7131f6689e10a0323502981e6cf3';
+
+export const isValidEmail = email => regex.email.test(email);
+export const isValidPassword = email => regex.email.test(email);
+export const isValidPhone = phone => regex.phoneNumber.test(phone);
 
 export const ToastMsg = (message, time = 100) => {
   let timeout = setTimeout(() => {
-    SimpleToast.show(message ? message : 'Sorry, Something went wrong. Please try again later.',SimpleToast.LONG);
+    SimpleToast.show(
+      message
+        ? message
+        : 'Sorry, Something went wrong. Please try again later.',
+      SimpleToast.LONG,
+    );
     clearTimeout(timeout);
   }, 500);
 };
-
+export const RFV = e => {
+  return e;
+};
 export const regex = {
   email: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
   phoneNumber: /^(0|[1-9][0-9]*)$/,
@@ -47,10 +65,6 @@ export const parseValues = data => {
   }
   return parsedData;
 };
-export const isValidEmail = email => regex.email.test(email);
-export const isValidPassword = email => regex.email.test(email);
-export const isValidPhone = phone => regex.phoneNumber.test(phone);
-
 export const isValidValue = ({
   value = '',
   required = true,
@@ -111,8 +125,6 @@ export function getRegionForCoordinates(points) {
     longitudeDelta: +deltaY,
   };
 }
-export const isIos = Platform.OS === 'ios';
-
 export const injectedJavaScript = `
 const meta = document.createElement('meta');
 meta.setAttribute('name', 'viewport');
@@ -131,7 +143,6 @@ document.addEventListener('gesturestart', function(event) {
 
 true; // note: this is needed to return a true value, preventing issues in WebView
 `;
-
 export const Shadow = (elevation = 5) => {
   return Platform.select({
     android: {
@@ -145,10 +156,6 @@ export const Shadow = (elevation = 5) => {
     },
   });
 };
-export const DATE_FORMATE = 'YYYY-MM-DD';
-
-export const CURRENCY = '₹';
-
 export const getCountryDetails = addList => {
   if (addList) {
     let countryCode = '';
@@ -185,7 +192,6 @@ export const getCountryDetails = addList => {
     return add_data;
   }
 };
-
 export const getCurrentLocation = async () => {
   const requestPermissions = async () => {
     if (Platform.OS === 'android') {
@@ -228,8 +234,6 @@ export const getCurrentLocation = async () => {
     throw new Error(error.message || 'Error checking location permissions');
   }
 };
-
-//find possible slots
 export const getNextAvailableDate = (selectedDate, location_id) => {
   if (!location_id?.provider_availability?.length) return null;
 
@@ -269,4 +273,20 @@ export const getNextAvailableDate = (selectedDate, location_id) => {
     }
   }
   return null; // No next available date in current month
+};
+export const cleanImageUrl = url => {
+  if (!url) return null;
+
+  // If HTTPS fails, try forcing HTTP
+  let cleanedUrl = url.replace(/(https?:\/\/[^\/]+)\/\//, '$1/');
+
+  // If URL starts with https but we know it might fail, try http
+  if (
+    cleanedUrl.startsWith('https://') &&
+    url.includes('lemonchiffon-walrus-503913.hostingersite.com')
+  ) {
+    cleanedUrl = cleanedUrl.replace('https://', 'http://');
+  }
+
+  return cleanedUrl;
 };

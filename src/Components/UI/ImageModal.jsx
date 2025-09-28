@@ -1,307 +1,310 @@
-
 import React from 'react';
 import {
-  View,
-  Text,
   StyleSheet,
+  Modal,
+  View,
   TouchableOpacity,
   Image,
-  Modal,
-  StatusBar,
-  Platform
+  Platform,
+  PermissionsAndroid,
 } from 'react-native';
-import { openCamera, openPicker } from 'react-native-image-crop-picker';
-import { PERMISSIONS, RESULTS, check, request } from 'react-native-permissions';
-import { Typography } from './Typography';
+import ImageCropPicker from 'react-native-image-crop-picker';
+import DocumentPicker, {pick} from '@react-native-documents/picker';
 import SimpleToast from 'react-native-simple-toast';
+import { Typography } from './Typography';
+import { Font } from '../../Constants/Font';
+import { images } from './images';
 import { COLOR } from '../../Constants/Colors';
-
+import { windowWidth } from '../../Backend/Utility';
 
 const ImageModal = ({
-  multiple = false,
   showModal,
-  close = () => { },
-  selected = () => { },
-  mediaType = 'photo',
+  documents = false,
+  document = false,
+  close = () => {},
+  selected = () => {},
+  TimeVal,
+  deleteImage = false,
+  showCropCircle = false,
+  onPressRemove = () => {},
 }) => {
-  const isIos = Platform.OS === 'ios';
-  // const [check, setCheck] = React.useState(1);
-  const checkBox = e => {
-    setCheck(e);
-    var ImagePicker = openPicker;
-    if (e == 'camera') {
-      ImagePicker = openCamera;
+
+  const requestCameraPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          {
+            title: 'Camera Permission',
+            message: 'App needs access to your camera.',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        return false;
+      }
     }
-    setTimeout(() => {
-      ImagePicker({
-        mediaType: mediaType,
-        width: 500,
-        height: 500,
+    return true;
+  };
+
+  const requestGalleryPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        if (Platform.Version >= 33) {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
+            {
+              title: 'Gallery Permission',
+              message: 'App needs access to your gallery to select images.',
+              buttonNeutral: 'Ask Me Later',
+              buttonNegative: 'Cancel',
+              buttonPositive: 'OK',
+            },
+          );
+          return granted === PermissionsAndroid.RESULTS.GRANTED;
+        } else {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+            {
+              title: 'Gallery Permission',
+              message: 'App needs access to your gallery to select images.',
+              buttonNeutral: 'Ask Me Later',
+              buttonNegative: 'Cancel',
+              buttonPositive: 'OK',
+            },
+          );
+          return granted === PermissionsAndroid.RESULTS.GRANTED;
+        }
+      } catch (err) {
+        console.error('Gallery permission error:', err);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const captureImage = async (type, cropImage = 'Profile', callback = () => {}) => {
+    try {
+      const options = {
+        mediaType: 'photo',
+        ...(!documents && {
+          width: 500,
+          height: 500,
+        }),
+        quality: 1,
         cropping: true,
-      })
-        .then(async response => {
-          selected(response, e);
-        })
-        .catch(err => { });
-    }, 200);
+        includeBase64: true,
+        showCropFrame: true,
+        cropperCircleOverlay: showCropCircle,
+      };
+
+      if (type === 'camera') {
+        const hasPermission = await requestCameraPermission();
+        if (!hasPermission) {
+          close();
+          SimpleToast.show(
+            'Camera permission denied. Please provide camera permission to use this feature.',
+            SimpleToast.SHORT,
+          );
+          return;
+        }
+      } else {
+        const hasPermission = await requestGalleryPermission();
+        if (!hasPermission) {
+          close();
+          SimpleToast.show(
+            'Gallery permission denied. Please provide gallery permission to use this feature.',
+            SimpleToast.SHORT,
+          );
+          return;
+        }
+      }
+
+      const pickerFn = type === 'camera'
+        ? ImageCropPicker.openCamera
+        : ImageCropPicker.openPicker;
+      const res = await pickerFn(options);
+
+      const imageData = {
+        name: res.filename || res.path.split('/').pop(),
+        type: res.mime,
+        uri: res.path,
+      };
+
+      callback(imageData, type);
+      close();
+    } catch (err) {
+      if (err.code !== 'E_PICKER_CANCELLED') {
+        console.error('Image picker error:', err?.message);
+        SimpleToast.show(err?.message, SimpleToast.SHORT);
+      }
+    }
   };
+
   const OpenCamera = () => {
-    setTimeout(() => {
-      openCamera({
-        mediaType: mediaType,
-        width: 500,
-        height: 500,
-        cropping: mediaType != 'video',
-      })
-        .then(async response => {
-          selected(response, 'camera');
-          close();
-        })
-        .catch(err => {
-          close();
-        });
-    }, 200);
+    captureImage('camera', 'Profile', selected);
   };
+
   const OpenGallery = () => {
-    setTimeout(() => {
-      openPicker({
-        mediaType: mediaType,
-        width: 500,
-        height: 500,
-        cropping: mediaType != 'video',
-        multiple: multiple,
-      })
-        .then(async response => {
-          selected(response, 'gallery');
-          close();
-        })
-        .catch(err => {
-          close();
-        });
-    }, 200);
+    captureImage('gallery', 'Profile', selected);
   };
-  const checkCameraPermission = () => {
-    check(!isIos ? PERMISSIONS.ANDROID.CAMERA : PERMISSIONS.IOS.CAMERA)
-      .then(result => {
-        console.warn("ress",result);
-        switch (result) {
-          case RESULTS.UNAVAILABLE:
-            requestCameraPermission();
-            SimpleToast.show(
-              `Camera feature is not available (on this device / in this context)`, SimpleToast.SHORT
-            );
-            console.log(
-              'This feature is not available (on this device / in this context)',
-            );
-            break;
-          case RESULTS.DENIED:
-            console.log(
-              'The permission has not been requested / is denied but requestable',
-            );
-            requestCameraPermission();
-            break;
-          case RESULTS.LIMITED:
-            requestCameraPermission();
-            console.log('The permission is limited: some actions are possible');
-            break;
-          case RESULTS.GRANTED:
-            OpenCamera();
-            console.log('The permission is granted');
-            break;
-          case RESULTS.BLOCKED:
-            SimpleToast.show(`Please provide camera permission to use this feature.`);
-            console.log('The permission is denied and not requestable anymore');
-            break;
-        }
-      })
-      .catch(error => {
-        console.log("error", error)
-        SimpleToast.show(`Please provide camera permission to use this feature.`, SimpleToast.SHORT);
+
+  const OpenDocument = async () => {
+    try {
+      const [file] = await pick({
+        type: ['application/pdf'],
+        allowMultiSelection: false,
       });
+      selected(file, 'document');
+      close();
+    } catch (err) {
+      if (!DocumentPicker.isCancel(err)) {
+        console.error('Document picker error:', err);
+        SimpleToast.show('Error picking document', SimpleToast.SHORT);
+      }
+    }
   };
 
-  const requestCameraPermission = () =>
-    request(isIos ? PERMISSIONS.IOS.CAMERA : PERMISSIONS.ANDROID.CAMERA)
-      .then(result => {
-        if (result === 'granted') OpenCamera();
-        else if (result === 'denied') checkCameraPermission();
-      })
-      .catch(e => console.warn(e));
-
-  const checkPhotoPermission = () => {
-    check(
-      !isIos
-        ? PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE
-        : PERMISSIONS.IOS.PHOTO_LIBRARY,
-    )
-      .then(result => {
-        switch (result) {
-          case RESULTS.UNAVAILABLE:
-            SimpleToast.show(
-              `This feature is not available (on this device / in this context)`, SimpleToast.SHORT
-            );
-            console.log(
-              'This feature is not available (on this device / in this context)',
-            );
-            break;
-          case RESULTS.DENIED:
-            console.log(
-              'The permission has not been requested / is denied but requestable',
-            );
-            requestPhotosPermission();
-            break;
-          case RESULTS.LIMITED:
-            requestPhotosPermission();
-            console.log('The permission is limited: some actions are possible');
-            break;
-          case RESULTS.GRANTED:
-            OpenGallery();
-            console.log('The permission is granted');
-            break;
-          case RESULTS.BLOCKED:
-            SimpleToast.show(`Please provide storage permission to use this feature.`, SimpleToast.SHORT);
-            console.log('The permission is denied and not requestable anymore');
-            break;
-        }
-      })
-      .catch(error => {
-        console.log("hereee", error)
-        SimpleToast.show(`Please provide storage permission to use this feature`, SimpleToast.SHORT);
-      });
-  };
-
-  const requestPhotosPermission = () => {
-    request(
-      isIos
-        ? PERMISSIONS.IOS.PHOTO_LIBRARY
-        : Platform.constants['Release'] > 12
-          ? PERMISSIONS.ANDROID.READ_MEDIA_IMAGES
-          : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE,
-    )
-      .then(result => {
-        if (result === 'granted' || result === 'limited') OpenGallery();
-        else if (result === 'denied') checkPhotoPermission();
-      })
-      .catch(e => console.warn(e));
-  };
   return (
-    <>
-      <Modal
-        statusBarTranslucent
-        onRequestClose={() => close()}
-        transparent={true}
-        style={{ height: '100%', flex: 1 }}
-        visible={showModal}
-        animationType="fade"
-        presentationStyle="overFullScreen"
-      >
-        <View style={styles.modalContainer}>
-          <TouchableOpacity
-            style={{
-              height: '50%',
-              width: '100%',
-              backgroundColor: 'transparent',
-            }}
-            onPress={() => close()}
-          />
-          <View style={styles.bottomModal} >
-            <View style={styles.modalShowSection}>
-              <TouchableOpacity
-                activeOpacity={1}
-                style={{ alignSelf: 'flex-end', margin: 10 }}
-                onPress={() => close()}>
-                {/* <Icon source={icons?.ic_cancel} size={15} /> */}
-              </TouchableOpacity>
-              <View style={styles.modalView}>
-                <View style={{ alignItems: 'center' }}>
-                  <TouchableOpacity
-                    style={styles.checkView}
-                    onPress={checkCameraPermission}>
-                    <Image
-                      style={{ height: 50, width: 50, }}
-                      source={require('../../assets/Images/camera.png')} // Replace with your camera icon
-                    />
-                    <Typography size={16}
-                      color={COLOR.black}>
-                      {"Camera"}
-                    </Typography>
-                  </TouchableOpacity>
-
-                </View>
-                <View style={{ alignItems: 'center' }}>
-                  <TouchableOpacity
-                    style={styles.checkView}
-                    onPress={checkPhotoPermission}>
-                    <Image
-                      style={{ height: 50, width: 50, }}
-                      source={require('../../assets/Images/picture.png')} // Replace with your gallery icon
-                    />
-                    <Typography
-                      size={16}
-                      color={COLOR.black}
-                    >
-                      {"Gallery"}
-                    </Typography>
-                  </TouchableOpacity>
-                </View>
+    <Modal
+      statusBarTranslucent
+      onRequestClose={close}
+      transparent
+      animationType="slide"
+      visible={showModal}>
+      <View style={styles.modalContainer}>
+        <View
+          style={[
+            styles.modalContent,
+            {height: documents ? windowWidth / 1.6 : windowWidth / 2},
+          ]}>
+          <View style={styles.modalHeader}>
+            <Typography size={20} font={Font.semibold}>
+              {documents ? 'Upload Document' : 'Upload Profile Image'}
+            </Typography>
+            <TouchableOpacity onPress={close}>
+              <Image
+                source={images.close}
+                style={{height: 20, width: 20, }}
+              />
+            </TouchableOpacity>
+          </View>
+          <View
+            style={[
+              styles.modalView,
+              {
+                height: documents || document ? 280 : deleteImage ? 220 : 200,
+              },
+            ]}>
+            <TouchableOpacity style={styles.checkView} onPress={OpenCamera}>
+              <View style={styles.iconContainer}>
+                <Image
+                  style={styles.icon}
+                  source={images.camera}
+                />
               </View>
-            </View>
+              <Typography size={15} style={{marginLeft: 15}}>
+                Capture Photo
+              </Typography>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.checkView} onPress={OpenGallery}>
+              <View style={styles.iconContainer}>
+                <Image
+                  style={styles.icon}
+                  source={images.gallery}
+                />
+              </View>
+              <Typography size={15} style={{marginLeft: 15}}>
+                Gallery Photo
+              </Typography>
+            </TouchableOpacity>
+
+            {/* {!documents && (
+              <TouchableOpacity style={styles.checkView} onPress={onPressRemove}>
+                <View style={styles.iconContainer}>
+                  <Image style={[styles.icon]} source={images.Document} />
+                </View>
+                <Typography size={20} style={{marginLeft: 15}}>
+                  Remove Photo
+                </Typography>
+              </TouchableOpacity>
+            )} */}
+
+            {(documents || document) && (
+              <TouchableOpacity style={styles.checkView} onPress={OpenDocument}>
+                <View style={styles.iconContainer}>
+                  <Image
+                    style={styles.icon}
+                    source={images.documentation}
+                  />
+                </View>
+                <Typography size={15} style={{marginLeft: 15}}>
+                  Choose Document
+                </Typography>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
-      </Modal>
-    </>
+      </View>
+    </Modal>
   );
 };
+
+export default ImageModal;
 
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    backgroundColor: COLOR.black + '80',
     justifyContent: 'flex-end',
-    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.4)',
   },
-  bottomModal: {
-    width: '100%',
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
+  modalContent: {
+    backgroundColor: COLOR.white,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    ...Platform.select({
+      ios: {
+        shadowColor: 'black',
+        shadowOffset: {width: 0, height: 2},
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 15,
+      },
+    }),
   },
-  modalView: {
-    width: '100%',
-    paddingBottom: 30,
-    backgroundColor: COLOR?.white,
+  modalHeader: {
+    padding: 8,
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: COLOR.primary,
     paddingHorizontal: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  modalShowSection: {
-    width: '90%',
-    backgroundColor: COLOR?.white,
-    flexWrap: 'wrap',
-    borderRadius: 8,
-    marginBottom: 20,
   },
   checkView: {
-    // width: '45%',
-    paddingVertical: 10,
     alignItems: 'center',
+    flexDirection: 'row',
+    width: '100%',
   },
-  modalText: {
-    fontSize: 16,
-    color: COLOR?.black,
+  modalView: {
+    borderRadius: 10,
+    marginTop: 20,
   },
-  check: {
-    height: 16,
-    width: 16,
-    borderRadius: 15,
-    backgroundColor: COLOR?.backgroundLight,
-    borderWidth: 2,
-    borderColor: COLOR?.dullWhite,
-    marginRight: 15,
+  iconContainer: {
+    borderRadius: 50,
+    height: 50,
+    width: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  icon: {
+    height: 25,
+    width: 25,
   },
 });
-
-export default ImageModal

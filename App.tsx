@@ -23,18 +23,6 @@ const App = () => {
         </View>
       </Provider>
     </SafeAreaProvider>
-
-    // <Provider store={store}>
-    // <AuthProvider>
-    //   <View style={styles.safeArea}>
-    //     <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-    //     <NavigationContainer>
-    //       <MainNavigation />
-    //       {/* <BankDetails /> */}
-    //     </NavigationContainer>
-    //   </View>
-    // </AuthProvider>
-    // </Provider>
   );
 };
 

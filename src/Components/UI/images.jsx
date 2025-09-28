@@ -23,4 +23,20 @@ export const images = {
   nodata: require('../../assets/Images/nodata.png'),
   search: require('../../assets/Images/search.png'),
   profile: require('../../assets/Images/profile.png'),
+  clock: require('../../assets/Images/clock.png'),
+
+
+  user: require('../../assets/Images/user.png'),
+  membership: require('../../assets/Images/premium.png'),
+  tc: require('../../assets/Images/term-loan.png'),
+  wallet: require('../../assets/Images/wallet.png'),
+  supportAccount: require('../../assets/Images/support.png'),
+  aboutUs: require('../../assets/Images/about-us.png'),
+  userAccount: require('../../assets/Images/addAccount.png'),
+  faq: require('../../assets/Images/chat.png'),
+  upload: require('../../assets/Images/cloud-computing.png'),
+  gallery: require('../../assets/Images/picture.png'),
+  camera: require('../../assets/Images/camera.png'),
+  documentation: require('../../assets/Images/documentation.png'),
+
 };

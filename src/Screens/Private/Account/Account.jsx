@@ -15,8 +15,10 @@ import {Typography} from '../../../Components/UI/Typography';
 import {Font} from '../../../Constants/Font';
 import {useDispatch, useSelector} from 'react-redux';
 import {isAuth, logOut, Token, userDetails} from '../../../Redux/action';
-import { DELETE_ACCOUNT } from '../../../Constants/ApiRoute';
-import { POST_WITH_TOKEN } from '../../../Backend/Api';
+import {DELETE_ACCOUNT} from '../../../Constants/ApiRoute';
+import {POST_WITH_TOKEN} from '../../../Backend/Api';
+import {cleanImageUrl} from '../../../Backend/Utility';
+import { images } from '../../../Components/UI/images';
 
 const Account = ({navigation}) => {
   const {setUser} = useContext(AuthContext);
@@ -25,79 +27,65 @@ const Account = ({navigation}) => {
   const [deleteAccount, setDeleteAccount] = useState(false);
   const dispatch = useDispatch();
   const userdata = useSelector(store => store.userDetails);
-    const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const token = useSelector(store => store.Token);
   console.log(token);
-  
-
 
   const profileImage = userdata?.image
     ? userdata?.image
     : 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+  console.log(userdata, 'profileImageprofileImage-->>');
 
   const arrowIcon = 'https://cdn-icons-png.flaticon.com/512/271/271228.png'; // right arrow icon
-
   const tabs = [
     {
       id: 1,
       title: 'Edit Profile',
-      icon: 'https://cdn-icons-png.flaticon.com/128/1077/1077114.png',
+      icon: images.user,
       navigate: 'EditProfile',
     },
-    // {
-    //   id: 2,
-    //   title: 'My Appointments',
-    //   icon: 'https://cdn-icons-png.flaticon.com/128/9411/9411437.png',
-    //   navigate: 'Appointment',
-    // },
+    {
+      id: 2,
+      title: 'Membership',
+      icon:images.membership,
+      navigate: 'Membership',
+    },
     {
       id: 7,
       title: 'QuickMySlot Wallet',
-      icon: 'https://cdn-icons-png.flaticon.com/128/60/60484.png',
+      icon: images.wallet,
       navigate: 'Wallet',
     },
     {
       id: 3,
       title: 'Terms & Conditions',
-      icon: 'https://cdn-icons-png.flaticon.com/128/10349/10349031.png',
+      icon: images.tc,
       navigate: 'Cms',
-      params: {
-        title: `Terms & Conditions`,
-        slug: 'terms-condition',
-      },
+      params: {title: 'Terms & Conditions', slug: 'terms-condition'},
     },
     {
       id: 4,
       title: 'About Us',
-      icon: 'https://cdn-icons-png.flaticon.com/128/1/1176.png',
+      icon: images.aboutUs,
       navigate: 'Cms',
-      params: {
-        title: `About Us`,
-        slug: 'about-us',
-      },
+      params: {title: 'About Us', slug: 'about-us'},
     },
     {
       id: 5,
       title: 'Support',
-      icon: 'https://cdn-icons-png.flaticon.com/128/4460/4460756.png',
+      icon: images.supportAccount,
       navigate: 'Support',
     },
     {
       id: 6,
       title: 'Invite family and Friends',
-      icon: 'https://cdn-icons-png.flaticon.com/128/10206/10206656.png',
+      icon: images.userAccount,
       navigate: 'Invite',
     },
-    // {
-    //   id: 7,
-    //   title: 'Change Password',
-    //   icon: 'https://cdn-icons-png.flaticon.com/128/11135/11135307.png',
-    //   navigate: 'ForgotPassword',
-    // },
     {
       id: 8,
       title: 'FAQ',
-      icon: 'https://cdn-icons-png.flaticon.com/128/1660/1660165.png',
+      icon: images.faq,
       navigate: 'Faq',
     },
   ];
@@ -110,7 +98,6 @@ const Account = ({navigation}) => {
     console.log('User logged out');
   };
 
-  
   const handleDeleteAccount = () => {
     setLoading(true);
     POST_WITH_TOKEN(
@@ -139,7 +126,10 @@ const Account = ({navigation}) => {
       />
       {/* Profile Section */}
       <View style={styles.profileSection}>
-        <Image source={{uri: profileImage}} style={styles.profileImage} />
+        <Image
+          source={{uri: cleanImageUrl(profileImage)}}
+          style={styles.profileImage}
+        />
         <Typography font={Font.semibold} variant="h2" color={COLOR.black}>
           {userdata?.name}
         </Typography>
@@ -160,7 +150,7 @@ const Account = ({navigation}) => {
               activeOpacity={0.7}
               onPress={() => navigation.navigate(item.navigate, item.params)}>
               <View style={styles.tabLeft}>
-                <Image source={{uri: item.icon}} style={styles.leftIcon} />
+                <Image source={item.icon} style={styles.leftIcon} />
                 <Typography font={Font.semibold} size={16} color={COLOR.black}>
                   {item.title}
                 </Typography>
@@ -205,7 +195,7 @@ const Account = ({navigation}) => {
         yesTitle="Yes"
         noTitle="No"
         onPressYes={() => {
-          handleDeleteAccount()
+          handleDeleteAccount();
         }}
         onPressNo={() => setDeleteAccount(false)}
       />

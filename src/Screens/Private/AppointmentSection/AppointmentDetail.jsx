@@ -16,13 +16,15 @@ import {Font} from '../../../Constants/Font';
 import {useIsFocused} from '@react-navigation/native';
 import {GET_WITH_TOKEN, POST_WITH_TOKEN} from '../../../Backend/Api';
 import {CANCEL_BOOKING, GET_BOOKING_DETAILS} from '../../../Constants/ApiRoute';
+import {images} from '../../../Components/UI/images';
+import moment from 'moment';
 
 const AppointmentDetail = ({route, navigation}) => {
   const [cancelAppointment, setCancelAppointment] = useState(false);
   const isFocused = useIsFocused();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(false);
-
+  const id = route?.params?.appointment?.id || '';
   useEffect(() => {
     if (isFocused) {
       getBookingList();
@@ -32,9 +34,9 @@ const AppointmentDetail = ({route, navigation}) => {
   const getBookingList = () => {
     setLoading(true);
     GET_WITH_TOKEN(
-      GET_BOOKING_DETAILS + 27,
+      GET_BOOKING_DETAILS + id,
       success => {
-        console.log(success);
+        console.log(success, 'booking details');
         setData(success?.data);
         setLoading(false);
       },
@@ -49,7 +51,7 @@ const AppointmentDetail = ({route, navigation}) => {
     );
   };
 
-    const CancelBooking = () => {
+  const CancelBooking = () => {
     setLoading(true);
     POST_WITH_TOKEN(
       CANCEL_BOOKING + 27,
@@ -60,8 +62,8 @@ const AppointmentDetail = ({route, navigation}) => {
       error => {
         setLoading(false);
         console.log(error);
-         setCancelAppointment(false)
-        navigation.goBack()
+        setCancelAppointment(false);
+        navigation.goBack();
       },
       fail => {
         setLoading(false);
@@ -70,7 +72,12 @@ const AppointmentDetail = ({route, navigation}) => {
     );
   };
 
-const [time, date] = Object.entries(data?.schedule_time ?? {})[0] || [];
+  const [time, date] = Object.entries(data?.schedule_time ?? {})[0] || [];
+  const dateKeys = moment(
+    Object.values(data?.schedule_time || route?.params?.appointment?.schedule_time || {})[0],
+    'DD/MM/YYYY',
+  ).format('DD MMM, YYYY');
+  const timeKeys = Object.keys(data?.schedule_time ||route?.params?.appointment?.schedule_time);
   const amount = Number(data?.amount) || 0;
   const tax = Number(data?.tax) || 0;
   const platformFee = Number(data?.platform_fee) || 0;
@@ -98,7 +105,6 @@ const [time, date] = Object.entries(data?.schedule_time ?? {})[0] || [];
     total: 610,
     paymentMethod: 'UPI (Google Pay)',
   };
-
   return (
     <View style={styles.container}>
       <HomeHeader
@@ -112,19 +118,32 @@ const [time, date] = Object.entries(data?.schedule_time ?? {})[0] || [];
         {/* Shop Info */}
         <View style={styles.card}>
           <Typography style={styles.sectionTitle}>Shop Details</Typography>
-          <Image source={{uri: data?.vendor?.image}} style={styles.shopImg} />
-          <Typography style={styles.shopName}>
-            {data?.vendor?.business_name}
-          </Typography>
+          <Image
+            source={{uri: data?.vendor?.image || data?.service?.image}}
+            style={styles.shopImg}
+          />
+          <Typography style={styles.shopName}>{data?.vendor?.name}</Typography>
           <TouchableOpacity onPress={() => handleOpenMap('')}>
-            <Typography style={[styles.text, {marginTop: 3}]}>
-              📍{data?.vendor?.address}
-            </Typography>
+            <View style={styles.infoRow}>
+              <Image
+                source={images.mark}
+                style={{height: 16, width: 16, marginTop: 5}}
+              />
+              <Typography style={styles.details} numberOfLines={2}>
+                {data.vendor?.exact_location || 'Address not available'}
+              </Typography>
+            </View>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handleCall('9876367898')}>
-            <Typography style={[styles.text, {marginTop: 5}]}>
-              📞 +91 {data?.vendor?.phone_number}
-            </Typography>
+            <View style={styles.infoRow}>
+              <Image
+                source={images.call}
+                style={{height: 16, width: 16, marginTop: 5}}
+              />
+              <Typography style={styles.details} numberOfLines={2}>
+                {data.vendor?.phone_number || 'Address not available'}
+              </Typography>
+            </View>
           </TouchableOpacity>
           {/* <TouchableOpacity style={styles.chatBtn}>
             <Typography style={styles.chatBtnText}>💬 Chat</Typography>
@@ -148,14 +167,26 @@ const [time, date] = Object.entries(data?.schedule_time ?? {})[0] || [];
           <Typography style={styles.sectionTitle}>Customer Details</Typography>
           <Typography style={styles.text}>👤 {data?.customer?.name}</Typography>
           <TouchableOpacity onPress={() => handleCall('9876367898')}>
-            <Typography style={[styles.text, {marginTop: 5}]}>
-              📞 +91 {data?.customer?.phone_number}
-            </Typography>
+            <View style={styles.infoRow}>
+              <Image
+                source={images.call}
+                style={{height: 16, width: 16, marginTop: 5}}
+              />
+              <Typography style={styles.details} numberOfLines={2}>
+                {data.vendor?.phone_number || 'Address not available'}
+              </Typography>
+            </View>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handleOpenMap('')}>
-            <Typography style={[styles.text, {marginTop: 5}]}>
-              📍 {data?.customer?.address}
-            </Typography>
+            <View style={styles.infoRow}>
+              <Image
+                source={images.mark}
+                style={{height: 16, width: 16, marginTop: 5}}
+              />
+              <Typography style={styles.details} numberOfLines={2}>
+                {data?.customer?.address || 'Address not available'}
+              </Typography>
+            </View>
           </TouchableOpacity>
         </View>
 
@@ -163,10 +194,16 @@ const [time, date] = Object.entries(data?.schedule_time ?? {})[0] || [];
         <View style={styles.card}>
           <Typography style={styles.sectionTitle}>Service Schedule</Typography>
           <Typography style={[styles.text, {marginTop: 5}]}>
-            📅 {date}
+            📅 {dateKeys}
           </Typography>
           <Typography style={[styles.text, {marginTop: 5}]}>
-            ⏰ {time}
+            ⏰{' '}
+            {timeKeys?.map((v, index) => {
+              return (
+                moment(v, 'HH:mm').format('hh:mm A') +
+                (index == timeKeys?.length - 1 ? '' : ', ')
+              );
+            })}
           </Typography>
         </View>
 
@@ -174,10 +211,10 @@ const [time, date] = Object.entries(data?.schedule_time ?? {})[0] || [];
         <View style={styles.card}>
           <Typography style={styles.sectionTitle}>Services</Typography>
           {/* {appointment.services.map((service, index) => ( */}
-            <View style={styles.serviceRow}>
-              <Typography style={styles.text}>{data?.service?.name}</Typography>
-              <Typography style={styles.text}>₹{data?.service?.price}</Typography>
-            </View>
+          <View style={styles.serviceRow}>
+            <Typography style={styles.text}>{data?.service?.name}</Typography>
+            <Typography style={styles.text}>₹{data?.service?.price}</Typography>
+          </View>
           {/* ))} */}
         </View>
 
@@ -204,12 +241,12 @@ const [time, date] = Object.entries(data?.schedule_time ?? {})[0] || [];
         </View>
 
         {/* Payment Method */}
-        <View style={styles.card}>
+        {/* <View style={styles.card}>
           <Typography style={styles.sectionTitle}>Payment Method</Typography>
           <Typography style={styles.text}>
             💳 {appointment.paymentMethod}
           </Typography>
-        </View>
+        </View> */}
 
         {/* Cancel Button */}
 
@@ -271,6 +308,7 @@ const styles = StyleSheet.create({
     height: 140,
     borderRadius: 8,
     marginBottom: 8,
+    backgroundColor: '#f0f0f0',
   },
   shopName: {
     fontSize: 16,
@@ -340,5 +378,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: Font.medium,
     fontSize: 15,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    marginBottom: 4,
+  },
+  details: {
+    fontSize: 13,
+    flexShrink: 1,
+    marginLeft: 10,
+    marginTop: 2,
+    fontFamily: Font.medium,
   },
 });

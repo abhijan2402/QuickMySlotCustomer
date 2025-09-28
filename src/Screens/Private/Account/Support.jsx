@@ -5,14 +5,13 @@ import {
   FlatList,
   TouchableOpacity,
   Modal,
-  TextInput,
   ScrollView,
   Image,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import HomeHeader from '../../../Components/HomeHeader';
 import {COLOR} from '../../../Constants/Colors';
-import CustomButton from '../../../Components/CustomButton';
 import {Typography} from '../../../Components/UI/Typography';
 import Button from '../../../Components/UI/Button';
 import {useIsFocused} from '@react-navigation/native';
@@ -22,25 +21,23 @@ import {validators} from '../../../Backend/Validator';
 import ImageModal from '../../../Components/UI/ImageModal';
 import {images} from '../../../Components/UI/images';
 import {ErrorBox} from '../../../Components/UI/ErrorBox';
-import {windowWidth} from '../../../Constants/Dimensions';
 import Input from '../../../Components/Input';
-import { Font } from '../../../Constants/Font';
+import {Font} from '../../../Constants/Font';
 import ImageUpload from '../../../Components/UI/ImageUpload';
-import { isValidForm } from '../../../Backend/Utility';
+import {isValidForm} from '../../../Backend/Utility';
 
 const Support = () => {
   const [tickets, setTickets] = useState([]);
-
   const [modalVisible, setModalVisible] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [error, setError] = useState('');
   const [image, setImage] = useState('');
-  console.log(image);
-
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const isFocus = useIsFocused();
+  console.log(image, 'image-->>>');
 
   useEffect(() => {
     if (isFocus) {
@@ -54,19 +51,26 @@ const Support = () => {
       SUPPORT,
       success => {
         setLoading(false);
-        console.log(success, 'dsdsdsdeeeeeeeeeeeeweewew-->>>');
-        setTickets(success?.data);
+        setRefreshing(false);
+        console.log(success, 'Support data-->>>');
+        setTickets(success?.data || []);
       },
       error => {
         console.log(error, 'errorerrorerror>>');
         setLoading(false);
+        setRefreshing(false);
       },
       fail => {
         console.log(fail, 'errorerrorerror>>');
-
         setLoading(false);
+        setRefreshing(false);
       },
     );
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    getSupport();
   };
 
   const handleImageSelected = (response, type) => {
@@ -101,8 +105,12 @@ const Support = () => {
         formData,
         success => {
           setLoading(false);
-          console.log(success, 'dsdsdsdeeeeeeeeeeeeweewew-->>>');
+          console.log(success, 'Ticket created-->>>');
           setModalVisible(false);
+          setNewTitle('');
+          setNewDesc('');
+          setImage('');
+          setError('');
           getSupport();
         },
         error => {
@@ -117,25 +125,42 @@ const Support = () => {
     }
   };
 
-
-
-  const renderTicket = ({item}) => (
-    <View style={styles.ticketCard}>
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'flex-start',
-          alignItems: 'center',
-        }}>
+  const renderTicket = ({item, index}) => (
+    <View
+      style={[
+        styles.ticketCard,
+        index === 0 && styles.firstTicketCard,
+        index === tickets?.length - 1 && styles.lastTicketCard,
+      ]}>
+      <View style={styles.ticketHeader}>
         <Image
           source={{uri: item.image_url}}
-          style={{height: 50, width: 50, borderRadius: 6}}
+          style={styles.ticketImage}
+          defaultSource={images.placeholder} // Add a placeholder image
         />
-        <View style={{marginLeft: 12}}>
-          <Typography style={styles.ticketTitle}>{item.title}</Typography>
-          <Typography style={styles.ticketDesc}>{item.description}</Typography>
+        <View style={styles.ticketContent}>
+          <Typography style={styles.ticketTitle} numberOfLines={1}>
+            {item.title}
+          </Typography>
+          <Typography style={styles.ticketDesc} numberOfLines={2}>
+            {item.description}
+          </Typography>
+          {item.created_at && (
+            <Typography style={styles.ticketDate}>
+              {new Date(item.created_at).toLocaleDateString()}
+            </Typography>
+          )}
         </View>
       </View>
+    </View>
+  );
+
+  const renderEmptyList = () => (
+    <View style={styles.emptyContainer}>
+      <Typography style={styles.emptyText}>No support tickets found</Typography>
+      <Typography style={styles.emptySubText}>
+        Raise a ticket to get started
+      </Typography>
     </View>
   );
 
@@ -147,20 +172,43 @@ const Support = () => {
         leftTint={COLOR.black}
       />
 
-      {loading ? (
-        <ActivityIndicator
-          size="large"
-          color={COLOR.primary}
-          style={{marginTop: 10}}
-        />
-      ) :<FlatList
-        data={tickets}
-        renderItem={renderTicket}
-        keyExtractor={item => item.id}
-        contentContainerStyle={{paddingVertical: 10, paddingHorizontal: 10}}
-      />}
+      <View style={styles.content}>
+        {loading && !refreshing ? (
+          <View style={styles.loaderContainer}>
+            <ActivityIndicator
+              size="large"
+              color={COLOR.primary}
+              style={styles.loader}
+            />
+            <Typography style={styles.loadingText}>
+              Loading tickets...
+            </Typography>
+          </View>
+        ) : (
+          <FlatList
+            data={tickets}
+            renderItem={renderTicket}
+            keyExtractor={item => item.id?.toString()}
+            contentContainerStyle={styles.listContainer}
+            ListEmptyComponent={renderEmptyList}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[COLOR.primary]}
+                tintColor={COLOR.primary}
+              />
+            }
+          />
+        )}
 
-      <Button title="Raise Ticket" onPress={() => setModalVisible(true)} />
+        <Button
+          title="Raise Ticket"
+          onPress={() => setModalVisible(true)}
+          style={styles.raiseButton}
+        />
+      </View>
 
       {/* Raise Ticket Modal */}
       <Modal
@@ -250,6 +298,7 @@ const Support = () => {
               showModal={showModal}
               close={() => setShowModal(false)}
               selected={handleImageSelected}
+              documents={true}
             />
           </View>
         </View>
@@ -264,83 +313,140 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  content: {
+    flex: 1,
     paddingHorizontal: 15,
   },
-  ticketCard: {
-    backgroundColor: '#f9f9f9',
-    padding: 12,
-    borderRadius: 8,
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loader: {
     marginBottom: 10,
+  },
+  loadingText: {
+    color: COLOR.primary,
+    fontSize: 16,
+  },
+  listContainer: {
+    flexGrow: 1,
+    paddingVertical: 10,
+  },
+  ticketCard: {
+    backgroundColor: '#fff',
+    padding: 16,
+    marginHorizontal: 2,
+    marginVertical: 4,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+    borderLeftWidth: 4,
+    borderLeftColor: COLOR.primary,
+  },
+  firstTicketCard: {
+    marginTop: 8,
+  },
+  lastTicketCard: {
+    marginBottom: 8,
+  },
+  ticketHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  ticketImage: {
+    height: 60,
+    width: 60,
+    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+  },
+  ticketContent: {
+    flex: 1,
+    marginLeft: 12,
   },
   ticketTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: COLOR.black,
+    marginBottom: 4,
   },
   ticketDesc: {
     fontSize: 14,
-    color: '#555',
-    marginVertical: 4,
+    color: '#666',
+    lineHeight: 20,
+    marginBottom: 6,
   },
   ticketDate: {
     fontSize: 12,
     color: '#888',
+    fontStyle: 'italic',
   },
-  status: {
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-    borderRadius: 12,
-    fontSize: 12,
-    overflow: 'hidden',
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 50,
   },
-  statusOpen: {
-    backgroundColor: '#ffebcc',
-    color: '#b36b00',
+  emptyText: {
+    fontSize: 18,
+    color: '#666',
+    marginBottom: 8,
+    textAlign: 'center',
   },
-  statusResolved: {
-    backgroundColor: '#d4edda',
-    color: '#155724',
+  emptySubText: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
   },
   raiseButton: {
-    backgroundColor: COLOR.primary,
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginVertical: 10,
-  },
-  raiseButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 16,
+    marginVertical: 16,
+    marginHorizontal: 2,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     padding: 20,
   },
   modalContent: {
     backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 15,
-    elevation: 5,
+    borderRadius: 16,
+    padding: 20,
+    maxHeight: '80%',
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
-    marginBottom: 10,
+    marginBottom: 20,
+    textAlign: 'center',
+    color: COLOR.primary,
   },
   input: {
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
-    padding: 10,
+    padding: 12,
     fontSize: 14,
-    marginBottom: 10,
+    marginBottom: 16,
   },
-  cancelBtn: {
-    alignItems: 'center',
-    marginTop: 10,
+  textArea: {
+    minHeight: 100,
+    textAlignVertical: 'top',
+  },
+  label: {
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  note: {
+    marginBottom: 0,
+    marginTop: 4,
   },
   imgWrapper: {
     position: 'relative',
@@ -348,16 +454,28 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   previewImg: {
-    width: windowWidth * 0.83,
+    width: '100%',
     height: 180,
     borderRadius: 8,
   },
   deleteBtn: {
     position: 'absolute',
-    top: 5,
-    right: 5,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 12,
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderRadius: 15,
     padding: 6,
+  },
+  deleteIcon: {
+    height: 12,
+    width: 12,
+  },
+  submitButton: {
+    marginTop: 20,
+  },
+  cancelButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: COLOR.primary,
   },
 });

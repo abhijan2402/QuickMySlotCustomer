@@ -63,7 +63,6 @@ const Button = ({
           <Typography
             size={titleSize}
             color={titleColor ?? COLOR.white}
-            // font={titleType}
             font={Font.semibold}
             style={{
               marginLeft: leftIcon ? 5 : 0,

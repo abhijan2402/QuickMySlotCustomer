@@ -154,6 +154,7 @@ const styles = StyleSheet.create({
     width: 290,
     height: 200,
     marginTop: windowHeight * 0.1,
+    resizeMode:'contain'
   },
   dividerContainer: {
     flexDirection: 'row',

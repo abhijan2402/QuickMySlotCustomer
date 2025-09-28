@@ -73,7 +73,7 @@ export default HomeHeader;
 const styles = StyleSheet.create({
   safeArea: {
     backgroundColor: '#fff',
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, // Fix overlap
+    // paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, // Fix overlap
   },
   header: {
     flexDirection: 'row',

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,40 +8,91 @@ import {
 } from 'react-native';
 import HomeHeader from '../../../Components/HomeHeader';
 import {COLOR} from '../../../Constants/Colors';
-import {useNavigation} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {Typography} from '../../../Components/UI/Typography';
 import Input from '../../../Components/Input';
-import {Font} from '../../../Constants/Font'; // <-- Assuming font constants
+import {Font} from '../../../Constants/Font';
+import {GET_WITH_TOKEN} from '../../../Backend/Api';
+import {PROMO_VENDOR} from '../../../Constants/ApiRoute';
 
-const offers = [
-  {
-    code: 'FIRST40',
-    title: 'Get 40% OFF',
-    discount: '20% Discount + 20% Cashback',
-    days: 'Valid on All Days',
-    description:
-      'After availing your services, pay at the salon using app via any mode of online payment and get 20% Discount & 20% Cashback as Cash on the net payable amount.',
-  },
-  {
-    code: 'WEEKEND10',
-    title: 'Get 10% OFF',
-    discount: '5% Discount + 5% Cashback',
-    days: 'Valid on Friday, Saturday, and Sunday',
-    description:
-      'After availing your services, pay at the salon using app via any mode of online payment and get 5% Discount & 5% Cashback as Cash on the net payable amount.',
-  },
-  {
-    code: 'GLAMUP40',
-    title: 'Get 40% OFF',
-    discount: '25% Discount + 15% Cashback',
-    days: 'Valid on Tuesday',
-    description:
-      'After availing your services, pay at the salon using app via any mode of online payment and get 25% Discount & 15% Cashback as Cash on the net payable amount.',
-  },
-];
+const OffersScreen = ({navigation, route}) => {
+  const businessId = route?.params?.businessId || null;
+  console.log('businessId--->', businessId);
 
-export default function OffersScreen() {
-  const navigation = useNavigation();
+  const [loading, setLoading] = useState(true);
+  const isFocused = useIsFocused();
+  const [promoData, setPromoData] = useState([]);
+
+  useEffect(() => {
+    if (isFocused) {
+      getPromo();
+    }
+  }, [isFocused]);
+
+  const getPromo = () => {
+    setLoading(true);
+    GET_WITH_TOKEN(
+      PROMO_VENDOR + businessId,
+      success => {
+        console.log(success, 'promo data-dsadsadas-');
+        setPromoData(success?.data || []);
+        setLoading(false);
+      },
+      error => {
+        setLoading(false);
+        console.log(error);
+      },
+      fail => {
+        setLoading(false);
+        console.log(fail);
+      },
+    );
+  };
+
+  // Format date to readable format
+  const formatDate = dateString => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  // Check if offer is active based on dates
+  const isOfferActive = offer => {
+    const now = new Date();
+    const startDate = new Date(offer.start_on);
+    const endDate = new Date(offer.expired_on);
+    return now >= startDate && now <= endDate && offer.isActive;
+  };
+
+  // Generate offer title based on type and amount
+  const getOfferTitle = offer => {
+    if (offer.type === 'flat') {
+      return `Get ₹${offer.amount} OFF`;
+    } else if (offer.type === 'percentage') {
+      return `Get ${offer.amount}% OFF`;
+    }
+    return `Get ${offer.amount} OFF`;
+  };
+
+  // Generate discount description
+  const getDiscountDescription = offer => {
+    if (offer.type === 'flat') {
+      return `Flat ₹${offer.amount} discount on total bill`;
+    } else if (offer.type === 'percentage') {
+      return `${offer.amount}% discount on total bill`;
+    }
+    return offer.description || 'Special discount offer';
+  };
+
+  // Generate validity text
+  const getValidityText = offer => {
+    const start = formatDate(offer.start_on);
+    const end = formatDate(offer.expired_on);
+    return `Valid from ${start} to ${end}`;
+  };
 
   return (
     <View style={styles.mainContainer}>
@@ -51,37 +102,36 @@ export default function OffersScreen() {
         leftTint={COLOR.primary}
       />
 
-      <ScrollView
-        style={styles.container}
-        showsVerticalScrollIndicator={false} // Hides scroll bar
-      >
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* How to Avail Offer Section */}
-        <View style={styles.infoBox}>
-          <Text style={styles.infoTitle}>How to avail the offer?</Text>
+        {businessId && (
+          <View style={styles.infoBox}>
+            <Text style={styles.infoTitle}>How to avail the offer?</Text>
 
-          <View style={styles.steps}>
-            <View style={styles.stepCard}>
-              <Text style={styles.stepTitle}>STEP 1</Text>
-              <Text style={styles.stepText}>
-                Book your appointment{'\n'}via the app
-              </Text>
-            </View>
+            <View style={styles.steps}>
+              <View style={styles.stepCard}>
+                <Text style={styles.stepTitle}>STEP 1</Text>
+                <Text style={styles.stepText}>
+                  Book your appointment{'\n'}via the app
+                </Text>
+              </View>
 
-            <View style={styles.stepCard}>
-              <Text style={styles.stepTitle}>STEP 2</Text>
-              <Text style={styles.stepText}>
-                Go and avail the{'\n'}services
-              </Text>
-            </View>
+              <View style={styles.stepCard}>
+                <Text style={styles.stepTitle}>STEP 2</Text>
+                <Text style={styles.stepText}>
+                  Go and avail the{'\n'}services
+                </Text>
+              </View>
 
-            <View style={styles.stepCard}>
-              <Text style={styles.stepTitle}>STEP 3</Text>
-              <Text style={styles.stepText}>
-                Pay bill with app{'\n'}to avail the offer
-              </Text>
+              <View style={styles.stepCard}>
+                <Text style={styles.stepTitle}>STEP 3</Text>
+                <Text style={styles.stepText}>
+                  Pay bill with app{'\n'}to avail the offer
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
+        )}
 
         {/* Coupon Input */}
         <View style={{marginHorizontal: 5, marginBottom: 20}}>
@@ -93,34 +143,107 @@ export default function OffersScreen() {
           />
         </View>
 
-        {/* Offers List */}
-        {offers.map((offer, index) => (
-          <View key={index} style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Typography style={styles.code}>{offer.code}</Typography>
-              <TouchableOpacity>
-                <Typography style={styles.apply}>APPLY</Typography>
+        {/* Loading State */}
+        {loading && (
+          <View style={styles.loadingContainer}>
+            <Typography style={styles.loadingText}>
+              Loading offers...
+            </Typography>
+          </View>
+        )}
+
+        {/* No Offers State */}
+        {!loading && promoData.length === 0 && (
+          <View style={styles.noOffersContainer}>
+            <Typography style={styles.noOffersText}>
+              No offers available at the moment
+            </Typography>
+          </View>
+        )}
+
+        {/* Dynamic Offers List */}
+        {!loading &&
+          promoData.map((offer, index) => (
+            <View
+              key={offer.id}
+              style={[
+                styles.card,
+                !isOfferActive(offer) && styles.inactiveCard,
+              ]}>
+              <View style={styles.cardHeader}>
+                <Typography style={styles.code}>{offer.promo_code}</Typography>
+                <TouchableOpacity
+                  onPress={() => {
+                    getSelectedOffer(offer);
+                    navigation.goBack();
+                  }}
+                  style={{
+                    padding: 6,
+                    borderRadius: 6,
+                    borderWidth: 1,
+                    borderColor: isOfferActive(offer) ? COLOR.primary : '#ccc',
+                    marginTop: 20,
+                  }}
+                  // disabled={!isOfferActive(offer)}
+                >
+                  <Typography
+                    style={[
+                      styles.apply,
+                      !isOfferActive(offer) && styles.disabledApply,
+                    ]}>
+                    {isOfferActive(offer) ? 'APPLY' : 'EXPIRED'}
+                  </Typography>
+                </TouchableOpacity>
+              </View>
+
+              {/* Status Badge */}
+              {!isOfferActive(offer) && (
+                <View style={styles.expiredBadge}>
+                  <Typography style={styles.expiredText}>
+                    Offer Expired
+                  </Typography>
+                </View>
+              )}
+
+              <Typography style={styles.offerTitle}>
+                {getOfferTitle(offer)}
+              </Typography>
+              <Typography style={styles.discount}>
+                {getDiscountDescription(offer)}
+              </Typography>
+              <Typography style={styles.days}>
+                {getValidityText(offer)}
+              </Typography>
+              <Typography style={styles.description}>
+                {offer.description ||
+                  'Special discount offer for our valued customers.'}
+              </Typography>
+
+              {offer.extra_text && (
+                <Typography style={styles.extraText}>
+                  {offer.extra_text}
+                </Typography>
+              )}
+
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.navigate('Cms', {
+                    title: 'Terms & Conditions',
+                    slug: 'terms-condition',
+                  });
+                }}>
+                <Typography style={styles.tnc}>T&C +</Typography>
               </TouchableOpacity>
             </View>
-
-            <Typography style={styles.offerTitle}>{offer.title}</Typography>
-            <Typography style={styles.discount}>{offer.discount}</Typography>
-            <Typography style={styles.days}>{offer.days}</Typography>
-            <Typography style={styles.description}>
-              {offer.description}
-            </Typography>
-
-            <TouchableOpacity>
-              <Typography style={styles.tnc}>T&C +</Typography>
-            </TouchableOpacity>
-          </View>
-        ))}
+          ))}
 
         <View style={{height: 50}} />
       </ScrollView>
     </View>
   );
-}
+};
+
+export default OffersScreen;
 
 const styles = StyleSheet.create({
   /** MAIN LAYOUT */
@@ -138,7 +261,6 @@ const styles = StyleSheet.create({
   /** Info Box */
   infoBox: {
     backgroundColor: '#f1f6ff',
-    // padding: 20,
     borderRadius: 16,
     paddingVertical: 20,
     margin: 16,
@@ -158,7 +280,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   stepCard: {
-    // flex: 1,
     backgroundColor: '#fff',
     marginHorizontal: 4,
     paddingVertical: 16,
@@ -184,6 +305,27 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 
+  /** Loading & No Offers */
+  loadingContainer: {
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    fontFamily: Font.medium,
+    color: COLOR.primary,
+    fontSize: 16,
+  },
+  noOffersContainer: {
+    alignItems: 'center',
+    padding: 40,
+  },
+  noOffersText: {
+    fontFamily: Font.medium,
+    color: '#666',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+
   /** Offer Card */
   card: {
     borderWidth: 1,
@@ -193,7 +335,15 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     backgroundColor: '#f9f9f9',
     marginHorizontal: 5,
+    position: 'relative',
   },
+  inactiveCard: {
+    backgroundColor: '#f5f5f5',
+    borderColor: '#d0d0d0',
+    opacity: 0.7,
+  },
+
+  /** Card Header */
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -212,6 +362,25 @@ const styles = StyleSheet.create({
     color: COLOR.primary,
     fontFamily: Font.semibold,
     fontSize: 14,
+  },
+  disabledApply: {
+    color: '#999',
+  },
+
+  /** Status Badge */
+  expiredBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: '#ff6b6b',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  expiredText: {
+    color: '#fff',
+    fontSize: 10,
+    fontFamily: Font.semibold,
   },
 
   /** Offer Details */
@@ -238,6 +407,13 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 6,
     fontSize: 13,
+  },
+  extraText: {
+    fontFamily: Font.regular,
+    color: '#666',
+    marginBottom: 6,
+    fontSize: 12,
+    fontStyle: 'italic',
   },
   tnc: {
     color: COLOR.primary,

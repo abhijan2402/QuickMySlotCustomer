@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   StyleSheet,
@@ -23,72 +23,43 @@ import SimpleModal from '../../../Components/UI/SimpleModal';
 import Button from '../../../Components/UI/Button';
 import useKeyboard from '../../../Constants/Utility';
 import {Font} from '../../../Constants/Font';
-import {ToastMsg} from '../../../Backend/Utility';
+import {CURRENCY, ToastMsg} from '../../../Backend/Utility';
 import {POST_FORM_DATA} from '../../../Backend/Api';
 import {CUSTOMER_BOOKINGS} from '../../../Constants/ApiRoute';
 import {useSelector} from 'react-redux';
 
 const BookingScreen = ({navigation, route}) => {
+  const platformFee = 75;
+  const tax = 25;
   const businessData = route?.params?.businessData || {};
   console.log('businessData--->', businessData);
   const cartData = route?.params?.cartData;
   console.log('cartData ->>', cartData);
   const cartItems = route?.params?.cartItems || [];
   console.log(cartItems, 'cartItemscartItemscartItems');
-
   console.log('cartItems-->', cartData);
-  const totalPrice = route?.params?.totalPrice || 0;
+  const totalPrice = route?.params?.totalPrice + platformFee + tax || 0;
   const userDetail = useSelector(state => state.userDetails);
   console.log('userDetail--->', userDetail);
   const [selectedServices, setSelectedServices] = useState([]);
+  console.log(selectedServices, 'selectedServicessssssss');
+
   const [selectedDate, setSelectedDate] = useState(27);
   const [selectedTimes, setSelectedTimes] = useState([]);
   const [note, setNote] = useState('');
   const [selectTime, setSelectTime] = useState(null);
   const [availOffer, setAvailOffer] = useState(false);
   const [calculate, setCalculate] = useState(false);
-  const [loading, setLoading] = useState(false); // Added loading state
-
+  const [loading, setLoading] = useState(false);
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [dateStart, setDateStart] = useState(null);
   const {isKeyboardVisible} = useKeyboard();
   const [showServices, setShowServices] = useState(false);
+  const [selectedOffer, setSelectedOffer] = useState('');
 
-  // Mock location data with provider availability
-  const mockLocation = {
-    id: 'location-1',
-    name: 'Test Location',
-    provider_availability: [
-      {
-        date: moment().utc().format('YYYY-MM-DD'), // Today
-        time_slot: [
-          {start_time: '09:00:00', end_time: '10:00:00'},
-          {start_time: '10:00:00', end_time: '11:00:00'},
-          {start_time: '11:00:00', end_time: '12:00:00'},
-          {start_time: '14:00:00', end_time: '15:00:00'},
-          {start_time: '15:00:00', end_time: '16:00:00'},
-        ],
-      },
-      {
-        date: moment().add(1, 'days').utc().format('YYYY-MM-DD'), // Tomorrow
-        time_slot: [
-          {start_time: '09:00:00', end_time: '10:00:00'},
-          {start_time: '10:30:00', end_time: '11:30:00'},
-          {start_time: '13:00:00', end_time: '14:00:00'},
-        ],
-      },
-      {
-        date: moment().add(2, 'days').utc().format('YYYY-MM-DD'),
-        time_slot: [
-          {start_time: '08:00:00', end_time: '09:00:00'},
-          {start_time: '11:00:00', end_time: '12:00:00'},
-          {start_time: '15:00:00', end_time: '16:00:00'},
-        ],
-      },
-    ],
-  };
-
-  const [location_id, setLocation_id] = useState(mockLocation);
+  // Get available schedule from business data
+  const availableSchedule = businessData?.services[0]?.available_schedule || {};
+  console.log('selectedOffervvvvvvv:', selectedOffer);
 
   const services = [
     {id: 1, name: 'Haircut & Styling', price: 45},
@@ -96,24 +67,55 @@ const BookingScreen = ({navigation, route}) => {
     {id: 3, name: 'Hair Coloring', price: 120},
   ];
 
-  const times = [
-    '08:00',
-    '08:30',
-    '09:00',
-    '09:30',
-    '10:00',
-    '10:30',
-    '11:00',
-    '11:30',
-    '13:00',
-    '13:30',
-    '14:00',
-    '14:30',
-    '15:00',
-    '15:30',
-    '16:00',
-    '16:30',
-  ];
+  // Function to get available times for selected date
+  const getAvailableTimesForDate = selectedDate => {
+    if (
+      !selectedDate ||
+      !availableSchedule ||
+      Object.keys(availableSchedule).length === 0
+    )
+      return [];
+
+    // Convert selected date to DD/MM/YYYY format to match available_schedule format
+    const formattedDate = moment(selectedDate).format('DD/MM/YYYY');
+
+    console.log('Looking for date:', formattedDate);
+    console.log('Available schedule:', availableSchedule);
+
+    // Find times for the selected date
+    const availableTimes = [];
+
+    Object.entries(availableSchedule).forEach(([time, date]) => {
+      if (date === formattedDate) {
+        availableTimes.push(time);
+      }
+    });
+
+    console.log('Available times for', formattedDate, ':', availableTimes);
+    return availableTimes;
+  };
+
+  // Generate time slots based on available schedule for selected date
+  const generateTimeSlots = () => {
+    if (!dateStart) return [];
+
+    const availableTimes = getAvailableTimesForDate(dateStart);
+
+    // Convert times to the format used in your UI (HH:mm)
+    return availableTimes
+      .map(time => {
+        // If time is in "00:05" format, ensure it has proper formatting
+        const [hours, minutes] = time.split(':');
+        const formattedTime = `${hours.padStart(2, '0')}:${minutes.padStart(
+          2,
+          '0',
+        )}`;
+        return formattedTime;
+      })
+      .sort(); // Sort times chronologically
+  };
+
+  const times = generateTimeSlots();
 
   const toggleService = id => {
     if (selectedServices.includes(id)) {
@@ -138,9 +140,7 @@ const BookingScreen = ({navigation, route}) => {
       ? services.filter(s => selectedServices.includes(s.id))
       : [services[0]];
 
-  const platformFee = 2;
   const subtotal = selectedItems.reduce((sum, s) => sum + s.price, 0);
-  const tax = subtotal * 0.1;
   const total = subtotal + tax + platformFee;
 
   const convertTimeSlots = (slots, date) => {
@@ -153,15 +153,16 @@ const BookingScreen = ({navigation, route}) => {
     }));
   };
 
-  const onBooking = () => {
+  const onBooking = is_paid_key => {
     if (selectedTimes.length === 0) {
       ToastMsg('Please select at least one time slot.');
       return;
     }
     console.log('Booking with times:', selectedTimes);
-    handleSubmit();
+    handleSubmit(is_paid_key);
   };
-  const handleSubmit = async () => {
+
+  const handleSubmit = async is_paid_key => {
     setLoading(true);
     const formattedTimes = selectedTimes.map(time => {
       return time.includes(':') ? `${time}:00` : `${time}:00:00`;
@@ -169,13 +170,14 @@ const BookingScreen = ({navigation, route}) => {
     const body = new FormData();
     body.append('order_id', cartItems[0]?.cart_id);
     body.append('customer_id', userDetail?.id);
+    body.append('note', note);
     body.append('vendor_id', businessData?.id);
     body.append('service_id', cartItems[0]?.id);
     body.append('amount', totalPrice || total);
-    body.append('tax', '5');
-    body.append('platform_fee', '10');
+    body.append('tax', '25');
+    body.append('platform_fee', '75');
     body.append('status', 'pending');
-    body.append('is_paid_key', '1');
+    body.append('is_paid_key', is_paid_key);
     selectedTimes.forEach((time, index) => {
       body.append(
         `schedule_time[${time}]`,
@@ -190,6 +192,7 @@ const BookingScreen = ({navigation, route}) => {
         console.log('Booking API Success:', success);
         setLoading(false);
         ToastMsg(success?.message || 'Booking successful!');
+        navigation.pop();
         navigation.navigate('BookingConfirmation', {
           data: {
             selectedServices: cartItems,
@@ -214,6 +217,17 @@ const BookingScreen = ({navigation, route}) => {
     );
   };
 
+  // Update available times when date changes
+  useEffect(() => {
+    if (dateStart) {
+      const availableTimes = generateTimeSlots();
+      console.log('Updated available times:', availableTimes);
+    }
+  }, [dateStart]);
+
+  global.getSelectedOffer = v => {
+    setSelectedOffer(v);
+  };
   return (
     <View style={styles.container}>
       <View style={{paddingHorizontal: 15}}>
@@ -248,6 +262,9 @@ const BookingScreen = ({navigation, route}) => {
               </Typography>
             </View>
             <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('Support');
+              }}
               style={{flexDirection: 'row', alignItems: 'center'}}>
               <Image
                 source={images.support}
@@ -275,37 +292,16 @@ const BookingScreen = ({navigation, route}) => {
             selected_date={
               selectTime?.date || moment()?.utc()?.format('YYYY-MM-DD')
             }
-            locationId={location_id?.id}
+            locationId={businessData?.id}
             onChangeDateVal={(val, month) => {
               let selected_date = `${month?.year}-${String(
                 month?.month + 1,
               ).padStart(2, '0')}-${String(val?.date).padStart(2, '0')}`;
               setDateStart(selected_date);
-              const temp = location_id?.provider_availability?.find(
-                v => v?.date == selected_date,
-              );
-              const now = new Date();
-              const todayStr = now.toISOString().split('T')[0];
+              console.log('Selected date:', selected_date);
 
-              let upcomingSlots = [];
-
-              if (temp?.date === todayStr) {
-                upcomingSlots = temp?.time_slot.filter(slot => {
-                  const slotStart = new Date(
-                    `${temp?.date}T${slot?.start_time}`,
-                  );
-                  return slotStart > now;
-                });
-              } else {
-                upcomingSlots = temp?.time_slot;
-              }
-
-              setAvailableTimeSlots(
-                convertTimeSlots(
-                  upcomingSlots || temp?.time_slot || [],
-                  selected_date,
-                ),
-              );
+              // Clear selected times when date changes
+              setSelectedTimes([]);
             }}
           />
 
@@ -318,7 +314,13 @@ const BookingScreen = ({navigation, route}) => {
               marginTop: 10,
             }}>
             <Typography font={Font.medium} size={14}>
-              You can select up-to 3 time slots
+              {times.length > 0
+                ? `Available time slots for ${
+                    dateStart
+                      ? moment(dateStart).format('DD/MM/YYYY')
+                      : 'selected date'
+                  }`
+                : 'No available time slots for selected date'}
             </Typography>
             <Image
               source={images.info}
@@ -326,30 +328,54 @@ const BookingScreen = ({navigation, route}) => {
             />
           </View>
 
-          <View style={styles.timeGrid}>
-            {times.map(time => (
-              <TouchableOpacity
-                key={time}
-                style={[
-                  styles.timeBox,
-                  selectedTimes.includes(time) && styles.selectedTimeBox,
-                ]}
-                onPress={() => toggleTimeSelection(time)}>
-                <Typography
-                  style={[
-                    styles.timeText,
-                    selectedTimes.includes(time) && styles.selectedTimeText,
-                  ]}>
-                  {time}
+          {times.length > 0 ? (
+            <>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: 10,
+                }}>
+                <Typography font={Font.medium} size={14}>
+                  You can select up-to 3 time slots
                 </Typography>
-              </TouchableOpacity>
-            ))}
-          </View>
+              </View>
+
+              <View style={styles.timeGrid}>
+                {times.map(time => (
+                  <TouchableOpacity
+                    key={time}
+                    style={[
+                      styles.timeBox,
+                      selectedTimes.includes(time) && styles.selectedTimeBox,
+                    ]}
+                    onPress={() => toggleTimeSelection(time)}>
+                    <Typography
+                      style={[
+                        styles.timeText,
+                        selectedTimes.includes(time) && styles.selectedTimeText,
+                      ]}>
+                      {time}
+                    </Typography>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </>
+          ) : (
+            <View style={styles.noSlotsContainer}>
+              <Typography style={styles.noSlotsText}>
+                No available time slots for the selected date. Please choose
+                another date.
+              </Typography>
+            </View>
+          )}
 
           {/* Choose Offer Button */}
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate('OffersScreen');
+              navigation.navigate('OffersScreen', {
+                businessId: businessData?.id,
+              });
             }}
             style={styles.offerBtn}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -364,26 +390,29 @@ const BookingScreen = ({navigation, route}) => {
               style={[styles.offerIcon, {marginRight: 0}]}
             />
           </TouchableOpacity>
-          <View style={styles.offerApplied}>
-            <View style={{flexDirection: 'row'}}>
-              <Image source={images.offer} style={{height: 24, width: 24}} />
-              <View style={{marginLeft: 10}}>
-                <Typography size={13} font={Font.medium}>
-                  Offer Applied
-                </Typography>
-                <Typography
-                  size={14}
-                  font={Font.semibold}
-                  color={COLOR.primary}
-                  style={{marginTop: 3}}>
-                  FIRST40
-                </Typography>
+          {selectedOffer?.promo_code && (
+            <View style={styles.offerApplied}>
+              <View style={{flexDirection: 'row'}}>
+                <Image source={images.offer} style={{height: 24, width: 24}} />
+                <View style={{marginLeft: 10}}>
+                  <Typography size={13} font={Font.medium}>
+                    Offer Applied
+                  </Typography>
+                  <Typography
+                    size={14}
+                    font={Font.semibold}
+                    color={COLOR.primary}
+                    style={{marginTop: 3}}>
+                    {selectedOffer?.promo_code}
+                  </Typography>
+                </View>
+              </View>
+
+              <View style={{marginRight: 10}}>
+                <Image source={images.cross2} style={{height: 14, width: 14}} />
               </View>
             </View>
-            <View style={{marginRight: 10}}>
-              <Image source={images.cross2} style={{height: 14, width: 14}} />
-            </View>
-          </View>
+          )}
 
           {/* Bill Details */}
           <View style={styles.billContainer}>
@@ -420,7 +449,7 @@ const BookingScreen = ({navigation, route}) => {
                 </TouchableOpacity>
               </TouchableOpacity>
               <Typography size={14} font={Font.semibold}>
-                ₹ {totalPrice}
+                ₹ {totalPrice ? totalPrice?.toFixed(2) : '00.00'}
               </Typography>
             </View>
 
@@ -433,7 +462,7 @@ const BookingScreen = ({navigation, route}) => {
                       style={{
                         flexDirection: 'row',
                         marginTop: 10,
-                        justifyContent: 'space-around',
+                        // justifyContent: 'space-around',
                       }}>
                       <View style={{alignItems: 'center'}}>
                         <Image
@@ -441,9 +470,9 @@ const BookingScreen = ({navigation, route}) => {
                           style={{height: 20, width: 20, marginBottom: 5}}
                           tintColor={COLOR.primary}
                         />
-                        <Typography size={12} font={Font.semibold}>
-                          Men
-                        </Typography>
+                        {/* <Typography size={12} font={Font.semibold}>
+                          {selectedServices?.service.category?.name}
+                        </Typography> */}
                       </View>
                       <View>
                         <Typography
@@ -454,24 +483,26 @@ const BookingScreen = ({navigation, route}) => {
                             borderBottomWidth: 1,
                             paddingBottom: 5,
                             borderBottomColor: COLOR.lightGrey,
+                            marginLeft: 15,
                           }}>
-                          Men's Grooming
+                          {cartItems[0]?.service?.category?.name}
                         </Typography>
                         <View style={styles.serviceRow}>
                           <View>
                             <Typography style={styles.serviceLabel}>
-                              Bread Trim
+                              {item?.name}
                             </Typography>
                             <Typography style={styles.serviceSub}>
-                              From ₹ 300 + GST
+                              From {CURRENCY}
+                              {item?.price}
                             </Typography>
                           </View>
-                          <TouchableOpacity>
+                          {/* <TouchableOpacity>
                             <Image
                               source={images.cross2}
                               style={styles.removeIcon}
                             />
-                          </TouchableOpacity>
+                          </TouchableOpacity> */}
                         </View>
                       </View>
                     </View>
@@ -481,11 +512,29 @@ const BookingScreen = ({navigation, route}) => {
             )}
 
             {/* Offer Applied */}
+            {selectedOffer?.amount > 0 && (
+              <View style={styles.offerAppliedRow}>
+                <Typography style={styles.offerAppliedText}>
+                  Offer Applied
+                </Typography>
+                <Typography style={styles.offerCode}>
+                  {CURRENCY}
+                  {selectedOffer?.amount > 0
+                    ? Number(selectedOffer?.amount).toFixed(2)
+                    : '0.00'}
+                </Typography>
+              </View>
+            )}
+
+            <View style={styles.offerAppliedRow}>
+              <Typography style={styles.offerAppliedText}>Tax</Typography>
+              <Typography style={styles.offerCode}>{CURRENCY}25.00</Typography>
+            </View>
             <View style={styles.offerAppliedRow}>
               <Typography style={styles.offerAppliedText}>
-                Offer Applied
+                Platform Fee
               </Typography>
-              <Typography style={styles.offerCode}>FIRST40</Typography>
+              <Typography style={styles.offerCode}>{CURRENCY}75.00</Typography>
             </View>
 
             {/* Total */}
@@ -493,7 +542,7 @@ const BookingScreen = ({navigation, route}) => {
               <Typography style={styles.totalLabel}>Approx Total</Typography>
               <View style={{flexDirection: 'row', alignItems: 'center'}}>
                 <Typography style={styles.strikePrice}>
-                  ₹${(total + 50).toFixed(2)}
+                  ₹{(total + 50).toFixed(2)}
                 </Typography>
                 <Typography style={styles.finalPrice}>
                   {' '}
@@ -503,7 +552,7 @@ const BookingScreen = ({navigation, route}) => {
             </View>
           </View>
 
-          <LinearGradient
+          {/* <LinearGradient
             colors={['#EE4E34', '#ff9d90ff']}
             start={{x: 1, y: 0}}
             end={{x: 1, y: 1}}
@@ -540,13 +589,14 @@ const BookingScreen = ({navigation, route}) => {
               }}>
               💡 Use this voucher to save on your next appointment!
             </Typography>
-          </LinearGradient>
+          </LinearGradient> */}
+
           <Typography
             size={15}
             font={Font.medium}
             color="gray"
             lineHeight={20}
-            style={{marginBottom: 15}}>
+            style={{marginBottom: 15, marginTop: 15}}>
             <Typography size={15} font={Font.semibold}>
               Note:
             </Typography>{' '}
@@ -648,15 +698,53 @@ const BookingScreen = ({navigation, route}) => {
               height={60}
               inputContainer={{marginTop: -10}}
               textAlignVertical="top"
+              multiline={true}
             />
           </View>
           {/* Book Now */}
-          <Button
-            title={loading ? 'Booking...' : 'Book Now'}
-            containerStyle={{marginBottom: 10, marginTop: 10}}
-            onPress={onBooking}
-            disabled={loading}
-          />
+          {loading ? (
+            <View
+              style={{
+                marginBottom: 20,
+                alignItems: 'center',
+                marginBottom: 30,
+                paddingVertical: 30,
+              }}>
+              <Typography textAlign={'center'} color={COLOR.primary} size={16}>
+                Booking...
+              </Typography>
+            </View>
+          ) : (
+            <View
+              style={{
+                marginBottom: 20,
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 30,
+              }}>
+              <Button
+                title={loading ? 'Booking...' : 'Pay After Service'}
+                containerStyle={{
+                  marginBottom: 10,
+                  marginTop: 10,
+                  width: '58%',
+                  backgroundColor: COLOR.white,
+                  borderWidth: 1,
+                  borderColor: COLOR.primary,
+                }}
+                onPress={() => onBooking('0')}
+                titleColor={COLOR.primary}
+                disabled={loading}
+              />
+              <Button
+                title={loading ? 'Booking...' : 'Pay Now'}
+                containerStyle={{marginBottom: 10, marginTop: 10, width: '38%'}}
+                onPress={() => onBooking('1')}
+                disabled={loading}
+              />
+            </View>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -691,8 +779,6 @@ const BookingScreen = ({navigation, route}) => {
     </View>
   );
 };
-
-// Styles remain exactly the same
 
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: '#fff'},
@@ -738,6 +824,19 @@ const styles = StyleSheet.create({
   selectedTimeBox: {backgroundColor: COLOR.primary, fontFamily: Font.medium},
   timeText: {color: '#333', fontSize: 13, fontFamily: Font.semibold},
   selectedTimeText: {color: '#fff', fontFamily: Font.medium},
+  noSlotsContainer: {
+    backgroundColor: '#f9f9f9',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  noSlotsText: {
+    color: '#666',
+    fontSize: 14,
+    fontFamily: Font.medium,
+    textAlign: 'center',
+  },
   offerBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -814,6 +913,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 5,
+    marginStart: 15,
   },
   serviceLabel: {fontSize: 15, fontFamily: Font.semibold, color: '#333'},
   serviceSub: {fontSize: 12, color: '#888', marginTop: 2},

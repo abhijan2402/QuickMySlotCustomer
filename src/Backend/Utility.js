@@ -290,3 +290,103 @@ export const cleanImageUrl = url => {
 
   return cleanedUrl;
 };
+// utils/ShopStatus.js
+
+export const isShopOpen = (workingDays, dailyStartTime, dailyEndTime) => {
+  const now = new Date();
+  
+  // Get current day in lowercase (e.g., 'monday')
+  const currentDay = now.toLocaleString('en-US', { weekday: 'long' }).toLowerCase();
+  
+  // Get current time in HH:MM format (24-hour)
+  const currentTime = now.toTimeString().slice(0, 5); // HH:MM
+  
+  // Check if current day is in working days
+  const isWorkingDay = workingDays?.includes(currentDay);
+  
+  if (!isWorkingDay) {
+    return {
+      isOpen: false,
+      reason: 'closed_today',
+      nextOpening: getNextOpening(workingDays, dailyStartTime)
+    };
+  }
+  
+  // Check if current time is within working hours
+  if (currentTime < dailyStartTime) {
+    return {
+      isOpen: false,
+      reason: 'opens_later',
+      nextOpening: `Opens at ${formatTime(dailyStartTime)} today`
+    };
+  }
+  
+  if (currentTime > dailyEndTime) {
+    return {
+      isOpen: false,
+      reason: 'closed_for_today',
+      nextOpening: getNextOpening(workingDays, dailyStartTime, currentDay)
+    };
+  }
+  
+  return {
+    isOpen: true,
+    reason: 'open',
+    closingTime: `Closes at ${formatTime(dailyEndTime)}`
+  };
+};
+
+const getNextOpening = (workingDays, dailyStartTime, currentDay = null) => {
+  const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const now = new Date();
+  const currentDayIndex = currentDay ? daysOfWeek.indexOf(currentDay) : now.getDay();
+  
+  // Check next 7 days
+  for (let i = 1; i <= 7; i++) {
+    const nextDayIndex = (currentDayIndex + i) % 7;
+    const nextDay = daysOfWeek[nextDayIndex];
+    
+    if (workingDays?.includes(nextDay)) {
+      const nextDate = new Date(now);
+      nextDate.setDate(now.getDate() + i);
+      
+      if (i === 1 && currentDay === nextDay) {
+        return `Opens at ${formatTime(dailyStartTime)} tomorrow`;
+      } else if (i === 1) {
+        return `Opens at ${formatTime(dailyStartTime)} tomorrow`;
+      } else {
+        const dayName = nextDate.toLocaleString('en-US', { weekday: 'long' });
+        return `Opens on ${dayName} at ${formatTime(dailyStartTime)}`;
+      }
+    }
+  }
+  
+  return 'Closed indefinitely';
+};
+
+const formatTime = (timeString) => {
+  // Convert "18:00" to "6:00 PM"
+  const [hours, minutes] = timeString.split(':');
+  const hour = parseInt(hours);
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  const formattedHour = hour % 12 || 12;
+  return `${formattedHour}:${minutes} ${ampm}`;
+};
+
+// Additional helper to get current status message
+export const getShopStatusMessage = (shopStatus) => {
+  if (shopStatus.isOpen) {
+    return `Open now • ${shopStatus.closingTime}`;
+  }
+  
+  switch (shopStatus.reason) {
+    case 'closed_today':
+      return `Closed today • ${shopStatus.nextOpening}`;
+    case 'opens_later':
+      return `Closed • ${shopStatus.nextOpening}`;
+    case 'closed_for_today':
+      return `Closed • ${shopStatus.nextOpening}`;
+    default:
+      return 'Currently closed';
+  }
+};

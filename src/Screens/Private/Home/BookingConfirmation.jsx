@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -14,6 +14,15 @@ import {images} from '../../../Components/UI/images';
 import ConfirmModal from '../../../Components/UI/ConfirmModel';
 import {handleCall, openMapWithDirections} from '../../../Constants/Utils';
 import moment from 'moment';
+import {
+  cleanImageUrl,
+  getShopStatusMessage,
+  isShopOpen,
+  ToastMsg,
+} from '../../../Backend/Utility';
+import {Font} from '../../../Constants/Font';
+import {CANCEL_BOOKING, GET_BOOKING_DETAILS} from '../../../Constants/ApiRoute';
+import {POST_WITH_TOKEN} from '../../../Backend/Api';
 
 const BookingConfirmation = ({navigation, route}) => {
   const [cancelBooking, setCancelBooking] = useState(false);
@@ -21,6 +30,49 @@ const BookingConfirmation = ({navigation, route}) => {
   console.log('Booking Data:--->>>>', data);
   const timeKeys = Object.keys(data?.bookingData?.data?.schedule_time);
   console.log('Time keys:', timeKeys); // Output: ["10:00", "10:30"]
+  const [shopStatus, setShopStatus] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [cancelAppointment, setCancelAppointment] = useState(false);
+
+  useEffect(() => {
+    if (data?.businessData) {
+      calculateShopStatus();
+    }
+  }, [data?.businessData]);
+
+  const calculateShopStatus = () => {
+    const status = isShopOpen(
+      data?.businessData.working_days,
+      data?.businessData.daily_start_time,
+      data?.businessData.daily_end_time,
+    );
+    setShopStatus(status);
+  };
+
+  const CancelBooking = () => {
+    setLoading(true);
+    POST_WITH_TOKEN(
+      CANCEL_BOOKING + data?.bookingData?.data?.id,
+      {},
+      success => {
+        console.log(success, 'dsaddasdadasdadsadas');
+        setLoading(false);
+        setCancelAppointment(false);
+        navigation.replace('BottomNavigation');
+        ToastMsg('Booking Cancelled Successfully');
+      },
+      error => {
+        setLoading(false);
+        console.log(error, 'eqewqewqewqeqeqw');
+        ToastMsg(error?.data.message);
+        setCancelAppointment(false);
+      },
+      fail => {
+        setLoading(false);
+        console.log(fail, 'fdfdfdfdfdfdfd');
+      },
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -30,9 +82,11 @@ const BookingConfirmation = ({navigation, route}) => {
           leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
           leftTint={COLOR.black}
         />
-        <ScrollView style={{marginHorizontal: 5}}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          style={{marginHorizontal: 5}}>
           <>
-            <View style={styles.noticeContainer}>
+            {/* <View style={styles.noticeContainer}>
               <Image
                 source={{
                   uri: 'https://cdn-icons-png.flaticon.com/128/1827/1827343.png',
@@ -43,7 +97,34 @@ const BookingConfirmation = ({navigation, route}) => {
                 The salon is currently closed. They will confirm your
                 appointment as soon as they open.
               </Typography>
-            </View>
+            </View> */}
+
+            {shopStatus && !shopStatus.isOpen && (
+              <View style={styles.closedBanner}>
+                <Typography style={styles.closedText}>
+                  ⚠️ The salon is currently closed
+                </Typography>
+                <Typography style={styles.noticeText}>
+                  They will confirm your appointment as soon as they open.
+                </Typography>
+                <Typography style={styles.nextOpeningText}>
+                  {shopStatus.nextOpening}
+                </Typography>
+              </View>
+            )}
+
+            {/* Shop Status Info (Always show) */}
+            {/* {shopStatus && (
+              <View
+                style={[
+                  styles.statusInfo,
+                  shopStatus.isOpen ? styles.openStatus : styles.closedStatus,
+                ]}>
+                <Typography style={styles.statusText}>
+                  {getShopStatusMessage(shopStatus)}
+                </Typography>
+              </View>
+            )} */}
 
             {/* What To Do Next */}
             <View style={styles.section}>
@@ -79,7 +160,10 @@ const BookingConfirmation = ({navigation, route}) => {
                 {data?.businessData?.business_name}
               </Typography>
               <View style={styles.salonRow}>
-                <Image source={images.logo} style={styles.salonLogo} />
+                <Image
+                  source={{uri: cleanImageUrl(data?.businessData?.image)}}
+                  style={styles.salonLogo}
+                />
                 <Typography style={styles.salonAddress}>
                   {data?.businessData?.exact_location}
                 </Typography>
@@ -91,7 +175,7 @@ const BookingConfirmation = ({navigation, route}) => {
                   style={styles.actionBtn}
                   onPress={() => handleCall(data?.businessData?.phone_number)}>
                   <Image source={images.call} style={styles.actionIcon} />
-                  <Typography style={styles.actionText}>Timings</Typography>
+                  <Typography style={styles.actionText}>Call Us</Typography>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.actionBtn}
@@ -105,18 +189,18 @@ const BookingConfirmation = ({navigation, route}) => {
                 </TouchableOpacity>
               </View>
 
-              <TouchableOpacity style={styles.callBtn}>
+              {/* <TouchableOpacity style={styles.callBtn}>
                 <Typography style={styles.callText}>
                   ABC Hairdressing
                 </Typography>
                 <Typography style={styles.callSubText}>
                   For queries or instant confirmation
                 </Typography>
-              </TouchableOpacity>
-              <Button
+              </TouchableOpacity> */}
+              {/* <Button
                 title={'Pay Now'}
                 containerStyle={{marginTop: 15, marginBottom: 5}}
-              />
+              /> */}
             </View>
 
             {/* Appointment Details */}
@@ -133,8 +217,8 @@ const BookingConfirmation = ({navigation, route}) => {
                   Object.values(
                     data?.bookingData?.data?.schedule_time || {},
                   )[0],
-                  'DD/MM/YYYY',
-                ).format('DD MMM, YYYY')}
+                  'DD-MM-YYYY',
+                ).format('DD MMM, YYYY') || 'N/A'}
               </Typography>
               <Typography style={styles.detailText}>
                 Time:{' '}
@@ -153,16 +237,16 @@ const BookingConfirmation = ({navigation, route}) => {
                 <View style={styles.serviceRow}>
                   <Image
                     source={{
-                      uri: 'https://cdn-icons-png.flaticon.com/128/3004/3004613.png',
+                      uri: cleanImageUrl(service?.service?.image),
                     }}
                     style={styles.serviceIcon}
                   />
                   <View>
                     <Typography style={styles.serviceName}>
-                      {service?.name}
+                      {service?.service?.name}
                     </Typography>
                     <Typography style={styles.serviceSubText}>
-                      Includes wash and blast dry
+                      {service?.service?.description}
                     </Typography>
                   </View>
                 </View>
@@ -172,10 +256,9 @@ const BookingConfirmation = ({navigation, route}) => {
             {/* Cancel & Reschedule */}
             <View style={styles.footerRow}>
               <Button
-                onPress={() => setCancelBooking(true)}
+                onPress={() => setCancelAppointment(true)}
                 title={'Cancel'}
                 titleColor={COLOR.red}
-                leftImg={images.cross2}
                 leftImgStyle={{
                   height: 16,
                   width: 16,
@@ -183,32 +266,30 @@ const BookingConfirmation = ({navigation, route}) => {
                   tintColor: COLOR.red,
                 }}
                 containerStyle={{
-                  width: '45%',
+                  width: '100%',
                   backgroundColor: 'white',
                   borderWidth: 1,
                   borderColor: COLOR.red,
                 }}
               />
-              <Button
-                title={'⏰ Reschedule'}
+              {/* <Button
+                title={'Reschedule'}
                 leftImgStyle={{height: 16, width: 16, marginRight: 10}}
                 containerStyle={{width: '45%'}}
-                onPress={() =>
-                  navigation.navigate('BottomNavigation')
-                }
-              />
+                onPress={() => navigation.navigate('BottomNavigation')}
+              /> */}
             </View>
           </>
         </ScrollView>
         <ConfirmModal
-          visible={cancelBooking}
-          close={() => setCancelBooking(false)}
-          title="Cancel Booking"
-          description="Are you sure you want to Cancel Booking?"
+          visible={cancelAppointment}
+          close={() => setCancelAppointment(false)}
+          title="Cancel Appointment"
+          description="Are you sure you want to Cancel Appointment?"
           yesTitle="Yes"
           noTitle="No"
-          onPressYes={() => {}}
-          onPressNo={() => setCancelBooking(false)}
+          onPressYes={() => CancelBooking()}
+          onPressNo={() => setCancelAppointment(false)}
         />
       </>
     </View>
@@ -256,6 +337,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginTop: 15,
+    padding: 15,
+    borderWidth: 1,
+    borderColor: COLOR?.primaryLight,
+    borderRadius: 8,
   },
   actionBtn: {alignItems: 'center'},
   actionIcon: {width: 22, height: 22, marginBottom: 4},
@@ -278,7 +363,13 @@ const styles = StyleSheet.create({
   payText: {textAlign: 'center', color: '#fff', fontWeight: '600'},
   detailText: {fontSize: 14, color: '#444', marginVertical: 3},
   serviceRow: {flexDirection: 'row', alignItems: 'center', marginTop: 10},
-  serviceIcon: {width: 40, height: 40, marginRight: 10},
+  serviceIcon: {
+    width: 40,
+    height: 40,
+    marginRight: 10,
+    overflow: 'hidden',
+    borderRadius: 8,
+  },
   serviceName: {fontSize: 15, fontWeight: '600'},
   serviceSubText: {fontSize: 13, color: '#888', marginTop: 2},
   footerRow: {
@@ -301,4 +392,49 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   rescheduleText: {color: '#333', fontWeight: '600'},
+  closedBanner: {
+    backgroundColor: '#fff3cd',
+    borderColor: '#ffeaa7',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    margin: 5,
+    marginBottom: 10,
+  },
+  closedText: {
+    fontFamily: Font.bold,
+    color: '#856404',
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  noticeText: {
+    fontFamily: Font.regular,
+    color: '#856404',
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  nextOpeningText: {
+    fontFamily: Font.semibold,
+    color: '#856404',
+    fontSize: 12,
+  },
+  statusInfo: {
+    padding: 10,
+    borderRadius: 8,
+    margin: 5,
+    marginBottom: 10,
+  },
+  openStatus: {
+    backgroundColor: '#d4edda',
+    borderColor: '#c3e6cb',
+  },
+  closedStatus: {
+    backgroundColor: '#f8d7da',
+    borderColor: '#f5c6cb',
+  },
+  statusText: {
+    fontFamily: Font.semibold,
+    fontSize: 13,
+    textAlign: 'center',
+  },
 });

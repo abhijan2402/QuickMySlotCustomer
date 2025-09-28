@@ -38,5 +38,6 @@ export const images = {
   gallery: require('../../assets/Images/picture.png'),
   camera: require('../../assets/Images/camera.png'),
   documentation: require('../../assets/Images/documentation.png'),
+  doc: require('../../assets/Images/google-docs.png'),
 
 };

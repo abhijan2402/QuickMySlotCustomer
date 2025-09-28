@@ -18,6 +18,7 @@ import {GET_WITH_TOKEN} from '../../../Backend/Api';
 import {SERVICES} from '../../../Constants/ApiRoute';
 import {useIsFocused} from '@react-navigation/native';
 import {cleanImageUrl} from '../../../Backend/Utility';
+import {useSelector} from 'react-redux';
 
 const SearchServices = ({navigation, route}) => {
   const [search, setSearch] = useState('');
@@ -31,6 +32,7 @@ const SearchServices = ({navigation, route}) => {
   const [perPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const currentLocation = useSelector(state => state.user.currentLocation);
   const buildApiUrl = (page = 1, searchTerm = '') => {
     let url = `${SERVICES}?service_category=${id}&page=${page}&per_page=${perPage}`;
     if (searchTerm.trim() !== '') {

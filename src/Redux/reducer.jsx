@@ -1,9 +1,4 @@
-import {
-  AUTH,
-  TOKEN,
-  LOG_OUT,
-  USER,
-} from './constant';
+import {AUTH, TOKEN, LOG_OUT, USER, CURRENT_LOCATION} from './constant';
 const initialState = {
   isAuth: false,
   userDetails: {},
@@ -30,6 +25,13 @@ const todoReducer = (state = initialState, action) => {
       return {
         ...state,
         userDetails: status.userDetails,
+      };
+    }
+    case CURRENT_LOCATION: {
+      const status = action.payload;
+      return {
+        ...state,
+        currentLocation: status.currentLocation,
       };
     }
     case LOG_OUT: {

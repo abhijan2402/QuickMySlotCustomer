@@ -16,14 +16,15 @@ import {COLOR} from '../../../Constants/Colors';
 import {images} from '../../../Components/UI/images';
 import {Typography} from '../../../Components/UI/Typography';
 import {Font} from '../../../Constants/Font';
-import { GOOGLE_API } from '../../../Backend/Utility';
+import {GOOGLE_API} from '../../../Backend/Utility';
+import {useDispatch} from 'react-redux';
+import { currentLocation } from '../../../Redux/action';
 
 const MainHomeHeader = () => {
   const navigation = useNavigation();
   const [location, setLocation] = useState('Getting location...');
-  const [currentLocation, setCurrentLocation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-
+  const dispatch = useDispatch();
   const isFocus = useIsFocused();
 
   const getCurrentLocation = async () => {
@@ -49,11 +50,9 @@ const MainHomeHeader = () => {
     try {
       await requestPermissions();
       return new Promise((resolve, reject) => {
-        Geolocation.getCurrentPosition(
-          position => resolve(position),
-          error => reject(new Error(error.message || 'Error getting location')),
-          {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
-        );
+        Geolocation.getCurrentPosition(info => {
+          resolve(info);
+        });
       });
     } catch (error) {
       throw new Error(error.message || 'Error checking location permissions');
@@ -80,13 +79,17 @@ const MainHomeHeader = () => {
     try {
       setIsLoading(true);
       const locationData = await getCurrentLocation();
-      setCurrentLocation(locationData);
+      console.log(locationData, 'locationData---->>');
       const address = await getAddressFromCoordinates(
         locationData.coords.latitude,
         locationData.coords.longitude,
       );
       setLocation(address);
+      dispatch(
+        currentLocation({address: address, coords: locationData.coords}),
+      );
     } catch (error) {
+      console.log(error, 'error----->>');
       setLocation('Location unavailable');
     } finally {
       setIsLoading(false);
@@ -112,7 +115,6 @@ const MainHomeHeader = () => {
             Your Location
           </Text>
           {isLoading ? (
-            // <ActivityIndicator size="small" color={COLOR.primary} />
             <Text style={styles.locationAddress} numberOfLines={1}>
               Loading...
             </Text>

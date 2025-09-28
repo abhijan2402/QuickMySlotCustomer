@@ -9,6 +9,7 @@ import {
   Image,
   ActivityIndicator,
   RefreshControl,
+  Linking,
 } from 'react-native';
 import HomeHeader from '../../../Components/HomeHeader';
 import {COLOR} from '../../../Constants/Colors';
@@ -28,16 +29,17 @@ import {isValidForm} from '../../../Backend/Utility';
 
 const Support = () => {
   const [tickets, setTickets] = useState([]);
+  console.log(tickets,'tickets>>>>>');
+  
   const [modalVisible, setModalVisible] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [error, setError] = useState('');
-  const [image, setImage] = useState('');
+  const [file, setFile] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const isFocus = useIsFocused();
-  console.log(image, 'image-->>>');
 
   useEffect(() => {
     if (isFocus) {
@@ -73,33 +75,32 @@ const Support = () => {
     getSupport();
   };
 
-  const handleImageSelected = (response, type) => {
-    if (response) {
-      setImage(response);
-    }
-    setShowModal(false);
-  };
-
   const handleUpdate = () => {
     let validationErrors = {
       title: validators.checkRequire('Title', newTitle),
       description: validators.checkRequire('Description', newDesc),
-      image: validators.checkRequire('image', image),
     };
+    console.log(file,'file>>>>>');
+    
     setError(validationErrors);
     if (isValidForm(validationErrors)) {
       setLoading(true);
       const formData = new FormData();
       formData.append('title', newTitle);
       formData.append('description', newDesc);
-      if (image) {
-        formData.append('image', {
-          uri: image.path,
-          type: image.mime || 'image/jpeg',
-          name: image.filename || `photo_${Date.now()}.jpg`,
-        });
+
+      if (file) {
+        // Prepare file for FormData based on source
+        const fileData = {
+          uri: file.uri || file.path,
+          type: file.mime || file.type || 'application/octet-stream',
+          name: file.name || file.filename || `file_${Date.now()}`,
+        };
+        formData.append('image', fileData);
       }
-      console.log('FormData ====>', formData);
+
+      console.log(formData, 'formdata>>>>>');
+
       POST_FORM_DATA(
         SUPPORT,
         formData,
@@ -109,7 +110,7 @@ const Support = () => {
           setModalVisible(false);
           setNewTitle('');
           setNewDesc('');
-          setImage('');
+          setFile(null);
           setError('');
           getSupport();
         },
@@ -125,6 +126,52 @@ const Support = () => {
     }
   };
 
+  // Render file preview in ticket list
+  const renderFilePreview = item => {
+    if (!item.file_url && !item.image_url) return null;
+
+    const fileUrl = item.file_url || item.image_url;
+    const isImage = fileUrl?.match(/\.(jpg|jpeg|png|gif|bmp|webp)$/i);
+    const isPdf = fileUrl?.match(/\.pdf$/i);
+
+    if (isImage) {
+      return (
+        <TouchableOpacity
+          onPress={() => {
+            /* Implement image preview modal */
+          }}>
+          <Image
+            source={{uri: fileUrl}}
+            style={styles.ticketFileImage}
+            defaultSource={images.placeholder}
+          />
+        </TouchableOpacity>
+      );
+    } else if (isPdf) {
+      return (
+        <TouchableOpacity
+          style={styles.pdfContainer}
+          onPress={() => Linking.openURL(fileUrl)}>
+          <Image source={images.pdfIcon} style={styles.pdfIcon} />
+          <Typography style={styles.pdfText} numberOfLines={1}>
+            View PDF
+          </Typography>
+        </TouchableOpacity>
+      );
+    } else {
+      return (
+        <TouchableOpacity
+          style={styles.fileContainer}
+          onPress={() => Linking.openURL(fileUrl)}>
+          <Image source={images.documentIcon} style={styles.fileIcon} />
+          <Typography style={styles.fileText} numberOfLines={1}>
+            View File
+          </Typography>
+        </TouchableOpacity>
+      );
+    }
+  };
+
   const renderTicket = ({item, index}) => (
     <View
       style={[
@@ -133,16 +180,12 @@ const Support = () => {
         index === tickets?.length - 1 && styles.lastTicketCard,
       ]}>
       <View style={styles.ticketHeader}>
-        <Image
-          source={{uri: item.image_url}}
-          style={styles.ticketImage}
-          defaultSource={images.placeholder} // Add a placeholder image
-        />
+        {renderFilePreview(item)}
         <View style={styles.ticketContent}>
           <Typography style={styles.ticketTitle} numberOfLines={1}>
             {item.title}
           </Typography>
-          <Typography style={styles.ticketDesc} numberOfLines={2}>
+          <Typography style={styles.ticketDesc} numberOfLines={3}>
             {item.description}
           </Typography>
           {item.created_at && (
@@ -218,14 +261,14 @@ const Support = () => {
         onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <ScrollView>
+            <ScrollView showsVerticalScrollIndicator={false}>
               <Typography style={styles.modalTitle}>
                 Raise a Support Ticket
               </Typography>
 
               <Input
                 label="Title"
-                placeholder=""
+                placeholder="Enter ticket title"
                 value={newTitle}
                 style={{borderColor: COLOR.primary}}
                 onChangeText={setNewTitle}
@@ -234,53 +277,49 @@ const Support = () => {
 
               <Input
                 label="Description"
-                placeholder=""
+                placeholder="Describe your issue"
                 value={newDesc}
                 style={{borderColor: COLOR.primary}}
                 onChangeText={setNewDesc}
                 error={error.description}
                 multiline={true}
+                numberOfLines={4}
               />
+
               <Typography
                 size={14}
                 font={Font.semibold}
                 color="#333"
                 style={[styles.label, {marginTop: 20, marginBottom: 5}]}>
-                Image
+                Attach File (Optional)
               </Typography>
-              {image ? (
-                <View style={styles.imgWrapper}>
-                  <Image
-                    source={{uri: image?.path ? image?.path : image?.uri}}
-                    style={styles.previewImg}
-                  />
-                  <TouchableOpacity
-                    style={styles.deleteBtn}
-                    onPress={() => setImage(null)}>
-                    <Image
-                      // source={images.cross}
-                      style={{height: 12, width: 12}}
-                      tintColor={'white'}
-                    />
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <ImageUpload onPress={() => setShowModal(true)} />
-              )}
+
+              {/* {file ? (
+                renderFileUploadPreview()
+              ) : ( */}
+              <ImageUpload
+                file={file}
+                setFile={v => {
+                  setFile(v);
+                }}
+              />
+              {/* )} */}
+
               <Typography
                 size={12}
                 color="#777"
                 font={Font.semibold}
                 style={[styles.note, {marginBottom: 0, marginTop: 5}]}>
-                Max file size: 2MB. JPG, PNG allowed.
+                Max file size: 10MB. Images, PDF, DOC allowed.
               </Typography>
-              {/* show error below image */}
-              {error.image && <ErrorBox error={error.image} />}
+
+              {error.file && <ErrorBox error={error.file} />}
+
               <Button
                 loading={loading}
                 title="Submit Ticket"
                 onPress={handleUpdate}
-                containerStyle={{marginTop: 10}}
+                containerStyle={{marginTop: 20}}
               />
               <Button
                 title="Cancel"
@@ -294,12 +333,6 @@ const Support = () => {
                 }}
               />
             </ScrollView>
-            <ImageModal
-              showModal={showModal}
-              close={() => setShowModal(false)}
-              selected={handleImageSelected}
-              documents={true}
-            />
           </View>
         </View>
       </Modal>
@@ -361,11 +394,51 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
   },
-  ticketImage: {
+  ticketFileImage: {
     height: 60,
     width: 60,
     borderRadius: 8,
     backgroundColor: '#f5f5f5',
+  },
+  pdfContainer: {
+    height: 60,
+    width: 60,
+    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  fileContainer: {
+    height: 60,
+    width: 60,
+    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  pdfIcon: {
+    height: 24,
+    width: 24,
+    tintColor: COLOR.primary,
+  },
+  fileIcon: {
+    height: 24,
+    width: 24,
+    tintColor: COLOR.primary,
+  },
+  pdfText: {
+    fontSize: 10,
+    color: COLOR.primary,
+    marginTop: 4,
+  },
+  fileText: {
+    fontSize: 10,
+    color: COLOR.primary,
+    marginTop: 4,
   },
   ticketContent: {
     flex: 1,
@@ -428,30 +501,49 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: COLOR.primary,
   },
-  input: {
+  fileWrapper: {
+    position: 'relative',
+    marginBottom: 12,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  documentWrapper: {
+    position: 'relative',
+    marginBottom: 12,
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
+    backgroundColor: '#f9f9f9',
+  },
+  documentPreview: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  documentIcon: {
+    height: 40,
+    width: 40,
+    tintColor: COLOR.primary,
+  },
+  documentInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  documentName: {
     fontSize: 14,
-    marginBottom: 16,
+    fontWeight: '600',
+    color: COLOR.black,
   },
-  textArea: {
-    minHeight: 100,
-    textAlignVertical: 'top',
+  documentType: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 2,
   },
-  label: {
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  note: {
-    marginBottom: 0,
-    marginTop: 4,
-  },
-  imgWrapper: {
-    position: 'relative',
-    marginBottom: 12,
-    alignSelf: 'flex-start',
+  documentSource: {
+    fontSize: 10,
+    color: '#999',
+    marginTop: 2,
+    fontStyle: 'italic',
   },
   previewImg: {
     width: '100%',
@@ -465,17 +557,38 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.6)',
     borderRadius: 15,
     padding: 6,
+    zIndex: 1,
+  },
+  deleteBtnDocument: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderRadius: 15,
+    padding: 6,
   },
   deleteIcon: {
     height: 12,
     width: 12,
   },
-  submitButton: {
-    marginTop: 20,
+  fileInfoOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    padding: 8,
   },
-  cancelButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: COLOR.primary,
+  fileInfoText: {
+    color: 'white',
+    fontSize: 10,
+  },
+  label: {
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  note: {
+    marginBottom: 0,
+    marginTop: 4,
   },
 });

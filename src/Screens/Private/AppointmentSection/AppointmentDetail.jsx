@@ -18,12 +18,15 @@ import {GET_WITH_TOKEN, POST_WITH_TOKEN} from '../../../Backend/Api';
 import {CANCEL_BOOKING, GET_BOOKING_DETAILS} from '../../../Constants/ApiRoute';
 import {images} from '../../../Components/UI/images';
 import moment from 'moment';
+import {cleanImageUrl} from '../../../Backend/Utility';
 
 const AppointmentDetail = ({route, navigation}) => {
   const [cancelAppointment, setCancelAppointment] = useState(false);
   const isFocused = useIsFocused();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(false);
+  console.log(data, 'data--->');
+
   const id = route?.params?.appointment?.id || '';
   useEffect(() => {
     if (isFocused) {
@@ -54,7 +57,7 @@ const AppointmentDetail = ({route, navigation}) => {
   const CancelBooking = () => {
     setLoading(true);
     POST_WITH_TOKEN(
-      CANCEL_BOOKING + 27,
+      CANCEL_BOOKING + id,
       success => {
         console.log(success);
         setLoading(false);
@@ -74,10 +77,14 @@ const AppointmentDetail = ({route, navigation}) => {
 
   const [time, date] = Object.entries(data?.schedule_time ?? {})[0] || [];
   const dateKeys = moment(
-    Object.values(data?.schedule_time || route?.params?.appointment?.schedule_time || {})[0],
-    'DD/MM/YYYY',
+    Object.values(
+      data?.schedule_time || route?.params?.appointment?.schedule_time || {},
+    )[0],
+    'DD-MM-YYYY',
   ).format('DD MMM, YYYY');
-  const timeKeys = Object.keys(data?.schedule_time ||route?.params?.appointment?.schedule_time);
+  const timeKeys = Object.keys(
+    data?.schedule_time || route?.params?.appointment?.schedule_time,
+  );
   const amount = Number(data?.amount) || 0;
   const tax = Number(data?.tax) || 0;
   const platformFee = Number(data?.platform_fee) || 0;
@@ -119,7 +126,11 @@ const AppointmentDetail = ({route, navigation}) => {
         <View style={styles.card}>
           <Typography style={styles.sectionTitle}>Shop Details</Typography>
           <Image
-            source={{uri: data?.vendor?.image || data?.service?.image}}
+            source={{
+              uri:
+                cleanImageUrl(data?.vendor?.image) ||
+                cleanImageUrl(data?.service?.image),
+            }}
             style={styles.shopImg}
           />
           <Typography style={styles.shopName}>{data?.vendor?.name}</Typography>
@@ -215,6 +226,7 @@ const AppointmentDetail = ({route, navigation}) => {
             <Typography style={styles.text}>{data?.service?.name}</Typography>
             <Typography style={styles.text}>₹{data?.service?.price}</Typography>
           </View>
+          <Typography>{data?.note}</Typography>
           {/* ))} */}
         </View>
 

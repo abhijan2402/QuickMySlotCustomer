@@ -80,7 +80,7 @@ const Appointment = ({navigation}) => {
     const timeKeys = Object.keys(item?.schedule_time);
     const dateKeys = moment(
       Object.values(item?.schedule_time || {})[0],
-      'DD/MM/YYYY',
+      'DD-MM-YYYY',
     ).format('DD MMM, YYYY');
 
     return (

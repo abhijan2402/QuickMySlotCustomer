@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Image,
@@ -9,21 +9,23 @@ import {
   FlatList,
 } from 'react-native';
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
-const ImageSwiper = () => {
-  const originalImages = [
-    'https://images.pexels.com/photos/3058864/pexels-photo-3058864.jpeg?auto=compress&cs=tinysrgb&w=600',
-    'https://images.pexels.com/photos/3992875/pexels-photo-3992875.jpeg?auto=compress&cs=tinysrgb&w=600',
-    'https://images.pexels.com/photos/3998426/pexels-photo-3998426.jpeg?auto=compress&cs=tinysrgb&w=600',
-    'https://images.pexels.com/photos/1813272/pexels-photo-1813272.jpeg?auto=compress&cs=tinysrgb&w=600',
+const ImageSwiper = ({data}) => {
+  console.log(data, 'data in image swiper');
+  
+  const originalImages = [...data
+    // 'https://images.pexels.com/photos/3058864/pexels-photo-3058864.jpeg?auto=compress&cs=tinysrgb&w=600',
+    // 'https://images.pexels.com/photos/3992875/pexels-photo-3992875.jpeg?auto=compress&cs=tinysrgb&w=600',
+    // 'https://images.pexels.com/photos/3998426/pexels-photo-3998426.jpeg?auto=compress&cs=tinysrgb&w=600',
+    // 'https://images.pexels.com/photos/1813272/pexels-photo-1813272.jpeg?auto=compress&cs=tinysrgb&w=600',
   ];
 
   // Duplicate list for looping
   const images = [...originalImages, ...originalImages];
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  
+
   const scrollX = useRef(new Animated.Value(0)).current;
   const flatListRef = useRef(null);
   const progress = useRef(new Animated.Value(0)).current;
@@ -36,28 +38,28 @@ const ImageSwiper = () => {
     if (progressAnim.current) {
       progressAnim.current.stop();
     }
-    
+
     progress.setValue(0);
     progressAnim.current = Animated.timing(progress, {
       toValue: 1,
       duration: DURATION,
       useNativeDriver: false,
     });
-    
-    progressAnim.current.start(({ finished }) => {
+
+    progressAnim.current.start(({finished}) => {
       if (finished) {
-        let nextIndex = (currentIndex + 1) % originalImages.length;
-        (nextIndex)
-        
-        if (flatListRef.current) {
+        let nextIndex = (currentIndex + 1) % originalImages?.length;
+        nextIndex;
+
+        if (flatListRef?.current) {
           // If we're at the last image of the original set, we need to scroll to the duplicate
           if (nextIndex === 0) {
-            flatListRef.current.scrollToIndex({
-              index: originalImages.length,
+            flatListRef?.current.scrollToIndex({
+              index: originalImages?.length,
               animated: true,
             });
           } else {
-            flatListRef.current.scrollToIndex({
+            flatListRef?.current?.scrollToIndex({
               index: nextIndex,
               animated: true,
             });
@@ -69,16 +71,17 @@ const ImageSwiper = () => {
   };
 
   useEffect(() => {
-    startProgressBar();
-    
-    return () => {
-      if (progressAnim.current) {
-        progressAnim.current.stop();
-      }
-    };
+    if (images?.length > 0) {
+      startProgressBar();
+      return () => {
+        if (progressAnim.current) {
+          progressAnim.current.stop();
+        }
+      };
+    }
   }, [currentIndex]);
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({item}) => (
     <View style={styles.imageContainer}>
       <View style={styles.ratingOverlay}>
         <Image
@@ -87,35 +90,36 @@ const ImageSwiper = () => {
         />
         <Text style={styles.ratingText}>(4.6)</Text>
       </View>
-      <Image source={{ uri: item }} style={styles.mainImage} />
+      <Image source={{uri: item}} style={styles.mainImage} />
     </View>
   );
 
   const renderPagination = () => {
     return (
       <View style={styles.pagination}>
-        {originalImages.map((_, i) => {
-          const isActive = i === currentIndex;
-          return (
-            <View key={i} style={styles.progressBarBackground}>
-              {isActive ? (
-                <Animated.View
-                  style={[
-                    styles.progressBarFill,
-                    {
-                      width: progress.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['0%', '100%'],
-                      }),
-                    },
-                  ]}
-                />
-              ) : i < currentIndex ? (
-                <View style={[styles.progressBarFill, { width: '100%' }]} />
-              ) : null}
-            </View>
-          );
-        })}
+        {images?.length > 0 &&
+          originalImages?.map((_, i) => {
+            const isActive = i === currentIndex;
+            return (
+              <View key={i} style={styles.progressBarBackground}>
+                {isActive ? (
+                  <Animated.View
+                    style={[
+                      styles.progressBarFill,
+                      {
+                        width: progress.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ['0%', '100%'],
+                        }),
+                      },
+                    ]}
+                  />
+                ) : i < currentIndex ? (
+                  <View style={[styles.progressBarFill, {width: '100%'}]} />
+                ) : null}
+              </View>
+            );
+          })}
       </View>
     );
   };
@@ -129,21 +133,23 @@ const ImageSwiper = () => {
         keyExtractor={(item, index) => index.toString()}
         horizontal
         pagingEnabled
-        scrollEnabled={false} 
+        scrollEnabled={false}
         showsHorizontalScrollIndicator={false}
         onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: true }
+          [{nativeEvent: {contentOffset: {x: scrollX}}}],
+          {useNativeDriver: true},
         )}
-        onMomentumScrollEnd={(event) => {
-          const newIndex = Math.floor(event.nativeEvent.contentOffset.x / width);
-          const actualIndex = newIndex % originalImages.length;
-          
+        onMomentumScrollEnd={event => {
+          const newIndex = Math.floor(
+            event.nativeEvent.contentOffset.x / width,
+          );
+          const actualIndex = newIndex % originalImages?.length;
+
           if (actualIndex !== currentIndex) {
             // setCurrentIndex(actualIndex);
-            
+
             // If we're at the end of the duplicated array, reset to beginning
-            if (newIndex >= originalImages.length) {
+            if (newIndex >= originalImages?.length) {
               setTimeout(() => {
                 flatListRef.current.scrollToIndex({
                   index: actualIndex,

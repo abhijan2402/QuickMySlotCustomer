@@ -18,6 +18,7 @@ import {
   REMOVE_TO_CART,
 } from '../../../Constants/ApiRoute';
 import {GET_WITH_TOKEN, POST_FORM_DATA} from '../../../Backend/Api';
+import {images} from '../../../Components/UI/images';
 
 const ServiceList = ({navigation, route}) => {
   const selectedServiceId = route.params?.subServicesId || null;
@@ -50,6 +51,7 @@ const ServiceList = ({navigation, route}) => {
           // For single selection, only take the first item
           const cartItem = success.data.items[0];
           const selectedItem = {
+            ...cartItem,
             id: cartItem.service.id,
             name: cartItem.service.name,
             cart_id: cartItem.cart_id,
@@ -97,7 +99,7 @@ const ServiceList = ({navigation, route}) => {
   };
 
   const removeExistingService = () => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       POST_FORM_DATA(
         `${REMOVE_TO_CART}${selectedService.cart_id}`,
         null,
@@ -181,7 +183,7 @@ const ServiceList = ({navigation, route}) => {
 
   // Calculate total items and price - For single selection
   const totalItems = selectedService ? 1 : 0;
-  const totalPrice = selectedService ? (selectedService.price || 0) : 0;
+  const totalPrice = selectedService ? selectedService.price || 0 : 0;
 
   return (
     <View style={styles.container}>
@@ -195,6 +197,7 @@ const ServiceList = ({navigation, route}) => {
 
       <View style={{flex: 1, flexDirection: 'row'}}>
         {/* Left Side Category */}
+        
         <View style={styles.leftPane}>
           <FlatList
             data={subServices}
@@ -263,7 +266,8 @@ const ServiceList = ({navigation, route}) => {
                         size={13}
                         font={Font.semibold}
                         color={isAdded(srv.id) ? COLOR.white : COLOR.black}>
-                        {isAdded(srv.id) ? 'Selected' : 'Select'} {/* Changed text */}
+                        {isAdded(srv.id) ? 'Selected' : 'Select'}{' '}
+                        {/* Changed text */}
                       </Typography>
                     )}
                   </TouchableOpacity>
@@ -287,30 +291,54 @@ const ServiceList = ({navigation, route}) => {
               cartItems: [selectedService], // Pass as array with single item
               cartData: cartData,
               businessData: apiData,
-              totalPrice:totalPrice,
+              totalPrice: totalPrice,
             })
           }
           style={styles.bookNowBtn}>
-          {apiData?.business_name && (
-            <Typography
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
+            {apiData?.business_name && (
+              <Typography
+                style={{
+                  left: 20,
+                  fontSize: 20,
+                  fontFamily: Font.semibold,
+                  color: COLOR.white,
+                  marginBottom: 10,
+                  alignSelf: 'flex-start',
+                  width: '80%',
+                }}>
+                {apiData?.business_name || 'Your Selected'}
+              </Typography>
+            )}
+            <View
               style={{
-                left: 20,
-                fontSize: 20,
-                fontFamily: Font.semibold,
-                color: COLOR.white,
+                right: 20,
+                borderWidth: 1,
+                borderColor: COLOR.white,
+                padding: 5,
+                borderRadius: 50,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: 'rgba(255, 255, 255, 0.3)',
                 marginBottom: 10,
-                alignSelf: 'flex-start',
-                width: '80%',
               }}>
-              {apiData?.business_name || 'Your Selected'}
-            </Typography>
-          )}
+              <Image
+                source={images.rightArrow}
+                style={{height: 20, width: 20}}
+              />
+            </View>
+          </View>
           <View style={styles.bookNowContent}>
             <Typography size={14} font={Font.semibold} color={COLOR.white}>
               Book Now ({totalItems})
             </Typography>
-            <Typography size={14} font={Font.medium} color={COLOR.white}>
-              ₹{(totalPrice || 0)}
+            <Typography size={20} font={Font.medium} color={COLOR.white}>
+              ₹{totalPrice || 0}
             </Typography>
           </View>
         </TouchableOpacity>

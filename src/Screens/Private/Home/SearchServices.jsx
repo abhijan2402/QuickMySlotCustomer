@@ -32,9 +32,10 @@ const SearchServices = ({navigation, route}) => {
   const [perPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const currentLocation = useSelector(state => state.user.currentLocation);
+  const currentLocation = useSelector(state => state.currentLocation);
+
   const buildApiUrl = (page = 1, searchTerm = '') => {
-    let url = `${SERVICES}?service_category=${id}&page=${page}&per_page=${perPage}`;
+    let url = `${SERVICES}?service_category=${id}&page=${page}&per_page=${perPage}&lat=${currentLocation?.latitude}$long=${currentLocation?.longitude}`;
     if (searchTerm.trim() !== '') {
       url += `&name=${encodeURIComponent(searchTerm.trim())}`;
     }
@@ -100,10 +101,10 @@ const SearchServices = ({navigation, route}) => {
 
     return (
       <View style={styles.footerLoader}>
-        <ActivityIndicator size="small" color={COLOR.primary} />
+        {/* <ActivityIndicator size="small" color={COLOR.primary} />
         <Typography size={12} color={COLOR.grey} style={{marginLeft: 10}}>
           Loading more...
-        </Typography>
+        </Typography> */}
       </View>
     );
   };
@@ -264,20 +265,21 @@ const SearchServices = ({navigation, route}) => {
           onRightIconPress={() => setSearch('')}
         />
       </View>
-
-      <FlatList
-        data={services}
-        keyExtractor={(item, index) => `${item.id}_${index}`}
-        renderItem={renderCard}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={!loading ? renderEmpty : null}
-        ListFooterComponent={renderFooter}
-        onEndReached={loadMore}
-        onEndReachedThreshold={0.5}
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-      />
+      {services.length > 0 && (
+        <FlatList
+          data={services}
+          keyExtractor={(item, index) => `${item.id}_${index}`}
+          renderItem={renderCard}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={!loading ? renderEmpty : null}
+          ListFooterComponent={renderFooter}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.5}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+        />
+      )}
 
       {loading && services.length === 0 && (
         <View style={styles.loadingContainer}>

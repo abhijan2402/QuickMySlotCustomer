@@ -21,11 +21,16 @@ import {
 } from '../../../Constants/Utils';
 import SimpleModal from '../../../Components/UI/SimpleModal';
 import {Font} from '../../../Constants/Font';
-import {ADD_TO_WISHLIST, PROMO_VENDOR, VENDOR_DETAIL} from '../../../Constants/ApiRoute';
+import {
+  ADD_TO_WISHLIST,
+  PROMO_VENDOR,
+  VENDOR_DETAIL,
+} from '../../../Constants/ApiRoute';
 import {useIsFocused} from '@react-navigation/native';
 import {GET_WITH_TOKEN, POST_FORM_DATA} from '../../../Backend/Api';
 import {Typography} from '../../../Components/UI/Typography';
 import moment from 'moment';
+import {cleanImageUrl} from '../../../Backend/Utility';
 
 const ProviderDetails = ({navigation, route}) => {
   const [activeTab, setActiveTab] = useState('Services');
@@ -35,40 +40,36 @@ const ProviderDetails = ({navigation, route}) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [apiData, setApiData] = useState([]);
   console.log('apidata', apiData);
-    const [promoData, setPromoData] = useState([]);
-
-
+  const [promoData, setPromoData] = useState([]);
   const isFocused = useIsFocused();
   const id = route?.params?.id;
   console.log(id);
-  
 
-  
-    useEffect(() => {
-      if (isFocused) {
-        getPromo();
-      }
-    }, [isFocused]);
-  
-    const getPromo = () => {
-      setLoading(true);
-      GET_WITH_TOKEN(
-        PROMO_VENDOR + id,
-        success => {
-          console.log(success);
-          setPromoData(success?.data)
-          setLoading(false);
-        },
-        error => {
-          setLoading(false);
-          console.log(success);
-        },
-        fail => {
-          setLoading(false);
-          console.log(fail);
-        },
-      );
-    };
+  useEffect(() => {
+    if (isFocused) {
+      getPromo();
+    }
+  }, [isFocused]);
+
+  const getPromo = () => {
+    setLoading(true);
+    GET_WITH_TOKEN(
+      PROMO_VENDOR + id,
+      success => {
+        console.log(success, 'promo data--');
+        setPromoData(success?.data);
+        setLoading(false);
+      },
+      error => {
+        setLoading(false);
+        console.log(success);
+      },
+      fail => {
+        setLoading(false);
+        console.log(fail);
+      },
+    );
+  };
 
   const allDays = [
     'monday',
@@ -199,7 +200,7 @@ const ProviderDetails = ({navigation, route}) => {
       </View>
 
       <ScrollView contentContainerStyle={{paddingBottom: 10}}>
-        <ImageSwiper />
+        <ImageSwiper data={[cleanImageUrl(apiData?.image)]} />
         {/* Provider Info */}
         <View style={styles.infoContainer}>
           <View
@@ -238,21 +239,21 @@ const ProviderDetails = ({navigation, route}) => {
               alignItems: 'center',
               marginTop: -10,
             }}>
-            <Text
+            <Typography
               style={[
                 {fontSize: 16, marginBottom: 2, fontFamily: Font.medium},
               ]}>
-              Unisex
-            </Text>
-            <View
+              {apiData?.gender || 'Unisex'}
+            </Typography>
+            {/* <View
               style={{
                 width: 1.5,
                 height: 15,
                 marginHorizontal: 10,
                 backgroundColor: 'black',
               }}
-            />
-            <Text style={[{fontSize: 16, fontFamily: Font.medium}]}>₹₹</Text>
+            /> */}
+            {/* <Text style={[{fontSize: 16, fontFamily: Font.medium}]}>₹₹</Text> */}
           </View>
           <TouchableOpacity
             onPress={() => setModalVisible(true)}
@@ -276,14 +277,14 @@ const ProviderDetails = ({navigation, route}) => {
                 }}
               />
             )}
-            <Text
+            <Typography
               style={{
                 fontSize: 13,
                 fontFamily: Font.regular,
                 color: isOpen ? 'green' : 'red',
               }}>
               {statusText}
-            </Text>
+            </Typography>
             <Image
               source={require('../../../assets/Images/down-arrow.png')}
               style={{height: 18, width: 10, marginLeft: 6}}
@@ -298,9 +299,7 @@ const ProviderDetails = ({navigation, route}) => {
               marginTop: 10,
             }}>
             <TouchableOpacity
-              onPress={() =>
-                handleOpenMap(apiData?.exact_location)
-              }
+              onPress={() => handleOpenMap(apiData?.exact_location)}
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -316,7 +315,7 @@ const ProviderDetails = ({navigation, route}) => {
                 source={require('../../../assets/Images/direction.png')}
                 style={{height: 16, width: 16}}
               />
-              <Text
+              <Typography
                 style={{
                   fontSize: 13,
                   marginLeft: 5,
@@ -324,7 +323,7 @@ const ProviderDetails = ({navigation, route}) => {
                   fontFamily: Font.regular,
                 }}>
                 Get Directions
-              </Text>
+              </Typography>
               <View
                 style={{
                   width: 1.5,
@@ -333,7 +332,7 @@ const ProviderDetails = ({navigation, route}) => {
                   backgroundColor: 'black',
                 }}
               />
-              <Text
+              <Typography
                 style={{
                   fontSize: 13,
                   marginRight: 5,
@@ -341,7 +340,7 @@ const ProviderDetails = ({navigation, route}) => {
                   fontFamily: Font.regular,
                 }}>
                 194.04 Kms
-              </Text>
+              </Typography>
               <Image
                 source={require('../../../assets/Images/rightarrow.png')}
                 style={{height: 18, width: 10}}
@@ -364,35 +363,30 @@ const ProviderDetails = ({navigation, route}) => {
                 source={require('../../../assets/Images/call.png')}
                 style={{height: 16, width: 16}}
               />
-              <Text
+              <Typography
                 style={{
                   fontSize: 13,
                   marginLeft: 5,
                   fontFamily: Font.regular,
                 }}>
                 Contact
-              </Text>
+              </Typography>
             </TouchableOpacity>
           </View>
         </View>
         <View style={[styles.section, {marginTop: 0}]}>
-          <Text style={styles.sectionTitle}>Address</Text>
-          <Text style={styles.sectionText}>
-            Shop no.36, Ground Floor, AIPL JOY STREET, Badshahpur, Sector
-            66,Gurugram, Haryana 122018
-          </Text>
+          <Typography style={styles.sectionTitle}>Address</Typography>
+          <Typography style={styles.sectionText}>
+            {apiData?.exact_location || apiData?.location_area_served}
+          </Typography>
           <TouchableOpacity
             style={{flexDirection: 'row', alignItems: 'center', marginTop: 5}}
-            onPress={() =>
-              openMapWithDirections(
-                apiData?.exact_location,
-              )
-            }>
+            onPress={() => openMapWithDirections(apiData?.exact_location)}>
             <Image
               source={require('../../../assets/Images/location.png')}
               style={{height: 16, width: 16, tintColor: COLOR.primary}}
             />
-            <Text
+            <Typography
               style={[
                 styles.sectionText,
                 {
@@ -403,20 +397,20 @@ const ProviderDetails = ({navigation, route}) => {
                 },
               ]}>
               Get Directions
-            </Text>
+            </Typography>
           </TouchableOpacity>
         </View>
         {/* About */}
         <View style={[styles.section, {marginTop: 0}]}>
-          <Text style={styles.sectionTitle}>About</Text>
-          <Text style={styles.sectionText}>
+          <Typography style={styles.sectionTitle}>About</Typography>
+          <Typography style={styles.sectionText}>
             {apiData?.business_description}
-          </Text>
+          </Typography>
         </View>
         <CouponCarousel promoData={promoData} />
         {/* Tabs */}
         <View style={{paddingHorizontal: 20}}>
-          <Text style={styles.title}>Amenities</Text>
+          <Typography style={styles.title}>Amenities</Typography>
           <View style={styles.amenityGrid}>
             {amenities.map(item => (
               <View
@@ -442,13 +436,13 @@ const ProviderDetails = ({navigation, route}) => {
               key={tab}
               style={[styles.tab, activeTab === tab && styles.activeTab]}
               onPress={() => setActiveTab(tab)}>
-              <Text
+              <Typography
                 style={[
                   styles.tabText,
                   activeTab === tab && styles.activeTabText,
                 ]}>
                 {tab}
-              </Text>
+              </Typography>
             </TouchableOpacity>
           ))}
         </View>
@@ -456,7 +450,7 @@ const ProviderDetails = ({navigation, route}) => {
         {/* Tab Content */}
         {activeTab === 'Services' && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Categories</Text>
+            <Typography style={styles.sectionTitle}>Categories</Typography>
             <View style={styles.categoryWrap}>
               {apiData?.sub_services?.length > 0 ? (
                 apiData.sub_services.map(sub => (
@@ -479,9 +473,9 @@ const ProviderDetails = ({navigation, route}) => {
                   </TouchableOpacity>
                 ))
               ) : (
-                <Text style={styles.sectionText}>
+                <Typography style={styles.sectionText}>
                   No Sub Services available
-                </Text>
+                </Typography>
               )}
             </View>
           </View>
@@ -489,17 +483,11 @@ const ProviderDetails = ({navigation, route}) => {
 
         {activeTab === 'Photos' && (
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, {marginBottom: 0}]}>
+            <Typography style={[styles.sectionTitle, {marginBottom: 0}]}>
               Gallery
-            </Text>
+            </Typography>
             <FlatList
-              data={[
-                'https://images.pexels.com/photos/4154062/pexels-photo-4154062.jpeg',
-                'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg',
-                'https://images.pexels.com/photos/3738341/pexels-photo-3738341.jpeg',
-                'https://images.pexels.com/photos/4154062/pexels-photo-4154062.jpeg',
-                'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg',
-              ]}
+              data={[cleanImageUrl(apiData?.image)]}
               keyExtractor={(item, index) => index.toString()}
               numColumns={3}
               showsHorizontalScrollIndicator={false}
@@ -512,12 +500,10 @@ const ProviderDetails = ({navigation, route}) => {
 
         {activeTab === 'About' && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>About Us</Text>
-            <Text style={styles.sectionText}>
-              Our salon offers professional services including hair, makeup,
-              spa, and skincare treatments. We use top-quality products to
-              ensure customer satisfaction.
-            </Text>
+            <Typography style={styles.sectionTitle}>About Us</Typography>
+            <Typography style={styles.sectionText}>
+              {apiData?.business_description}
+            </Typography>
           </View>
         )}
 
@@ -564,10 +550,10 @@ const ProviderDetails = ({navigation, route}) => {
                       />
                     )}
                   />
-                  <Text style={styles.reviewText}>
+                  <Typography style={styles.reviewText}>
                     Amazing service and very friendly staff! Highly recommend
                     this salon.
-                  </Text>
+                  </Typography>
                 </View>
               )}
             />

@@ -69,7 +69,6 @@ const Login = ({navigation}) => {
     );
   };
 
-
   const handleLoginSuccess = user => {};
 
   return (
@@ -153,8 +152,9 @@ const styles = StyleSheet.create({
   logo: {
     width: 290,
     height: 200,
-    marginTop: windowHeight * 0.1,
-    resizeMode:'contain'
+    marginTop: windowHeight * 0.05,
+    resizeMode: 'contain',
+    marginBottom: 10,
   },
   dividerContainer: {
     flexDirection: 'row',

@@ -23,6 +23,7 @@ import {isAuth, Token, userDetails} from '../../Redux/action';
 import {useDispatch} from 'react-redux';
 import {Font} from '../../Constants/Font';
 import Header from '../../Components/FeedHeader';
+import {images} from '../../Components/UI/images';
 
 const OtpScreen = ({navigation, route}) => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -137,12 +138,7 @@ const OtpScreen = ({navigation, route}) => {
         onBackPress={() => navigation.goBack()}
       />
 
-      <Image
-        source={{
-          uri: 'https://cdn-icons-png.flaticon.com/128/9042/9042592.png',
-        }}
-        style={styles.image}
-      />
+      <Image source={images.logo} style={styles.logo} />
 
       <View style={{padding: 20, alignItems: 'center'}}>
         <Typography
@@ -252,5 +248,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: Font.semibold,
     backgroundColor: '#f9f9f9',
+  },
+  logo: {
+    width: 290,
+    height: 200,
+    marginTop: windowHeight * 0.05,
+    resizeMode: 'contain',
+    alignSelf: 'center',
+    marginBottom:10
   },
 });

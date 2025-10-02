@@ -24,55 +24,30 @@ import {userDetails} from '../../../Redux/action';
 import {useIsFocused} from '@react-navigation/native';
 
 const EditProfile = ({navigation}) => {
+  const {isKeyboardVisible} = useKeyboard();
+  const isFocus = useIsFocused();
+  const dispatch = useDispatch();
+  const {user} = useContext(AuthContext);
+  const userdata = useSelector(store => store.userDetails);
   const [firstName, setFirstName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [profileImage, setProfileImage] = useState({});
+  console.log(profileImage, 'profileImageprofileImageprofileImage');
+
   const [isEditing, setIsEditing] = useState(true);
-  const {isKeyboardVisible} = useKeyboard();
-  const isFocus = useIsFocused();
-  const {user} = useContext(AuthContext);
-  console.log(user, 'user--->>');
-  const userdata = useSelector(store => store.userDetails);
-  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [error, setError] = useState({});
+
   useEffect(() => {
     if (isFocus) {
       setFirstName(userdata?.name || '');
       setEmail(userdata?.email || '');
       setPhone(userdata?.phone_number);
-      setProfileImage({path: cleanImageUrl(userdata?.image)});
-      // setCity(userdata?.city || '');
-      // setAddress(userdata?.exact_location || '');
-      // setPinCode(userdata?.zip_code);
+      setProfileImage({uri: cleanImageUrl(userdata?.image)});
     }
   }, [isFocus]);
-
-  // Modal state
-  const [showModal, setShowModal] = useState(false);
-
-  // Validation errors
-  const [error, setError] = useState({});
-
-  // const handleUpdate = () => {
-  //   let validationErrors = {
-  //     name: validators.checkRequire('Name', firstName),
-  //     email: validators.checkEmail('Email', email),
-  //     phone: validators.checkNumber('Phone Number', phone),
-  //   };
-
-  //   setError(validationErrors);
-
-  //   if (isValidForm(validationErrors)) {
-  //     console.log('✅ Updated Profile:', {
-  //       firstName,
-  //       email,
-  //       phone,
-  //       profileImage,
-  //     });
-  //     setIsEditing(false);
-  //   }
-  // };
 
   const handleImageSelected = response => {
     console.log(response, 'das59eqw8669ed74wqa648de97w');
@@ -94,18 +69,16 @@ const EditProfile = ({navigation}) => {
       formData.append('name', firstName);
       formData.append('email', email);
       formData.append('phone', phone);
-      if (profileImage && profileImage?.mime) {
+      if (profileImage?.mime || profileImage?.type) {
         formData.append('profile_picture', {
-          uri: profileImage?.path,
-          type: profileImage?.mime || 'image/jpeg',
-          name: profileImage?.filename || 'profileImage?.path',
+          uri: profileImage?.path || profileImage?.uri,
+          type: profileImage?.mime || profileImage?.type || 'image/jpeg',
+          name:
+            profileImage?.filename ||
+            profileImage?.name ||
+            'profileImage?.path',
         });
       }
-      // formData.append('address', address);
-      // formData.append('city', city);
-      // formData.append('state', state);
-      // formData.append('country', country);
-      // formData.append('zip_code', pinCode);
       console.log('FormData ====>', formData);
       POST_FORM_DATA(
         UPDATE_PROFILE,
@@ -156,9 +129,10 @@ const EditProfile = ({navigation}) => {
           <View style={styles.profileSection}>
             <Image
               source={{
-                uri: profileImage?.path
-                  ? profileImage?.path
-                  : 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+                uri:
+                  profileImage?.uri || profileImage?.path
+                    ? profileImage?.path || profileImage?.uri
+                    : 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
               }}
               style={styles.profileImage}
             />
@@ -200,7 +174,7 @@ const EditProfile = ({navigation}) => {
             value={phone}
             onChangeText={setPhone}
             keyboardType="phone-pad"
-            editable={isEditing}
+            editable={false}
             error={error?.phone}
             inputContainer={{marginBottom: 20}}
           />

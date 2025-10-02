@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
+  Keyboard,
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
@@ -17,10 +18,11 @@ import Input from '../../../Components/Input';
 import {GET_WITH_TOKEN} from '../../../Backend/Api';
 import {SERVICES} from '../../../Constants/ApiRoute';
 import {useIsFocused} from '@react-navigation/native';
-import {cleanImageUrl} from '../../../Backend/Utility';
+import {cleanImageUrl, windowWidth} from '../../../Backend/Utility';
 import {useSelector} from 'react-redux';
 
 const SearchServices = ({navigation, route}) => {
+  const ref = useRef();
   const [search, setSearch] = useState('');
   const [services, setServices] = useState([]);
   const [filteredServices, setFilteredServices] = useState([]);
@@ -46,6 +48,8 @@ const SearchServices = ({navigation, route}) => {
     GET_WITH_TOKEN(
       buildApiUrl(page, searchTerm),
       success => {
+        console.log(success, 'successsuccesssuccesssuccesserwrewfd');
+
         const responseData = success?.data?.data || [];
         const paginationInfo = success?.data?.last_page || {};
         if (shouldAppend) {
@@ -75,6 +79,10 @@ const SearchServices = ({navigation, route}) => {
     if (isFocused) {
       setCurrentPage(1);
       fetchServices(1, '');
+    }
+    if (!id) {
+      ref.current.focus();
+      // Keyboard.isVisible()
     }
   }, [isFocused, id]);
 
@@ -119,22 +127,14 @@ const SearchServices = ({navigation, route}) => {
       <View style={styles.imageContainer}>
         {item?.image ? (
           <Image
-            source={{uri: cleanImageUrl(item.image)}}
+            source={{uri: cleanImageUrl(item?.image)}}
             style={styles.cardImage}
             defaultSource={images.placeholder}
-            onError={() => console.log('Image failed to load:', item.image)}
+            onError={() => console.log('Image failed to load:', item?.image)}
           />
         ) : (
           <View style={styles.placeholderImage}>
             <Typography color={COLOR.grey}>No Image</Typography>
-          </View>
-        )}
-
-        {item?.rating && (
-          <View style={styles.ratingBadge}>
-            <Typography size={12} font={Font.medium} color={COLOR.white}>
-              ⭐ {item.rating}
-            </Typography>
           </View>
         )}
       </View>
@@ -254,6 +254,7 @@ const SearchServices = ({navigation, route}) => {
 
       <View style={styles.searchContainer}>
         <Input
+          ref={ref}
           value={search}
           onChangeText={setSearch}
           leftIcon={images.search}
@@ -332,13 +333,13 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   cardImage: {
-    width: '100%',
+    width: windowWidth - 30,
     height: 190,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
   },
   placeholderImage: {
-    width: '100%',
+    width: windowWidth - 30,
     height: 190,
     backgroundColor: COLOR.lightGrey,
     justifyContent: 'center',

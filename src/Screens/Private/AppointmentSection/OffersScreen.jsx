@@ -13,7 +13,10 @@ import {Typography} from '../../../Components/UI/Typography';
 import Input from '../../../Components/Input';
 import {Font} from '../../../Constants/Font';
 import {GET_WITH_TOKEN} from '../../../Backend/Api';
-import {PROMO_VENDOR} from '../../../Constants/ApiRoute';
+import {
+  HIGHLIGHTED_PROMO_CODE,
+  PROMO_VENDOR,
+} from '../../../Constants/ApiRoute';
 
 const OffersScreen = ({navigation, route}) => {
   const businessId = route?.params?.businessId || null;
@@ -32,9 +35,8 @@ const OffersScreen = ({navigation, route}) => {
   const getPromo = () => {
     setLoading(true);
     GET_WITH_TOKEN(
-      PROMO_VENDOR + businessId,
+      businessId ? PROMO_VENDOR + businessId : HIGHLIGHTED_PROMO_CODE,
       success => {
-        console.log(success, 'promo data-dsadsadas-');
         setPromoData(success?.data || []);
         setLoading(false);
       },
@@ -104,7 +106,7 @@ const OffersScreen = ({navigation, route}) => {
 
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* How to Avail Offer Section */}
-        {businessId && (
+        {!businessId && (
           <View style={styles.infoBox}>
             <Text style={styles.infoTitle}>How to avail the offer?</Text>
 
@@ -134,14 +136,14 @@ const OffersScreen = ({navigation, route}) => {
         )}
 
         {/* Coupon Input */}
-        <View style={{marginHorizontal: 5, marginBottom: 20}}>
+        {/* <View style={{marginHorizontal: 5, marginBottom: 20}}>
           <Input
             label="Offers available for you"
             placeholder="Enter Coupon Code"
             style={{borderColor: COLOR.primary}}
             labelStyle={{fontFamily: Font.semibold}}
           />
-        </View>
+        </View> */}
 
         {/* Loading State */}
         {loading && (
@@ -172,28 +174,30 @@ const OffersScreen = ({navigation, route}) => {
               ]}>
               <View style={styles.cardHeader}>
                 <Typography style={styles.code}>{offer.promo_code}</Typography>
-                <TouchableOpacity
-                  onPress={() => {
-                    getSelectedOffer(offer);
-                    navigation.goBack();
-                  }}
-                  style={{
-                    padding: 6,
-                    borderRadius: 6,
-                    borderWidth: 1,
-                    borderColor: isOfferActive(offer) ? COLOR.primary : '#ccc',
-                    marginTop: 20,
-                  }}
-                  // disabled={!isOfferActive(offer)}
-                >
-                  <Typography
-                    style={[
-                      styles.apply,
-                      !isOfferActive(offer) && styles.disabledApply,
-                    ]}>
-                    {isOfferActive(offer) ? 'APPLY' : 'EXPIRED'}
-                  </Typography>
-                </TouchableOpacity>
+                {isOfferActive(offer) && businessId && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      getSelectedOffer(offer);
+                      navigation.goBack();
+                    }}
+                    style={{
+                      padding: 6,
+                      borderRadius: 6,
+                      borderWidth: 1,
+                      borderColor: isOfferActive(offer)
+                        ? COLOR.primary
+                        : '#ccc',
+                    }}
+                    disabled={!isOfferActive(offer)}>
+                    <Typography
+                      style={[
+                        styles.apply,
+                        !isOfferActive(offer) && styles.disabledApply,
+                      ]}>
+                      {isOfferActive(offer) ? 'APPLY' : 'EXPIRED'}
+                    </Typography>
+                  </TouchableOpacity>
+                )}
               </View>
 
               {/* Status Badge */}

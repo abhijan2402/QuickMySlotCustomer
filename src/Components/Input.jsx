@@ -34,6 +34,8 @@ const Input = ({
   inputContainer,
   leftTintColor,
   rightIconStyle,
+  editable = true,
+  ref,
   ...rest
 }) => {
   return (
@@ -66,6 +68,7 @@ const Input = ({
           placeholder={placeholder}
           placeholderTextColor={COLOR.grey}
           value={value}
+          editable={editable}
           onChangeText={onChangeText}
           secureTextEntry={secureTextEntry}
           keyboardType={keyboardType}
@@ -77,6 +80,7 @@ const Input = ({
             style,
           ]}
           textAlignVertical={multiline ? 'top' : 'center'}
+          ref={ref}
           {...rest}
         />
 

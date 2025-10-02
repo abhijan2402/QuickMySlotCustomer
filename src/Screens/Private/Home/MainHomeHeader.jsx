@@ -9,6 +9,8 @@ import {
   Platform,
   PermissionsAndroid,
   ActivityIndicator,
+  TextInput,
+  Dimensions,
 } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
@@ -17,13 +19,32 @@ import {images} from '../../../Components/UI/images';
 import {Typography} from '../../../Components/UI/Typography';
 import {Font} from '../../../Constants/Font';
 import {GOOGLE_API} from '../../../Backend/Utility';
-import {useDispatch} from 'react-redux';
-import { currentLocation } from '../../../Redux/action';
+import {useDispatch, useSelector} from 'react-redux';
+import {currentLocation} from '../../../Redux/action';
+import SimpleModal from '../../../Components/UI/SimpleModal';
+import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
+
+const {width, height} = Dimensions.get('window');
 
 const MainHomeHeader = () => {
   const navigation = useNavigation();
+  const userdata = useSelector(store => store.userDetails);
+  const storedLocation = useSelector(store => store.currentLocation);
+
+  console.log(userdata, 'userdatauserdatauserdata');
+
   const [location, setLocation] = useState('Getting location...');
   const [isLoading, setIsLoading] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [predictions, setPredictions] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [mapRegion, setMapRegion] = useState({
+    latitude: 37.78825,
+    longitude: -122.4324,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  });
   const dispatch = useDispatch();
   const isFocus = useIsFocused();
 
@@ -85,6 +106,20 @@ const MainHomeHeader = () => {
         locationData.coords.longitude,
       );
       setLocation(address);
+
+      // Set initial map region to current location
+      setMapRegion({
+        latitude: locationData.coords.latitude,
+        longitude: locationData.coords.longitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      });
+
+      setSelectedLocation({
+        latitude: locationData.coords.latitude,
+        longitude: locationData.coords.longitude,
+      });
+
       dispatch(
         currentLocation({address: address, coords: locationData.coords}),
       );
@@ -96,15 +131,127 @@ const MainHomeHeader = () => {
     }
   };
 
+  // Fetch location predictions for autocomplete
+  const fetchPredictions = async query => {
+    if (!query || query.length < 3) {
+      setPredictions([]);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
+          query,
+        )}&key=${GOOGLE_API}&components=country:us`, // Adjust country code as needed
+      );
+      const data = await response.json();
+      if (data.predictions) {
+        setPredictions(data.predictions);
+      }
+    } catch (error) {
+      console.error('Error fetching predictions:', error);
+    }
+  };
+
+  // Get place details and update map
+  const selectPrediction = async placeId => {
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/details/json?placeid=${placeId}&key=${GOOGLE_API}`,
+      );
+      const data = await response.json();
+      if (data.result && data.result.geometry) {
+        const {location} = data.result.geometry;
+        setMapRegion({
+          latitude: location.lat,
+          longitude: location.lng,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        });
+        setSelectedLocation({
+          latitude: location.lat,
+          longitude: location.lng,
+        });
+        setSearchQuery(data.result.formatted_address);
+        setPredictions([]);
+      }
+    } catch (error) {
+      console.error('Error fetching place details:', error);
+    }
+  };
+
+  const handleMapRegionChange = region => {
+    setMapRegion(region);
+  };
+
+  const handleMarkerDragEnd = e => {
+    const {latitude, longitude} = e.nativeEvent.coordinate;
+    setSelectedLocation({latitude, longitude});
+    updateAddressFromCoordinates(latitude, longitude);
+  };
+
+  const updateAddressFromCoordinates = async (lat, lng) => {
+    try {
+      const address = await getAddressFromCoordinates(lat, lng);
+      setSearchQuery(address);
+    } catch (error) {
+      console.error('Error updating address:', error);
+    }
+  };
+
+  const confirmLocation = async () => {
+    if (selectedLocation) {
+      const address = await getAddressFromCoordinates(
+        selectedLocation.latitude,
+        selectedLocation.longitude,
+      );
+      setLocation(address);
+      dispatch(
+        currentLocation({
+          address: address,
+          coords: {
+            latitude: selectedLocation.latitude,
+            longitude: selectedLocation.longitude,
+          },
+        }),
+      );
+    }
+  };
+
   useEffect(() => {
-    fetchLocation();
+    if (!storedLocation?.address) {
+      fetchLocation();
+    } else {
+      setLocation(storedLocation?.address);
+      setSearchQuery(storedLocation?.address);
+      setMapRegion({
+        latitude: storedLocation.coords.latitude,
+        longitude: storedLocation.coords.longitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      });
+      setSelectedLocation({
+        latitude: storedLocation.coords.latitude,
+        longitude: storedLocation.coords.longitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      });
+    }
   }, [isFocus]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchPredictions(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
 
   return (
     <View style={styles.header}>
       <TouchableOpacity
         style={styles.locationContainer}
-        onPress={fetchLocation}
+        onPress={() => setModalVisible(true)}
         disabled={isLoading}>
         <Image
           source={images.mark}
@@ -162,12 +309,93 @@ const MainHomeHeader = () => {
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('EditProfile')}>
           <Image
-            source={images.profile}
-            style={styles.icon}
-            tintColor={COLOR.primary}
+            source={userdata?.image ? {uri: userdata?.image} : images.profile}
+            style={[
+              styles.icon,
+              {
+                borderRadius: 20,
+                height: 35,
+                minWidth: 35,
+              },
+            ]}
           />
         </TouchableOpacity>
       </View>
+      <SimpleModal
+        visible={modalVisible}
+        modalContainer={{
+          width: '90%',
+        }}
+        //   onClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContent}>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            <Text style={styles.modalTitle}>Select Location</Text>
+            <TouchableOpacity
+              onPress={() => {
+                setModalVisible(false);
+              }}>
+              <Image source={images.close} style={{height: 20, width: 20}} />
+            </TouchableOpacity>
+          </View>
+          {/* Search Input */}
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search for a location..."
+              placeholderTextColor={COLOR.lightGrey}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+
+          {/* Predictions List */}
+          {predictions.length > 0 && (
+            <View style={styles.predictionsContainer}>
+              {predictions.map(prediction => (
+                <TouchableOpacity
+                  key={prediction.place_id}
+                  style={styles.predictionItem}
+                  onPress={() => selectPrediction(prediction.place_id)}>
+                  <Text style={styles.predictionText}>
+                    {prediction.description}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          {/* Map View */}
+          <View style={styles.mapContainer}>
+            <MapView
+              style={styles.map}
+              provider={PROVIDER_GOOGLE}
+              region={mapRegion}
+              onRegionChangeComplete={handleMapRegionChange}
+              showsUserLocation={true}
+              showsMyLocationButton={true}>
+              {selectedLocation && (
+                <Marker
+                  coordinate={selectedLocation}
+                  draggable
+                  onDragEnd={handleMarkerDragEnd}
+                  pinColor={COLOR.primary}
+                />
+              )}
+            </MapView>
+          </View>
+
+          {/* Confirm Button */}
+          <TouchableOpacity
+            style={styles.confirmButton}
+            onPress={() => {
+              confirmLocation();
+              setModalVisible(false);
+            }}>
+            <Text style={styles.confirmButtonText}>Confirm Location</Text>
+          </TouchableOpacity>
+        </View>
+      </SimpleModal>
     </View>
   );
 };
@@ -213,6 +441,63 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     resizeMode: 'contain',
+  },
+  modalContent: {},
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: Font.bold,
+    color: COLOR.primary,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  searchContainer: {
+    marginBottom: 12,
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    fontFamily: Font.regular,
+  },
+  predictionsContainer: {
+    maxHeight: 150,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    marginBottom: 12,
+    backgroundColor: 'white',
+  },
+  predictionItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  predictionText: {
+    fontSize: 14,
+    fontFamily: Font.regular,
+    color: '#333',
+  },
+  mapContainer: {
+    height: 300,
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
+  map: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  confirmButton: {
+    backgroundColor: COLOR.primary,
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  confirmButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontFamily: Font.semibold,
   },
 });
 

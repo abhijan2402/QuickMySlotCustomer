@@ -26,7 +26,8 @@ export const WALLET_VERIFY = 'wallet/verify';
 export const GET_MEMBERSHIP_LIST = 'subscriptions?type=customer';
 export const MEMBERSHIP_VERIFY_PAYMENT = 'subscription/verify-payment';
 export const MEMBERSHIP_CREATE_ORDER = 'subscription/create-order';
-// export const CANCEL_BOOKING = 'customer/booking/6/cancel';
+export const HIGHLIGHTED_PROMO_CODE = 'customer/promo-code/highlighted';
+export const BOOKING_VERIFY = 'customer/booking-verify';
 
 
 

@@ -21,7 +21,7 @@ import {GET_WITH_TOKEN} from '../../../Backend/Api';
 import {GET_PROFILE, HOME} from '../../../Constants/ApiRoute';
 import {Font} from '../../../Constants/Font';
 import Video from 'react-native-video';
-import { cleanImageUrl } from '../../../Backend/Utility';
+import {cleanImageUrl} from '../../../Backend/Utility';
 
 const {width} = Dimensions.get('window');
 
@@ -116,9 +116,14 @@ const MainHome = ({navigation}) => {
       <MainHomeHeader />
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Search Bar */}
-        <View style={{marginTop: -10, marginBottom: 10}}>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('SearchServices', {id: ''});
+          }}
+          style={{marginTop: -10, marginBottom: 10}}>
           <Input
             value={search}
+            editable={false}
             onChangeText={v => setSearch(v)}
             leftIcon={images.search}
             placeholder="Search for services..."
@@ -128,7 +133,7 @@ const MainHome = ({navigation}) => {
             rightIconStyle={{height: 14, width: 14}}
             onRightIconPress={() => setSearch('')}
           />
-        </View>
+        </TouchableOpacity>
         {/* My Bookings */}
         {myBookings.length > 0 && (
           <View>

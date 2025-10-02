@@ -54,8 +54,7 @@ const ServiceList = ({navigation, route}) => {
             ...cartItem,
             id: cartItem.service.id,
             name: cartItem.service.name,
-            cart_id: cartItem.cart_id,
-            price: parseFloat(cartItem.item_price),
+            price: success?.data?.total_price,
           };
           setSelectedService(selectedItem); // Set single service
           setCartData(success.data);

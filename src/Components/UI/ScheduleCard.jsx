@@ -130,8 +130,8 @@ const ScheduleCard = ({
     const currentYear = new Date().getFullYear();
     const endOfMonth = moment(new Date()).endOf('month').format('YYYY-MM-DD');
     const startOfMonth = moment(new Date())
-      .startOf('month')
-      .format('YYYY-MM-DD');
+      ?.startOf('month')
+      ?.format('YYYY-MM-DD');
 
     if (selected_date) {
       let tempDate = moment(selected_date, 'YYYY-MM-DD')?.format('MMMM');

@@ -41,11 +41,10 @@ const AddAmount = ({navigation, route}) => {
   const createRazorpayOrder = async amount => {
     try {
       const formData = new FormData();
-      formData.append('amount', amount); // Convert to paise
-
+      formData.append('amount', amount); 
       const orderResponse = await new Promise((resolve, reject) => {
         POST_FORM_DATA(
-          ADD_WALLET, // Use CREATE_RAZORPAY_ORDER endpoint instead of WALLET_VERIFY
+          ADD_WALLET, 
           formData,
           success => {
             console.log('Order creation success:', success);

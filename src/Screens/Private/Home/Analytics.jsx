@@ -13,6 +13,7 @@ import {Font} from '../../../Constants/Font';
 import {useIsFocused} from '@react-navigation/native';
 import {GET_ANALYTICS} from '../../../Constants/ApiRoute';
 import {GET_WITH_TOKEN} from '../../../Backend/Api';
+import {CURRENCY} from '../../../Backend/Utility';
 
 const {width} = Dimensions.get('window');
 
@@ -32,7 +33,7 @@ const MyAnalytics = ({navigation}) => {
     GET_WITH_TOKEN(
       GET_ANALYTICS,
       success => {
-        console.log(success ,'analytics--->>');
+        console.log(success?.data, 'analytics--->>');
         setData(success?.data);
         setLoading(false);
       },
@@ -64,27 +65,39 @@ const MyAnalytics = ({navigation}) => {
 
           <View style={styles.grid}>
             <View style={styles.box}>
-              <Typography style={styles.amount}>${data?.spend_this_month}</Typography>
+              <Typography style={styles.amount}>
+                {CURRENCY}
+                {data?.spend_this_month || '0.00'}
+              </Typography>
               <Typography style={styles.label}>Spent This Month</Typography>
             </View>
             <View style={styles.box}>
-              <Typography style={styles.amount}>${data?.saved_this_month}</Typography>
+              <Typography style={styles.amount}>
+                {CURRENCY}
+                {data?.saved_this_month || '0.00'}
+              </Typography>
               <Typography style={styles.label}>Saved This Month</Typography>
             </View>
             <View style={styles.box}>
-              <Typography style={styles.amount}>{data?.total_bookings}</Typography>
+              <Typography style={styles.amount}>
+                {data?.total_bookings}
+              </Typography>
               <Typography style={styles.label}>Total Bookings</Typography>
             </View>
             <View style={styles.box}>
-              <Typography style={styles.amount}>{data?.favorite_providers}</Typography>
+              <Typography style={styles.amount}>
+                {data?.favorite_providers || '0'}
+              </Typography>
               <Typography style={styles.label}>Favorite Providers</Typography>
             </View>
           </View>
         </View>
-
         {/* Cashback Banner */}
         <View style={styles.cashbackCard}>
-          <Typography style={styles.cashbackAmount}>${data?.cashback_earned}</Typography>
+          <Typography style={styles.cashbackAmount}>
+            {CURRENCY}
+            {data?.cashback_earned || '0.00'}
+          </Typography>
           <Typography style={styles.cashbackText}>
             Cashback Earned This Month{'\n'}from wallet recharges and bookings!
           </Typography>

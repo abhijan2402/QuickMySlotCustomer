@@ -5,18 +5,15 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
-  TextInput,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
-import CustomButton from '../../../Components/CustomButton';
-import {windowHeight, windowWidth} from '../../../Constants/Dimensions';
+import {windowWidth} from '../../../Constants/Dimensions';
 import ScheduleCard from '../../../Components/UI/ScheduleCard';
 import moment from 'moment';
 import {Typography} from '../../../Components/UI/Typography';
-import LinearGradient from 'react-native-linear-gradient';
 import Input from '../../../Components/Input';
 import {images} from '../../../Components/UI/images';
 import SimpleModal from '../../../Components/UI/SimpleModal';
@@ -25,8 +22,9 @@ import useKeyboard from '../../../Constants/Utility';
 import {Font} from '../../../Constants/Font';
 import {CURRENCY, ToastMsg} from '../../../Backend/Utility';
 import {POST_FORM_DATA} from '../../../Backend/Api';
-import {CUSTOMER_BOOKINGS} from '../../../Constants/ApiRoute';
+import {BOOKING_VERIFY, CUSTOMER_BOOKINGS} from '../../../Constants/ApiRoute';
 import {useSelector} from 'react-redux';
+import RazorpayCheckout from 'react-native-razorpay';
 
 const BookingScreen = ({navigation, route}) => {
   const platformFee = 75;
@@ -38,12 +36,12 @@ const BookingScreen = ({navigation, route}) => {
   const cartItems = route?.params?.cartItems || [];
   console.log(cartItems, 'cartItemscartItemscartItems');
   console.log('cartItems-->', cartData);
-  const totalPrice = route?.params?.totalPrice + platformFee + tax || 0;
+  const totalPrice = route?.params?.totalPrice || 0;
   const userDetail = useSelector(state => state.userDetails);
   console.log('userDetail--->', userDetail);
   const [selectedServices, setSelectedServices] = useState([]);
   console.log(selectedServices, 'selectedServicessssssss');
-
+  const userdata = useSelector(store => store.userDetails);
   const [selectedDate, setSelectedDate] = useState(27);
   const [selectedTimes, setSelectedTimes] = useState([]);
   const [note, setNote] = useState('');
@@ -59,7 +57,7 @@ const BookingScreen = ({navigation, route}) => {
 
   // Get available schedule from business data
   const availableSchedule = businessData?.services[0]?.available_schedule || {};
-  console.log('selectedOffervvvvvvv:', selectedOffer);
+  console.log('selectedOffervvvvdddadawvvv:', availableSchedule);
 
   const services = [
     {id: 1, name: 'Haircut & Styling', price: 45},
@@ -141,7 +139,9 @@ const BookingScreen = ({navigation, route}) => {
       : [services[0]];
 
   const subtotal = selectedItems.reduce((sum, s) => sum + s.price, 0);
-  const total = subtotal + tax + platformFee;
+
+  const total =
+    subtotal + tax + platformFee + (Number(selectedOffer?.amount) || 0);
 
   const convertTimeSlots = (slots, date) => {
     return slots.map(slot => ({
@@ -159,62 +159,80 @@ const BookingScreen = ({navigation, route}) => {
       return;
     }
     console.log('Booking with times:', selectedTimes);
-    handleSubmit(is_paid_key);
+    if (is_paid_key) {
+      initiateRazorpayPayment(is_paid_key);
+    } else {
+      handleSubmit(is_paid_key);
+    }
   };
+  console.log(cartItems, 'cartItemscartItems');
 
   const handleSubmit = async is_paid_key => {
     setLoading(true);
-    const formattedTimes = selectedTimes.map(time => {
-      return time.includes(':') ? `${time}:00` : `${time}:00:00`;
-    });
-    const body = new FormData();
-    body.append('order_id', cartItems[0]?.cart_id);
-    body.append('customer_id', userDetail?.id);
-    body.append('note', note);
-    body.append('vendor_id', businessData?.id);
-    body.append('service_id', cartItems[0]?.id);
-    body.append('amount', totalPrice || total);
-    body.append('tax', '25');
-    body.append('platform_fee', '75');
-    body.append('status', 'pending');
-    body.append('is_paid_key', is_paid_key);
-    selectedTimes.forEach((time, index) => {
-      body.append(
-        `schedule_time[${time}]`,
-        dateStart || moment().format('YYYY/MM/DD'),
-      );
-    });
-    console.log(body, 'bodybodybody');
-    POST_FORM_DATA(
-      CUSTOMER_BOOKINGS,
-      body,
-      success => {
-        console.log('Booking API Success:', success);
-        setLoading(false);
-        ToastMsg(success?.message || 'Booking successful!');
-        navigation.pop();
-        navigation.navigate('BookingConfirmation', {
-          data: {
-            selectedServices: cartItems,
-            total: totalPrice || total,
-            note,
-            selectedTimes,
-            bookingData: success,
-            businessData,
+    try {
+      // const formattedTimes = selectedTimes.map(time => {
+      //   return time.includes(':') ? `${time}:00` : `${time}:00:00`;
+      // });
+      const body = new FormData();
+      body.append('order_id', cartItems[0]?.cart_id);
+      body.append('customer_id', userDetail?.id);
+      body.append('note', note);
+      body.append('vendor_id', businessData?.id);
+      body.append('service_id', cartItems[0]?.id);
+      body.append('amount', total);
+      body.append('tax', '25');
+      body.append('platform_fee', '75');
+      body.append('status', 'pending');
+      body.append('is_paid_key', is_paid_key);
+      selectedTimes.forEach((time, index) => {
+        body.append(
+          `schedule_time[${time}]`,
+          dateStart || moment().format('YYYY/MM/DD'),
+        );
+      });
+      console.log(body, 'bodybodybody');
+      const orderResponse = await new Promise((resolve, reject) => {
+        POST_FORM_DATA(
+          CUSTOMER_BOOKINGS,
+          body,
+          success => {
+            console.log('Booking API Success:', success);
+            setLoading(false);
+            if (is_paid_key) {
+              resolve(success);
+            } else {
+              ToastMsg(success?.message || 'Booking successful!');
+              navigation.pop();
+              navigation.navigate('BookingConfirmation', {
+                data: {
+                  selectedServices: cartItems,
+                  total: total,
+                  note,
+                  selectedTimes,
+                  bookingData: success,
+                  businessData,
+                },
+              });
+            }
           },
-        });
-      },
-      error => {
-        console.log('Booking API Error:', error);
-        setLoading(false);
-        ToastMsg('Booking failed. Please try again.');
-      },
-      fail => {
-        console.log('Booking API Fail:', fail);
-        setLoading(false);
-        ToastMsg('Booking failed. Please try again.');
-      },
-    );
+          error => {
+            console.log('Booking API Error:', error);
+            setLoading(false);
+            ToastMsg('Booking failed. Please try again.');
+          },
+          fail => {
+            console.log('Booking API Fail:', fail);
+            setLoading(false);
+            ToastMsg('Booking failed. Please try again.');
+          },
+        );
+      });
+      return orderResponse;
+    } catch (error) {
+      setLoading(false);
+      console.log('Order creation exception:', error);
+      throw new Error('Failed to create order: ' + error.message);
+    }
   };
 
   // Update available times when date changes
@@ -227,6 +245,132 @@ const BookingScreen = ({navigation, route}) => {
 
   global.getSelectedOffer = v => {
     setSelectedOffer(v);
+  };
+
+  // Razorpay configuration (Remove key_secret from frontend!)
+  const razorpayConfig = {
+    key_id: 'rzp_test_RL1gmdHRZxYSlx', // Only key_id should be in frontend
+    currency: 'INR',
+    name: 'QuickMySlot',
+    description: 'Add Amount to Wallet',
+  };
+
+  const initiateRazorpayPayment = async is_paid_key => {
+    const amount = total;
+    if (!amount || amount <= 0) {
+      ToastMsg('Please enter a valid amount');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Step 1: Create Razorpay order on your backend
+      const orderData = await handleSubmit(is_paid_key);
+      console.log(orderData, 'orderData---==>');
+
+      // Check the response structure - it might be nested in data property
+      const orderId = orderData?.order_id || orderData?.data?.order_id;
+
+      if (!orderId) {
+        console.log('Order data received:', orderData);
+        throw new Error(
+          'Failed to create payment order - no order ID received',
+        );
+      }
+
+      // Step 2: Initialize Razorpay checkout
+      const options = {
+        description: 'Booking Payment',
+        image: 'https://your-app-logo.png', // Your app logo
+        currency: razorpayConfig.currency,
+        key: razorpayConfig.key_id,
+        amount: amount * 100, // Convert to paise
+        name: razorpayConfig.name,
+        order_id: orderId, // Use the extracted order ID
+        prefill: {
+          email: userdata?.email || 'user@example.com',
+          contact: userdata?.phone_number || '9999999999',
+          name: userdata?.name || 'User',
+        },
+        theme: {color: COLOR.primary},
+      };
+
+      console.log('Razorpay options:', options);
+
+      // Step 3: Open Razorpay checkout
+      RazorpayCheckout.open(options)
+        .then(data => {
+          // Payment successful
+          console.log('Payment Success:', data);
+          // Step 4: Verify payment on your backend
+          verifyPayment({
+            bookingId: orderData?.id,
+            razorpay_payment_id: data.razorpay_payment_id,
+            razorpay_order_id: data.razorpay_order_id,
+            razorpay_signature: data.razorpay_signature,
+          });
+        })
+        .catch(error => {
+          setLoading(false);
+          console.log('Razorpay Payment Error:', error);
+          // Handle different error cases
+          if (error.code === 2) {
+            // Payment cancelled by user
+            ToastMsg('Payment was cancelled');
+          } else if (error.code === 0) {
+            // Network error
+            ToastMsg('Network error. Please check your connection.');
+          } else {
+            // Other errors
+            ToastMsg(error.description || 'Payment failed. Please try again.');
+          }
+        });
+    } catch (error) {
+      setLoading(false);
+      console.log('Razorpay Init Error:', error);
+      ToastMsg(
+        error.message || 'Failed to initialize payment. Please try again.',
+      );
+    }
+  };
+
+  const verifyPayment = paymentData => {
+    const formData = new FormData();
+    formData.append('booking_id', paymentData.bookingId);
+    formData.append('razorpay_signature', paymentData.razorpay_signature);
+    formData.append('razorpay_order_id', paymentData.razorpay_order_id);
+    formData.append('razorpay_payment_id', paymentData.razorpay_payment_id);
+
+    POST_FORM_DATA(
+      BOOKING_VERIFY, // This should be your payment verification endpoint
+      formData,
+      success => {
+        console.log(success, 'successsuccesssuccess');
+        setLoading(false);
+        ToastMsg('Amount added to wallet successfully!');
+        navigation.pop();
+        navigation.navigate('BookingConfirmation', {
+          data: {
+            selectedServices: cartItems,
+            total: total,
+            note,
+            selectedTimes,
+            bookingData: success,
+            businessData,
+          },
+        });
+      },
+      error => {
+        console.log(error, 'errorerrorerrorerror');
+        setLoading(false);
+        ToastMsg('Payment verification failed. Please contact support.');
+      },
+      fail => {
+        setLoading(false);
+        ToastMsg('Network error. Please try again.');
+      },
+    );
   };
   return (
     <View style={styles.container}>
@@ -288,10 +432,9 @@ const BookingScreen = ({navigation, route}) => {
             style={{marginTop: 20, marginBottom: 5}}>
             Select Date & Time of Appoinment
           </Typography>
+
           <ScheduleCard
-            selected_date={
-              selectTime?.date || moment()?.utc()?.format('YYYY-MM-DD')
-            }
+            selected_date={selectTime?.date || moment()?.format('YYYY-MM-DD')}
             locationId={businessData?.id}
             onChangeDateVal={(val, month) => {
               let selected_date = `${month?.year}-${String(
@@ -299,34 +442,34 @@ const BookingScreen = ({navigation, route}) => {
               ).padStart(2, '0')}-${String(val?.date).padStart(2, '0')}`;
               setDateStart(selected_date);
               console.log('Selected date:', selected_date);
-
-              // Clear selected times when date changes
               setSelectedTimes([]);
             }}
           />
 
           {/* Time Selector */}
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginBottom: 10,
-              marginTop: 10,
-            }}>
-            <Typography font={Font.medium} size={14}>
-              {times.length > 0
-                ? `Available time slots for ${
-                    dateStart
-                      ? moment(dateStart).format('DD/MM/YYYY')
-                      : 'selected date'
-                  }`
-                : 'No available time slots for selected date'}
-            </Typography>
-            <Image
-              source={images.info}
-              style={{height: 15, width: 15, marginLeft: 5}}
-            />
-          </View>
+          {times.length > 0 && (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+                marginTop: 10,
+              }}>
+              <Typography font={Font.medium} size={14}>
+                {times.length > 0
+                  ? `Available time slots for ${
+                      dateStart
+                        ? moment(dateStart).format('DD/MM/YYYY')
+                        : 'selected date'
+                    }`
+                  : 'No available time slots for selected date'}
+              </Typography>
+              <Image
+                source={images.info}
+                style={{height: 15, width: 15, marginLeft: 5}}
+              />
+            </View>
+          )}
 
           {times.length > 0 ? (
             <>
@@ -449,7 +592,7 @@ const BookingScreen = ({navigation, route}) => {
                 </TouchableOpacity>
               </TouchableOpacity>
               <Typography size={14} font={Font.semibold}>
-                ₹ {totalPrice ? totalPrice?.toFixed(2) : '00.00'}
+                ₹ {totalPrice ? Number(totalPrice || 0)?.toFixed(2) : '00.00'}
               </Typography>
             </View>
 
@@ -541,12 +684,12 @@ const BookingScreen = ({navigation, route}) => {
             <View style={styles.totalRow}>
               <Typography style={styles.totalLabel}>Approx Total</Typography>
               <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <Typography style={styles.strikePrice}>
-                  ₹{(total + 50).toFixed(2)}
-                </Typography>
+                {/* <Typography style={styles.strikePrice}>
+                  ₹{Number(total + 50).toFixed(2)}
+                </Typography> */}
                 <Typography style={styles.finalPrice}>
                   {' '}
-                  ₹{total.toFixed(2)}
+                  ₹{Number(total).toFixed(2)}
                 </Typography>
               </View>
             </View>
@@ -830,6 +973,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 10,
     alignItems: 'center',
+    marginTop: 10,
   },
   noSlotsText: {
     color: '#666',

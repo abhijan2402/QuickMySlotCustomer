@@ -50,7 +50,6 @@ const Appointment = ({navigation}) => {
     );
   };
 
-
   const getStatus = item => {
     return item.status || 'Pending';
   };
@@ -82,7 +81,6 @@ const Appointment = ({navigation}) => {
       Object.values(item?.schedule_time || {})[0],
       'DD-MM-YYYY',
     ).format('DD MMM, YYYY');
-
     return (
       <TouchableOpacity
         onPress={() =>
@@ -94,7 +92,7 @@ const Appointment = ({navigation}) => {
             <Image
               source={{
                 uri:
-                  cleanImageUrl(item?.vendor?.image) ||
+                  cleanImageUrl(item?.vendor?.image || item?.service?.image) ||
                   'https://via.placeholder.com/55',
               }}
               style={styles.serviceImage}
@@ -187,7 +185,7 @@ const Appointment = ({navigation}) => {
     selectedFilter === 'All'
       ? appointments
       : appointments.filter(item => getStatus(item) === selectedFilter);
-
+  console.log(appointments, 'appointmentsappointments--->');
   return (
     <View style={styles.container}>
       <HomeHeader
@@ -316,6 +314,7 @@ const styles = StyleSheet.create({
     width: 55,
     height: 55,
     borderRadius: 12,
+    backgroundColor: COLOR.lightGrey,
   },
   title: {
     fontSize: 16,

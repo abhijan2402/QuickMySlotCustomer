@@ -1,11 +1,11 @@
 import React, {useContext} from 'react';
 import {
-  View, 
-  ActivityIndicator, 
-  SafeAreaView, 
-  StatusBar, 
+  View,
+  ActivityIndicator,
+  SafeAreaView,
+  StatusBar,
   Platform,
-  StyleSheet
+  StyleSheet,
 } from 'react-native';
 import {AuthContext} from '../Backend/AuthContent';
 import RootNavigation from './RootNavigation';
@@ -18,14 +18,9 @@ const useStatusBarHeight = () => {
   if (Platform.OS === 'ios') {
     return 0;
   }
-  
+
   // For Android 15+ (API 34+)
-  if (Platform.Version >= 34) {
-    return StatusBar.currentHeight || 0;
-  }
-  
-  // For older Android versions
-  return 0;
+  return StatusBar.currentHeight || 0;
 };
 
 const MainNavigation = () => {
@@ -35,9 +30,9 @@ const MainNavigation = () => {
 
   return (
     <View style={[styles.container, {paddingTop: statusBarHeight}]}>
-      <StatusBar 
-        backgroundColor="transparent" 
-        translucent 
+      <StatusBar
+        backgroundColor="transparent"
+        translucent
         barStyle="dark-content"
       />
       <SafeAreaView style={styles.safeArea}>

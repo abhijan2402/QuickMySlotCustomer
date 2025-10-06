@@ -309,13 +309,17 @@ const MainHomeHeader = () => {
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('EditProfile')}>
           <Image
-            source={userdata?.image ? {uri: userdata?.image} : images.profile}
+            // source={userdata?.image ? {uri: userdata?.image} : images.profile}
+            source={{
+              uri: 'https://plus.unsplash.com/premium_photo-1689568126014-06fea9d5d341?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D',
+            }}
             style={[
               styles.icon,
               {
                 borderRadius: 20,
                 height: 35,
                 minWidth: 35,
+                backgroundColor: COLOR.lightGrey,
               },
             ]}
           />

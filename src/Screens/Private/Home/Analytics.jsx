@@ -67,26 +67,26 @@ const MyAnalytics = ({navigation}) => {
             <View style={styles.box}>
               <Typography style={styles.amount}>
                 {CURRENCY}
-                {data?.spend_this_month || '0.00'}
+                {data?.spend_this_month || '5000.00'}
               </Typography>
               <Typography style={styles.label}>Spent This Month</Typography>
             </View>
             <View style={styles.box}>
               <Typography style={styles.amount}>
                 {CURRENCY}
-                {data?.saved_this_month || '0.00'}
+                {data?.saved_this_month || '2050.00'}
               </Typography>
               <Typography style={styles.label}>Saved This Month</Typography>
             </View>
             <View style={styles.box}>
               <Typography style={styles.amount}>
-                {data?.total_bookings}
+                {data?.total_bookings || "3"}
               </Typography>
               <Typography style={styles.label}>Total Bookings</Typography>
             </View>
             <View style={styles.box}>
               <Typography style={styles.amount}>
-                {data?.favorite_providers || '0'}
+                {data?.favorite_providers || '4'}
               </Typography>
               <Typography style={styles.label}>Favorite Providers</Typography>
             </View>
@@ -96,7 +96,7 @@ const MyAnalytics = ({navigation}) => {
         <View style={styles.cashbackCard}>
           <Typography style={styles.cashbackAmount}>
             {CURRENCY}
-            {data?.cashback_earned || '0.00'}
+            {data?.cashback_earned || '570.00'}
           </Typography>
           <Typography style={styles.cashbackText}>
             Cashback Earned This Month{'\n'}from wallet recharges and bookings!

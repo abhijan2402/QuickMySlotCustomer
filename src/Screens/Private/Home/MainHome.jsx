@@ -7,6 +7,8 @@ import {
   ScrollView,
   Dimensions,
   FlatList,
+  SafeAreaView,
+  StatusBar,
   BackHandler,
 } from 'react-native';
 import {COLOR} from '../../../Constants/Colors';

@@ -1,17 +1,31 @@
-import React, { useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { PermissionsAndroid, Platform, SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import React, {useEffect} from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import {
+  PermissionsAndroid,
+  Platform,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import MainNavigation from './src/navigators/MainNavigation';
-import { AuthProvider } from './src/Backend/AuthContent';
+import {AuthProvider} from './src/Backend/AuthContent';
 import NoInternetAlert from './src/Components/UI/NoInternetAlert';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Provider } from 'react-redux';
-import { store } from './src/Redux/store';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {Provider} from 'react-redux';
+import {store} from './src/Redux/store';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
-import { fcmService } from './src/Notification/FMCService';
-import { localNotificationService } from './src/Notification/LocalNotificationService';
+import {fcmService} from './src/Notification/FMCService';
+import {localNotificationService} from './src/Notification/LocalNotificationService';
 import messaging from '@react-native-firebase/messaging';
+import SplashScreen from 'react-native-splash-screen';
 const App = () => {
+  useEffect(() => {
+    setTimeout(() => {
+      SplashScreen.hide();
+    }, 2000);
+  }, []);
   const requestNotificationPermissions = async () => {
     if (Platform.OS === 'ios') {
       PushNotificationIOS.requestPermissions();
@@ -32,7 +46,6 @@ const App = () => {
 
   useEffect(() => {
     setTimeout(() => {
-
       requestNotificationPermissions();
       requestUserPermission();
 

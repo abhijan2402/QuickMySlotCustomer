@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, {useContext, useRef} from 'react';
 import {
   View,
   ActivityIndicator,
@@ -13,6 +13,7 @@ import AuthStack from './AuthNavigation';
 import {ToastProvider} from '../Constants/ToastContext';
 import {useSelector} from 'react-redux';
 
+// export const navigationRef=useRef(null)
 // Custom hook for status bar height
 const useStatusBarHeight = () => {
   if (Platform.OS === 'ios') {

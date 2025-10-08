@@ -30,6 +30,7 @@ const Login = ({navigation}) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const {isKeyboardVisible} = useKeyboard();
+console.log('lllll');
 
   const onSubmit = () => {
     let error = {

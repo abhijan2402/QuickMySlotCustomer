@@ -1,3 +1,5 @@
 <resources>
     <color name="ic_launcher_background">#00000000</color> <!-- Transparent -->
+        <color name="primary">#FFFFFF</color> <!-- Transparent -->
+
 </resources>

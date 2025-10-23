@@ -1,7 +1,10 @@
 import UIKit
+import FirebaseCore
+import GoogleMaps
 import React
 import React_RCTAppDelegate
 import ReactAppDependencyProvider
+
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -27,8 +30,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       withModuleName: "QuickMySlot",
       in: window,
       launchOptions: launchOptions
+      
     )
-
+    GMSServices.provideAPIKey("AIzaSyDsRXO8vkZFS6TnnNs6i0MD_d_De7d5xqo")
+    FirebaseApp.configure()
     return true
   }
 }

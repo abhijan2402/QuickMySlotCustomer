@@ -127,16 +127,16 @@ console.log('lllll');
           />
 
           {/* Divider with text */}
-          <View style={styles.dividerContainer}>
+          {/* <View style={styles.dividerContainer}>
             <View style={styles.divider} />
             <Typography size={14} color="#888" style={{paddingHorizontal: 15}}>
               Or
             </Typography>
             <View style={styles.divider} />
-          </View>
+          </View> */}
 
           {/* Google Login Button */}
-          <GoogleAuthButton onLoginSuccess={handleLoginSuccess} />
+          {/* <GoogleAuthButton onLoginSuccess={handleLoginSuccess} /> */}
         </LinearGradient>
       </ScrollView>
     </KeyboardAvoidingView>

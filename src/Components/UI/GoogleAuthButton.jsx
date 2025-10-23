@@ -12,11 +12,13 @@ import {COLOR} from '../../Constants/Colors';
 import {windowWidth} from '../../Constants/Dimensions';
 
 const GoogleAuthButton = ({onLoginSuccess}) => {
-  // ✅ Configure Google Sign-In once
   useEffect(() => {
      GoogleSignin.configure({
        webClientId:
          '218547319777-4dbc8eridimnd6c8d3m78oqu66m297vj.apps.googleusercontent.com',
+          iosClientId:"218547319777-6u1vohnhg1m7sml8v5kmgt53a788fcsd.apps.googleusercontent.com",
+         offlineAccess: false,
+          scopes: ['profile', 'email'],
      });
    }, []);
 

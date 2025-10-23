@@ -6,6 +6,8 @@ import {
   TextInput,
   View,
   Keyboard,
+  Touchable,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import {COLOR} from '../../Constants/Colors';
 import CustomButton from '../../Components/CustomButton';
@@ -130,7 +132,8 @@ const OtpScreen = ({navigation, route}) => {
   };
 
   return (
-    <View style={styles.container}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={styles.container} >
       <Header
         title="OTP Verification"
         showBack="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
@@ -214,6 +217,7 @@ const OtpScreen = ({navigation, route}) => {
         )}
       </View>
     </View>
+      </TouchableWithoutFeedback>
   );
 };
 

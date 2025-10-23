@@ -1,6 +1,6 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {Image, Text, View, TouchableOpacity, StyleSheet} from 'react-native';
+import {Image, Text, View, TouchableOpacity, StyleSheet, Platform} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Account from '../Screens/Private/Account/Account';
 import {COLOR} from '../Constants/Colors';
@@ -73,7 +73,7 @@ const BottomNavigation = () => {
         tabBarStyle: {
           paddingVertical: 8,
           position: 'relative',
-          height: 60 + insets.bottom, // dynamically add safe area
+          height: Platform.OS == 'android' ? 60 + insets.bottom : 40 + insets.bottom, // dynamically add safe area
           paddingBottom: insets.bottom, // ensures icons/labels are above gesture bar
           borderWidth: 1,
         },

@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, { useContext, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -6,22 +6,22 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import {COLOR} from '../../../Constants/Colors';
-import {AuthContext} from '../../../Backend/AuthContent';
+import { COLOR } from '../../../Constants/Colors';
+import { AuthContext } from '../../../Backend/AuthContent';
 import HomeHeader from '../../../Components/HomeHeader';
 import Button from '../../../Components/UI/Button';
 import ConfirmModal from '../../../Components/UI/ConfirmModel';
-import {Typography} from '../../../Components/UI/Typography';
-import {Font} from '../../../Constants/Font';
-import {useDispatch, useSelector} from 'react-redux';
-import {isAuth, logOut, Token, userDetails} from '../../../Redux/action';
-import {DELETE_ACCOUNT} from '../../../Constants/ApiRoute';
-import {POST_WITH_TOKEN} from '../../../Backend/Api';
-import {cleanImageUrl} from '../../../Backend/Utility';
+import { Typography } from '../../../Components/UI/Typography';
+import { Font } from '../../../Constants/Font';
+import { useDispatch, useSelector } from 'react-redux';
+import { isAuth, logOut, Token, userDetails } from '../../../Redux/action';
+import { DELETE_ACCOUNT } from '../../../Constants/ApiRoute';
+import { POST_WITH_TOKEN } from '../../../Backend/Api';
+import { cleanImageUrl } from '../../../Backend/Utility';
 import { images } from '../../../Components/UI/images';
 
-const Account = ({navigation}) => {
-  const {setUser} = useContext(AuthContext);
+const Account = ({ navigation }) => {
+  const { setUser } = useContext(AuthContext);
 
   const [visible, setVisible] = useState(false);
   const [deleteAccount, setDeleteAccount] = useState(false);
@@ -47,7 +47,7 @@ const Account = ({navigation}) => {
     {
       id: 2,
       title: 'Membership',
-      icon:images.membership,
+      icon: images.membership,
       navigate: 'Membership',
     },
     {
@@ -61,14 +61,14 @@ const Account = ({navigation}) => {
       title: 'Terms & Conditions',
       icon: images.tc,
       navigate: 'Cms',
-      params: {title: 'Terms & Conditions', slug: 'terms-condition'},
+      params: { title: 'Terms & Conditions', slug: 'terms-condition' },
     },
     {
       id: 4,
       title: 'About Us',
       icon: images.aboutUs,
       navigate: 'Cms',
-      params: {title: 'About Us', slug: 'about-us'},
+      params: { title: 'About Us', slug: 'about-us' },
     },
     {
       id: 5,
@@ -127,7 +127,7 @@ const Account = ({navigation}) => {
       {/* Profile Section */}
       <View style={styles.profileSection}>
         <Image
-          source={{uri: cleanImageUrl(profileImage)}}
+          source={{ uri: cleanImageUrl(profileImage) }}
           style={styles.profileImage}
         />
         <Typography font={Font.semibold} variant="h2" color={COLOR.black}>
@@ -140,7 +140,7 @@ const Account = ({navigation}) => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{paddingBottom: 20}}>
+        contentContainerStyle={{ paddingBottom: 20 }}>
         {/* Tabs */}
         <View style={styles.tabContainer}>
           {tabs.map(item => (
@@ -155,13 +155,13 @@ const Account = ({navigation}) => {
                   {item.title}
                 </Typography>
               </View>
-              <Image source={{uri: arrowIcon}} style={styles.arrowIcon} />
+              <Image source={{ uri: arrowIcon }} style={styles.arrowIcon} />
             </TouchableOpacity>
           ))}
         </View>
         <Button
           title={'Log Out'}
-          containerStyle={{marginTop: 15, marginBottom: 0}}
+          containerStyle={{ marginTop: 15, marginBottom: 0 }}
           onPress={() => setVisible(true)}
         />
         <Button

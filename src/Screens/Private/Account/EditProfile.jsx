@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -9,25 +9,27 @@ import {
   Platform,
 } from 'react-native';
 import Input from '../../../Components/Input';
-import {COLOR} from '../../../Constants/Colors';
+import { COLOR } from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
 import ImageModal from '../../../Components/UI/ImageModal';
 import useKeyboard from '../../../Constants/Utility';
-import {cleanImageUrl, isValidForm, ToastMsg} from '../../../Backend/Utility';
-import {validators} from '../../../Backend/Validator';
+import { cleanImageUrl, isValidForm, ToastMsg } from '../../../Backend/Utility';
+import { validators } from '../../../Backend/Validator';
 import Button from '../../../Components/UI/Button';
-import {AuthContext} from '../../../Backend/AuthContent';
-import {useDispatch, useSelector} from 'react-redux';
-import {UPDATE_PROFILE} from '../../../Constants/ApiRoute';
-import {POST_FORM_DATA} from '../../../Backend/Api';
-import {userDetails} from '../../../Redux/action';
-import {useIsFocused} from '@react-navigation/native';
+import { AuthContext } from '../../../Backend/AuthContent';
+import { useDispatch, useSelector } from 'react-redux';
+import { UPDATE_PROFILE } from '../../../Constants/ApiRoute';
+import { POST_FORM_DATA } from '../../../Backend/Api';
+import { userDetails } from '../../../Redux/action';
+import { useIsFocused } from '@react-navigation/native';
+import { useToast } from '../../../Constants/ToastContext';
 
-const EditProfile = ({navigation}) => {
-  const {isKeyboardVisible} = useKeyboard();
+const EditProfile = ({ navigation }) => {
+  const { isKeyboardVisible } = useKeyboard();
+  const { showToast } = useToast()
   const isFocus = useIsFocused();
   const dispatch = useDispatch();
-  const {user} = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const userdata = useSelector(store => store.userDetails);
   const [firstName, setFirstName] = useState('');
   const [email, setEmail] = useState('');
@@ -45,7 +47,7 @@ const EditProfile = ({navigation}) => {
       setFirstName(userdata?.name || '');
       setEmail(userdata?.email || '');
       setPhone(userdata?.phone_number);
-      setProfileImage({uri: cleanImageUrl(userdata?.image)});
+      setProfileImage({ uri: cleanImageUrl(userdata?.image) });
     }
   }, [isFocus]);
 
@@ -93,11 +95,13 @@ const EditProfile = ({navigation}) => {
           fetchUserProfile();
         },
         error => {
+          showToast(error?.data?.message)
           console.log(error, 'errorerrorerror>>');
           setError(error?.data?.errors);
           setLoading(false);
         },
         fail => {
+          showToast(fail?.data?.message)
           console.log(fail, 'errorerrorerror>>');
           setLoading(false);
         },
@@ -106,24 +110,24 @@ const EditProfile = ({navigation}) => {
   };
   return (
     <View
-      style={{flex: 1, backgroundColor: COLOR.white, paddingHorizontal: 15}}>
+      style={{ flex: 1, backgroundColor: COLOR.white, paddingHorizontal: 15 }}>
       <HomeHeader
         title="Edit Profile"
         leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
         leftTint={COLOR.black}
       />
       <KeyboardAvoidingView
-        style={{flex: 1}}
+        style={{ flex: 1 }}
         behavior={
           Platform.OS === 'ios'
             ? 'padding'
             : isKeyboardVisible
-            ? 'height'
-            : undefined
+              ? 'height'
+              : undefined
         }
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 30}>
         <ScrollView
-          style={{flex: 1, paddingHorizontal: 5}}
+          style={{ flex: 1, paddingHorizontal: 5 }}
           contentContainerStyle={styles.container}>
           {/* Profile Image */}
           <View style={styles.profileSection}>
@@ -176,7 +180,7 @@ const EditProfile = ({navigation}) => {
             keyboardType="phone-pad"
             editable={false}
             error={error?.phone}
-            inputContainer={{marginBottom: 20}}
+            inputContainer={{ marginBottom: 20 }}
           />
         </ScrollView>
         {/* Edit / Update Button */}
@@ -243,7 +247,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     shadowColor: '#000',
     shadowOpacity: 0.1,
-    shadowOffset: {width: 0, height: 3},
+    shadowOffset: { width: 0, height: 3 },
     shadowRadius: 6,
     elevation: 4,
   },

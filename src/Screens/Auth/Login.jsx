@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   Image,
   KeyboardAvoidingView,
@@ -8,29 +8,29 @@ import {
   View,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import {windowHeight, windowWidth} from '../../Constants/Dimensions';
-import {COLOR} from '../../Constants/Colors';
-import {isValidForm, showToast, ToastMsg} from '../../Backend/Utility';
+import { windowHeight, windowWidth } from '../../Constants/Dimensions';
+import { COLOR } from '../../Constants/Colors';
+import { isValidForm, showToast, ToastMsg } from '../../Backend/Utility';
 import Button from '../../Components/UI/Button';
 import GoogleAuthButton from '../../Components/UI/GoogleAuthButton';
-import {ScrollView} from 'react-native';
+import { ScrollView } from 'react-native';
 import Input from '../../Components/Input';
-import {Typography} from '../../Components/UI/Typography';
-import {validators} from '../../Backend/Validator';
-import {SIGN_UP} from '../../Constants/ApiRoute';
-import {API, POST, useApi} from '../../Backend/Api';
+import { Typography } from '../../Components/UI/Typography';
+import { validators } from '../../Backend/Validator';
+import { SIGN_UP } from '../../Constants/ApiRoute';
+import { API, POST, useApi } from '../../Backend/Api';
 import useKeyboard from '../../Constants/Utility';
-import {images} from '../../Components/UI/images';
-import {isAuth, Token, userDetails} from '../../Redux/action';
-import {Font} from '../../Constants/Font';
+import { images } from '../../Components/UI/images';
+import { isAuth, Token, userDetails } from '../../Redux/action';
+import { Font } from '../../Constants/Font';
 import axios from 'axios';
 
-const Login = ({navigation}) => {
+const Login = ({ navigation }) => {
   const [number, setNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const {isKeyboardVisible} = useKeyboard();
-console.log('lllll');
+  const { isKeyboardVisible } = useKeyboard();
+  console.log('lllll');
 
   const onSubmit = () => {
     let error = {
@@ -70,28 +70,32 @@ console.log('lllll');
     );
   };
 
-  const handleLoginSuccess = user => {};
+  const handleLoginSuccess = user => {
+    console.log(user, "USERRRRR");
+
+    // https://api.quickmyslot.com/public/api/google
+  };
 
   return (
     <KeyboardAvoidingView
-      style={{flex: 1, paddingHorizontal: 20, backgroundColor: COLOR.white}}
+      style={{ flex: 1, paddingHorizontal: 20, backgroundColor: COLOR.white }}
       behavior={
         Platform.OS === 'ios'
           ? 'padding'
           : isKeyboardVisible
-          ? 'height'
-          : undefined
+            ? 'height'
+            : undefined
       }
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 100}>
       <StatusBar backgroundColor={'white'} />
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{flexGrow: 1}}
+        contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}>
         <LinearGradient
           colors={[COLOR.white, COLOR.white]}
-          start={{x: 0, y: 0}}
-          end={{x: 0, y: 1}}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
           style={styles.container}>
           {/* Logo */}
           <Image source={images.logo} style={styles.logo} />
@@ -103,7 +107,7 @@ console.log('lllll');
             color="#242524"
             textAlign="center"
             lineHeight={28}
-            style={{width: windowWidth / 1.2, marginTop: 10, marginBottom: 10}}>
+            style={{ width: windowWidth / 1.2, marginTop: 10, marginBottom: 10 }}>
             Get Bookings, Expand Business with QuickSlot
           </Typography>
 
@@ -120,7 +124,7 @@ console.log('lllll');
 
           {/* Continue Button */}
           <Button
-            containerStyle={{marginTop: 30, width: '100%'}}
+            containerStyle={{ marginTop: 30, width: '100%' }}
             title={'Continue'}
             onPress={onSubmit}
             loading={loading}
@@ -129,7 +133,7 @@ console.log('lllll');
           {/* Divider with text */}
           {/* <View style={styles.dividerContainer}>
             <View style={styles.divider} />
-            <Typography size={14} color="#888" style={{paddingHorizontal: 15}}>
+            <Typography font={Font.semibold} size={14} color="#888" style={{ paddingHorizontal: 15 }}>
               Or
             </Typography>
             <View style={styles.divider} />

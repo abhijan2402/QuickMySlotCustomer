@@ -14,6 +14,9 @@ export const ADD_FAQ = 'faq-support';
 export const ADD_TO_CART = 'customer/cart/add';
 export const REMOVE_TO_CART = 'customer/cart-remove/';
 export const ADD_TO_WISHLIST = 'customer/wishlist-add';
+export const REMOVE_TO_WISHLIST = 'customer/wishlist-remove';
+
+
 export const GET_CART = 'customer/cart';
 export const CUSTOMER_BOOKINGS = 'customer/bookings';
 export const GET_BOOKING_LIST = 'customer/bookings/list';

@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -8,92 +8,113 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import {COLOR} from '../../../Constants/Colors';
+import { COLOR } from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
-import {Typography} from '../../../Components/UI/Typography';
-import {Font} from '../../../Constants/Font';
+import { Typography } from '../../../Components/UI/Typography';
+import { Font } from '../../../Constants/Font';
 import {
   ADD_TO_CART,
   GET_CART,
   REMOVE_TO_CART,
 } from '../../../Constants/ApiRoute';
-import {GET_WITH_TOKEN, POST_FORM_DATA} from '../../../Backend/Api';
-import {images} from '../../../Components/UI/images';
+import { GET_WITH_TOKEN, POST_FORM_DATA } from '../../../Backend/Api';
+import { images } from '../../../Components/UI/images';
+import { ToastMsg } from '../../../Backend/Utility';
+import AddonModal from '../../../Components/UI/AddonModal';
+import { useIsFocused } from '@react-navigation/native';
 
-const ServiceList = ({navigation, route}) => {
+const ServiceList = ({ navigation, route }) => {
   const selectedServiceId = route.params?.subServicesId || null;
   const [selectedCategory, setSelectedCategory] = useState(
     selectedServiceId || null,
   );
-  const [selectedService, setSelectedService] = useState(null); // Changed to single service
+  const [selectedService, setSelectedService] = useState([]); // Changed to single service
   const [loading, setLoading] = useState(null);
   const [cartData, setCartData] = useState(null);
-
+  const [totalAmountVal, settotalAmountVal] = useState(0)
+  const [totalLength, settotalLength] = useState(0)
+  const [CartItemVal, setCartItemVal] = useState([])
+  const [showAddonModal, setshowAddonModal] = useState(false)
+  const [selectedAddon, setSelectedAddon] = useState({})
   const subServices = route.params?.subServices || [];
   const services = route.params?.services || [];
   const apiData = route.params?.apiData || {};
-  console.log(apiData, 'apiData--->');
-
+  const isFocus = useIsFocused()
   useEffect(() => {
-    getCart();
-  }, []);
-
+    if (isFocus) {
+      getCart();
+    }
+  }, [isFocus]);
   const isAdded = serviceId => {
-    return selectedService?.id === serviceId; // Check if this service is selected
+    return Array.isArray(selectedService)
+      ? selectedService.some(service => service.id === serviceId)
+      : false;
   };
 
   const getCart = () => {
     GET_WITH_TOKEN(
       GET_CART,
       success => {
-        console.log('Cart data:', success);
-        if (success?.data?.items && success.data.items.length > 0) {
-          // For single selection, only take the first item
-          const cartItem = success.data.items[0];
-          const selectedItem = {
+        const items = success?.data?.items || [];
+        setCartItemVal(items)
+        if (items.length > 0) {
+          // Map each item to include consistent structure
+          const selectedItems = items.map(cartItem => ({
             ...cartItem,
-            id: cartItem.service.id,
-            name: cartItem.service.name,
-            price: success?.data?.total_price,
-          };
-          setSelectedService(selectedItem); // Set single service
+            id: cartItem?.service?.id,
+            name: cartItem?.service?.name,
+            price: cartItem?.service?.price || cartItem?.price,
+            cart_id: cartItem?.id
+          }));
+          // console.log(selectedItems, "SELECTDED__ITEMMMSMM");
+
+          settotalAmountVal(success?.data?.total_price)
+          settotalLength(success?.data?.total_items)
+          setSelectedService(selectedItems); // Now an array
           setCartData(success.data);
         } else {
-          setSelectedService(null); // Clear selection
+          setSelectedService([]); // Empty array when no items
           setCartData(null);
         }
+
         setLoading(null);
       },
       error => {
         console.log('Cart fetch error:', error);
-        setSelectedService(null);
+        setSelectedService([]);
         setCartData(null);
         setLoading(null);
       },
       fail => {
         console.log('Cart fetch fail:', fail);
-        setSelectedService(null);
+        setSelectedService([]);
         setCartData(null);
         setLoading(null);
       },
     );
   };
 
-  const handleCart = async service => {
+
+  const handleCart = async (service, addon, key, value) => {
     if (loading) return;
 
     setLoading(service.id);
-
-    // If already selected, remove it
     if (isAdded(service.id)) {
-      removeFromCart(service, selectedService.cart_id);
+      const filteredVal = CartItemVal?.filter(i =>
+        selectedService?.some(j => j?.service?.id === i?.service_id)
+      );
+      if (filteredVal?.length > 0) {
+        removeFromCart(service, filteredVal[0]?.id);
+      }
     } else {
-      // If another service is selected, remove it first
       if (selectedService) {
         await removeExistingService();
       }
-      // Then add the new service
-      addToCart(service);
+      if (addon) {
+        addToCart(service, key, value);
+      } else {
+        addToCart(service);
+      }
     }
   };
 
@@ -119,15 +140,20 @@ const ServiceList = ({navigation, route}) => {
     });
   };
 
-  const addToCart = service => {
+  const addToCart = (service, key, value) => {
     const formData = new FormData();
     formData.append('service_id', service.id);
     formData.append('price', service.price);
+    if (key) {
+      formData.append(`addons[${key}]`, value);
 
+    }
+    console.log(formData, "NH");
     POST_FORM_DATA(
       ADD_TO_CART,
       formData,
       success => {
+        // getCart()
         console.log('Added to cart:', success);
         const newCartItem = {
           id: service.id,
@@ -135,7 +161,7 @@ const ServiceList = ({navigation, route}) => {
           cart_id: success.data?.cart_id || `temp_${Date.now()}`,
           price: service.price,
         };
-        setSelectedService(newCartItem); // Set single service
+        // setSelectedService(newCartItem); // Set single service
         setLoading(null);
         getCart();
       },
@@ -158,14 +184,14 @@ const ServiceList = ({navigation, route}) => {
       null,
       success => {
         console.log('Removed from cart:', success);
+        ToastMsg(success?.message);
         setSelectedService(null); // Clear selection
         setLoading(null);
         getCart();
       },
       error => {
-        console.log('Remove cart error:', error);
         setLoading(null);
-        alert('Failed to remove service from cart. Please try again.');
+        ToastMsg(error?.message);
       },
       fail => {
         console.log('Remove cart fail:', fail);
@@ -186,7 +212,7 @@ const ServiceList = ({navigation, route}) => {
 
   return (
     <View style={styles.container}>
-      <View style={{paddingHorizontal: 15}}>
+      <View style={{ paddingHorizontal: 15 }}>
         <HomeHeader
           title="Services"
           leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
@@ -194,14 +220,16 @@ const ServiceList = ({navigation, route}) => {
         />
       </View>
 
-      <View style={{flex: 1, flexDirection: 'row'}}>
+      <View style={{ flex: 1, flexDirection: 'row' }}>
         {/* Left Side Category */}
-        
+
         <View style={styles.leftPane}>
           <FlatList
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 60 }}
             data={subServices}
             keyExtractor={item => item.id.toString()}
-            renderItem={({item}) => (
+            renderItem={({ item }) => (
               <TouchableOpacity
                 style={[
                   styles.categoryItem,
@@ -209,7 +237,7 @@ const ServiceList = ({navigation, route}) => {
                 ]}
                 onPress={() => setSelectedCategory(item.id)}>
                 <Image
-                  source={{uri: item.image_url}}
+                  source={{ uri: item.image_url }}
                   style={styles.categoryImage}
                 />
                 <Typography
@@ -232,7 +260,7 @@ const ServiceList = ({navigation, route}) => {
               'Services'}
           </Typography>
 
-          <ScrollView showsVerticalScrollIndicator={false}>
+          <ScrollView contentContainerStyle={{ paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
             {filteredServices.length > 0 ? (
               filteredServices.map(srv => (
                 <View key={srv.id} style={styles.serviceRow}>
@@ -250,26 +278,53 @@ const ServiceList = ({navigation, route}) => {
                       ₹{srv.price}
                     </Typography>
                   </View>
-                  <TouchableOpacity
-                    style={[
-                      styles.addBtn,
-                      isAdded(srv.id) && styles.addedBtn,
-                      loading === srv.id && styles.disabledBtn,
-                    ]}
-                    onPress={() => handleCart(srv)}
-                    disabled={loading === srv.id}>
-                    {loading === srv.id ? (
-                      <ActivityIndicator size="small" color={COLOR.white} />
-                    ) : (
+                  <View>
+                    <TouchableOpacity
+                      style={[
+                        styles.addBtn,
+                        isAdded(srv.id) && styles.addedBtn,
+                        loading === srv.id && styles.disabledBtn,
+                      ]}
+                      onPress={() => {
+                        const filteredVal = CartItemVal?.filter(i =>
+                          srv.id === i?.service_id);
+                        if (filteredVal?.length > 0) {
+                          removeFromCart("", filteredVal[0]?.id);
+                        } else {
+                          if (srv?.addons != null) {
+                            setSelectedAddon(srv)
+                            setshowAddonModal(true)
+                          } else {
+                            handleCart(srv)
+                          }
+                        }
+                      }}
+                      disabled={loading === srv.id}>
+                      {loading === srv.id ? (
+                        <ActivityIndicator size="small" color={COLOR.white} />
+                      ) : (
+                        <Typography
+                          size={13}
+                          font={Font.semibold}
+                          color={isAdded(srv.id) ? COLOR.white : COLOR.black}>
+                          {isAdded(srv.id) ? 'Added' : 'Add +'}{' '}
+                          {/* Changed text */}
+                        </Typography>
+                      )}
+                    </TouchableOpacity>
+                    {
+                      srv?.addons != null &&
                       <Typography
-                        size={13}
-                        font={Font.semibold}
+                        marginTop={4}
+                        textAlign={"center"}
+                        size={10}
+                        font={Font.regular}
                         color={isAdded(srv.id) ? COLOR.white : COLOR.black}>
-                        {isAdded(srv.id) ? 'Selected' : 'Select'}{' '}
-                        {/* Changed text */}
+                        customisable
                       </Typography>
-                    )}
-                  </TouchableOpacity>
+                    }
+                  </View>
+
                 </View>
               ))
             ) : (
@@ -283,7 +338,7 @@ const ServiceList = ({navigation, route}) => {
         </View>
       </View>
 
-      {selectedService && ( // Show only when a service is selected
+      {CartItemVal?.length > 0 && ( // Show only when a service is selected
         <TouchableOpacity
           onPress={() =>
             navigation.navigate('BookingScreen', {
@@ -300,7 +355,7 @@ const ServiceList = ({navigation, route}) => {
               alignItems: 'center',
               justifyContent: 'space-between',
             }}>
-            {apiData?.business_name && (
+            {/* {apiData?.business_name && (
               <Typography
                 style={{
                   left: 20,
@@ -313,8 +368,8 @@ const ServiceList = ({navigation, route}) => {
                 }}>
                 {apiData?.business_name || 'Your Selected'}
               </Typography>
-            )}
-            <View
+            )} */}
+            {/* <View
               style={{
                 right: 20,
                 borderWidth: 1,
@@ -328,20 +383,27 @@ const ServiceList = ({navigation, route}) => {
               }}>
               <Image
                 source={images.rightArrow}
-                style={{height: 20, width: 20}}
+                style={{ height: 20, width: 20 }}
               />
-            </View>
+            </View> */}
           </View>
           <View style={styles.bookNowContent}>
             <Typography size={14} font={Font.semibold} color={COLOR.white}>
-              Book Now ({totalItems})
+              Book Now ({totalLength})
             </Typography>
             <Typography size={20} font={Font.medium} color={COLOR.white}>
-              ₹{totalPrice || 0}
+              ₹{totalAmountVal || 0}
             </Typography>
           </View>
         </TouchableOpacity>
       )}
+
+      <AddonModal
+        onAddService={(val, key, value) => { handleCart(val, true, key, value); setshowAddonModal(false) }}
+        visible={showAddonModal}
+        onClose={() => setshowAddonModal(false)}
+        selectedAddon={selectedAddon} />
+
     </View>
   );
 };
@@ -349,25 +411,25 @@ const ServiceList = ({navigation, route}) => {
 export default ServiceList;
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: '#fff'},
-  leftPane: {width: 100, backgroundColor: '#f9f9f9'},
+  container: { flex: 1, backgroundColor: '#fff' },
+  leftPane: { width: 100, backgroundColor: '#f9f9f9' },
   categoryItem: {
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  activeCategory: {backgroundColor: '#e6f0ff'},
-  categoryImage: {width: 40, height: 40, borderRadius: 8, marginBottom: 5},
+  activeCategory: { backgroundColor: '#e6f0ff' },
+  categoryImage: { width: 40, height: 40, borderRadius: 8, marginBottom: 5 },
   categoryText: {
     flexShrink: 1,
     fontFamily: Font.medium,
     marginTop: 5,
     textAlign: 'center',
   },
-  activeCategoryText: {fontWeight: 'bold', color: COLOR.primary},
+  activeCategoryText: { fontWeight: 'bold', color: COLOR.primary },
 
-  rightPane: {flex: 1, padding: 10},
+  rightPane: { flex: 1, padding: 10 },
   heading: {
     marginBottom: 10,
     color: COLOR.black,
@@ -418,7 +480,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 10,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 3},
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,

@@ -29,10 +29,16 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
+				<!-- <string>218547319777-5bgbf2erkqnp0rqvq7kjgstejf0t8qiv.apps.googleusercontent.com</string> -->
 				<string>com.googleusercontent.apps.218547319777-t1ur6iegrrbj563lkc336fr8ogk4tiv1</string>
 			</array>
 		</dict>
 	</array>
+	<key>LSApplicationQueriesSchemes</key>
+<array>
+  <string>google</string>
+  <string>com.googleusercontent.apps.218547319777-t1ur6iegrrbj563lkc336fr8ogk4tiv1</string>
+</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
@@ -52,12 +58,14 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+<string>QuickMySlot app requires access to your camera to take photos to provide better services.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Quick My Slot Wants To Access Your Location For Booking Purposes</string>
+	<string>QuickMySlot Wants To Access Your Location For Booking Purposes</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Quick My Slot Wants To Access Your Location For Booking Purposes</string>
+	<string>QuickMySlot Wants To Access Your Location For Booking Purposes</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Quick My Slot Wants To Access Your Photo Library For Profile Picture</string>
+	<string>QuickMySlot Wants To Access Your Photo Library For Profile Picture</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Montserrat-Black.ttf</string>

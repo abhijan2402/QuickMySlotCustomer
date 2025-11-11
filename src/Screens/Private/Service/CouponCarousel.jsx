@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,13 @@ import {
   Image,
   SafeAreaView,
 } from 'react-native';
-import {COLOR} from '../../../Constants/Colors';
-import {Font} from '../../../Constants/Font';
+import { COLOR } from '../../../Constants/Colors';
+import { Font } from '../../../Constants/Font';
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
-const CouponCarousel = ({promoData}) => {
+const CouponCarousel = ({ promoData, cashbackPercentage, title = "Offers available for you" }) => {
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollViewRef = useRef(null);
 
@@ -53,7 +54,7 @@ const CouponCarousel = ({promoData}) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>Offers available for you</Text>
+      <Text style={styles.header}>{title}</Text>
       <ScrollView
         ref={scrollViewRef}
         horizontal
@@ -66,38 +67,52 @@ const CouponCarousel = ({promoData}) => {
           );
           setCurrentIndex(newIndex);
         }}>
-        {promoData.map((coupon, index) => (
-          <View key={coupon.id} style={styles.card}>
-            <View style={styles.contentRow}>
-              <Image
-                source={require('../../../assets/Images/discount.png')}
-                style={styles.icon}
-              />
-              <View style={styles.textContainer}>
-                <Text style={styles.title}>{coupon.promo_code}</Text>
-                <Text style={styles.description}>{coupon?.type}{' '}₹{coupon.amount}</Text>
-              </View>
+        {/* {promoData.map((coupon, index) => ( */}
+        <View style={styles.card}>
+          <View style={styles.contentRow}>
+            <Image
+              source={require('../../../assets/Images/discount.png')}
+              style={styles.icon}
+            />
+            <View style={styles.textContainer}>
+              <Text style={styles.title}>
+                Total discount upto{' '}
+                {cashbackPercentage
+                  ? Number(cashbackPercentage.replace('%', '')) + 20
+                  : 20}
+                %
+              </Text>
 
-              {/* Pagination section */}
-             {promoData.length > 1 &&  <View style={styles.pageInfo}>
-                <Text style={styles.pageText}>
-                  {currentIndex + 1}/{promoData.length}
-                </Text>
-                <View style={styles.dots}>
-                  {promoData.map((_, dotIndex) => (
-                    <View
-                      key={dotIndex}
-                      style={[
-                        styles.dot,
-                        dotIndex === currentIndex && styles.dotActive,
-                      ]}
-                    />
-                  ))}
-                </View>
-              </View>}
+              <Text style={styles.description}>
+                {cashbackPercentage != "0"
+                  ? `${cashbackPercentage} discount + Cashback upto 20%`
+                  : 'Cashback upto 20%'}
+              </Text>
             </View>
+
+            {/* <Text style={styles.title}>{coupon.promo_code}</Text> */}
+            {/* <Text style={styles.description}>{coupon?.type}{' '}₹{coupon.amount} + {cashbackPercentage} Cashback</Text> */}
+
+            {/* Pagination section */}
+            {promoData.length > 1 && <View style={styles.pageInfo}>
+              <Text style={styles.pageText}>
+                {currentIndex + 1}/{promoData.length}
+              </Text>
+              <View style={styles.dots}>
+                {promoData.map((_, dotIndex) => (
+                  <View
+                    key={dotIndex}
+                    style={[
+                      styles.dot,
+                      dotIndex === currentIndex && styles.dotActive,
+                    ]}
+                  />
+                ))}
+              </View>
+            </View>}
           </View>
-        ))}
+        </View>
+        {/* ))} */}
       </ScrollView>
     </SafeAreaView>
   );
@@ -124,11 +139,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
     marginBottom: 10,
+    borderWidth: 1,
+    borderColor: COLOR.primary
   },
   contentRow: {
     flexDirection: 'row',
@@ -142,6 +159,7 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     flex: 1,
+
   },
   title: {
     fontSize: 14,
@@ -150,7 +168,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 13,
-    color: '#666',
+    color: COLOR.primary,
     marginTop: 2,
     fontFamily: Font.medium,
   },

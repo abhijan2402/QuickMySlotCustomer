@@ -9,7 +9,7 @@ import {
   PermissionsAndroid,
 } from 'react-native';
 import ImageCropPicker from 'react-native-image-crop-picker';
-import DocumentPicker, {pick} from '@react-native-documents/picker';
+import DocumentPicker, { pick } from '@react-native-documents/picker';
 import SimpleToast from 'react-native-simple-toast';
 import { Typography } from './Typography';
 import { Font } from '../../Constants/Font';
@@ -21,12 +21,12 @@ const ImageModal = ({
   showModal,
   documents = false,
   document = false,
-  close = () => {},
-  selected = () => {},
+  close = () => { },
+  selected = () => { },
   TimeVal,
   deleteImage = false,
   showCropCircle = false,
-  onPressRemove = () => {},
+  onPressRemove = () => { },
 }) => {
 
   const requestCameraPermission = async () => {
@@ -86,7 +86,7 @@ const ImageModal = ({
     return true;
   };
 
-  const captureImage = async (type, cropImage = 'Profile', callback = () => {}) => {
+  const captureImage = async (type, cropImage = 'Profile', callback = () => { }) => {
     try {
       const options = {
         mediaType: 'photo',
@@ -129,7 +129,7 @@ const ImageModal = ({
       const res = await pickerFn(options);
 
 
-      console.log(res,"resresres")
+      console.log(res, "resresres")
 
       // const imageData = {
       //   name: res.filename || res.path.split('/').pop(),
@@ -137,7 +137,7 @@ const ImageModal = ({
       //   uri: res.path,
       // };
 
-      callback(imageData, type);
+      callback(res, type);
       close();
     } catch (err) {
       if (err.code !== 'E_PICKER_CANCELLED') {
@@ -182,7 +182,7 @@ const ImageModal = ({
         <View
           style={[
             styles.modalContent,
-            {height: documents ? windowWidth / 1.6 : windowWidth / 2},
+            { height: documents ? windowWidth / 1.6 : windowWidth / 2 },
           ]}>
           <View style={styles.modalHeader}>
             <Typography size={20} font={Font.semibold}>
@@ -191,7 +191,7 @@ const ImageModal = ({
             <TouchableOpacity onPress={close}>
               <Image
                 source={images.close}
-                style={{height: 20, width: 20, }}
+                style={{ height: 20, width: 20, }}
               />
             </TouchableOpacity>
           </View>
@@ -202,17 +202,17 @@ const ImageModal = ({
                 height: documents || document ? 280 : deleteImage ? 220 : 200,
               },
             ]}>
-            {/* <TouchableOpacity style={styles.checkView} onPress={OpenCamera}>
+            <TouchableOpacity style={styles.checkView} onPress={OpenCamera}>
               <View style={styles.iconContainer}>
                 <Image
                   style={styles.icon}
                   source={images.camera}
                 />
               </View>
-              <Typography size={15} style={{marginLeft: 15}}>
+              <Typography size={15} style={{ marginLeft: 15 }}>
                 Capture Photo
               </Typography>
-            </TouchableOpacity> */}
+            </TouchableOpacity>
 
             <TouchableOpacity style={styles.checkView} onPress={OpenGallery}>
               <View style={styles.iconContainer}>
@@ -221,7 +221,7 @@ const ImageModal = ({
                   source={images.gallery}
                 />
               </View>
-              <Typography size={15} style={{marginLeft: 15}}>
+              <Typography size={15} style={{ marginLeft: 15 }}>
                 Gallery Photo
               </Typography>
             </TouchableOpacity>
@@ -245,7 +245,7 @@ const ImageModal = ({
                     source={images.documentation}
                   />
                 </View>
-                <Typography size={15} style={{marginLeft: 15}}>
+                <Typography size={15} style={{ marginLeft: 15 }}>
                   Choose Document
                 </Typography>
               </TouchableOpacity>
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: 'black',
-        shadowOffset: {width: 0, height: 2},
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 4,
       },

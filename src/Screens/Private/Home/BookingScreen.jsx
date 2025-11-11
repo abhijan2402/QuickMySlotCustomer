@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -8,39 +8,37 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import {COLOR} from '../../../Constants/Colors';
+import { COLOR } from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
-import {windowWidth} from '../../../Constants/Dimensions';
+import { windowHeight, windowWidth } from '../../../Constants/Dimensions';
 import ScheduleCard from '../../../Components/UI/ScheduleCard';
 import moment from 'moment';
-import {Typography} from '../../../Components/UI/Typography';
+import { Typography } from '../../../Components/UI/Typography';
 import Input from '../../../Components/Input';
-import {images} from '../../../Components/UI/images';
+import { images } from '../../../Components/UI/images';
 import SimpleModal from '../../../Components/UI/SimpleModal';
 import Button from '../../../Components/UI/Button';
 import useKeyboard from '../../../Constants/Utility';
-import {Font} from '../../../Constants/Font';
-import {CURRENCY, ToastMsg} from '../../../Backend/Utility';
-import {POST_FORM_DATA} from '../../../Backend/Api';
-import {BOOKING_VERIFY, CUSTOMER_BOOKINGS} from '../../../Constants/ApiRoute';
-import {useSelector} from 'react-redux';
+import { Font } from '../../../Constants/Font';
+import { CURRENCY, ToastMsg } from '../../../Backend/Utility';
+import { GET_WITH_TOKEN, POST_FORM_DATA } from '../../../Backend/Api';
+import { BOOKING_VERIFY, CUSTOMER_BOOKINGS, GET_CART, REMOVE_TO_CART } from '../../../Constants/ApiRoute';
+import { useSelector } from 'react-redux';
 import RazorpayCheckout from 'react-native-razorpay';
+import AvailOfferModal from '../../../Components/UI/AvailOfferModal';
+import CalculateBillOffer from '../../../Components/UI/CalculateBillOffer';
+import { useIsFocused } from '@react-navigation/native';
 
-const BookingScreen = ({navigation, route}) => {
+const BookingScreen = ({ navigation, route }) => {
+  const isFocus = useIsFocused()
   const platformFee = 75;
   const tax = 25;
-  const businessData = route?.params?.businessData || {};
-  console.log('businessData--->', businessData);
-  const cartData = route?.params?.cartData;
-  console.log('cartData ->>', cartData);
-  const cartItems = route?.params?.cartItems || [];
-  console.log(cartItems, 'cartItemscartItemscartItems');
-  console.log('cartItems-->', cartData);
-  const totalPrice = route?.params?.totalPrice || 0;
+  // const businessData = route?.params?.businessData || {};
+  // const cartData = route?.params?.cartData;
+  // const cartItems = route?.params?.cartItems || [];
+  // const totalPrice = route?.params?.totalPrice || 0;
   const userDetail = useSelector(state => state.userDetails);
-  console.log('userDetail--->', userDetail);
   const [selectedServices, setSelectedServices] = useState([]);
-  console.log(selectedServices, 'selectedServicessssssss');
   const userdata = useSelector(store => store.userDetails);
   const [selectedDate, setSelectedDate] = useState(27);
   const [selectedTimes, setSelectedTimes] = useState([]);
@@ -51,77 +49,51 @@ const BookingScreen = ({navigation, route}) => {
   const [loading, setLoading] = useState(false);
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [dateStart, setDateStart] = useState(null);
-  const {isKeyboardVisible} = useKeyboard();
+  const { isKeyboardVisible } = useKeyboard();
   const [showServices, setShowServices] = useState(false);
   const [selectedOffer, setSelectedOffer] = useState('');
+  const [times, setTimes] = useState([]);
+  const [cartValue, setcartValue] = useState([])
+  const [Paymentbreakdown, setPaymentbreakdown] = useState(null)
+  const [totalItemsVal, settotalItemsVal] = useState(0)
+  const [shopData, setShopData] = useState(null);
 
   // Get available schedule from business data
-  const availableSchedule = businessData?.services[0]?.available_schedule || {};
-  console.log('selectedOffervvvvdddadawvvv:', availableSchedule);
+  // const availableSchedule = businessData?.services[0]?.available_schedule || {};
 
   const services = [
-    {id: 1, name: 'Haircut & Styling', price: 45},
-    {id: 2, name: 'Hair Spa', price: 60},
-    {id: 3, name: 'Hair Coloring', price: 120},
+    { id: 1, name: 'Haircut & Styling', price: 45 },
+    { id: 2, name: 'Hair Spa', price: 60 },
+    { id: 3, name: 'Hair Coloring', price: 120 },
   ];
 
-  // Function to get available times for selected date
-  const getAvailableTimesForDate = selectedDate => {
-    if (
-      !selectedDate ||
-      !availableSchedule ||
-      Object.keys(availableSchedule).length === 0
-    )
-      return [];
 
-    // Convert selected date to DD/MM/YYYY format to match available_schedule format
-    const formattedDate = moment(selectedDate).format('DD/MM/YYYY');
+  const generateTimeSlots = (startTime, endTime) => {
+    if (!startTime || !endTime) return [];
 
-    console.log('Looking for date:', formattedDate);
-    console.log('Available schedule:', availableSchedule);
+    const slots = [];
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
 
-    // Find times for the selected date
-    const availableTimes = [];
+    let current = new Date();
+    current.setHours(startHour, startMinute, 0, 0);
 
-    Object.entries(availableSchedule).forEach(([time, date]) => {
-      if (date === formattedDate) {
-        availableTimes.push(time);
-      }
-    });
+    const end = new Date();
+    end.setHours(endHour, endMinute, 0, 0);
 
-    console.log('Available times for', formattedDate, ':', availableTimes);
-    return availableTimes;
-  };
-
-  // Generate time slots based on available schedule for selected date
-  const generateTimeSlots = () => {
-    if (!dateStart) return [];
-
-    const availableTimes = getAvailableTimesForDate(dateStart);
-
-    // Convert times to the format used in your UI (HH:mm)
-    return availableTimes
-      .map(time => {
-        // If time is in "00:05" format, ensure it has proper formatting
-        const [hours, minutes] = time.split(':');
-        const formattedTime = `${hours.padStart(2, '0')}:${minutes.padStart(
-          2,
-          '0',
-        )}`;
-        return formattedTime;
-      })
-      .sort(); // Sort times chronologically
-  };
-
-  const times = generateTimeSlots();
-
-  const toggleService = id => {
-    if (selectedServices.includes(id)) {
-      setSelectedServices(selectedServices.filter(s => s !== id));
-    } else {
-      setSelectedServices([...selectedServices, id]);
+    while (current < end) {
+      const next = new Date(current.getTime() + 30 * 60000); // +30 min
+      const formatted = current.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      slots.push(formatted);
+      current = next;
     }
+
+    return slots;
   };
+
 
   const toggleTimeSelection = time => {
     if (selectedTimes.includes(time)) {
@@ -133,84 +105,90 @@ const BookingScreen = ({navigation, route}) => {
     }
   };
 
-  const selectedItems =
-    selectedServices.length > 0
-      ? services.filter(s => selectedServices.includes(s.id))
-      : [services[0]];
+  // const selectedItems =
+  //   selectedServices.length > 0
+  //     ? services.filter(s => selectedServices.includes(s.id))
+  //     : [services[0]];
 
-  const subtotal = selectedItems.reduce((sum, s) => sum + s.price, 0);
+  // const subtotal = selectedItems.reduce((sum, s) => sum + s.price, 0);
 
-  const total =
-    subtotal + tax + platformFee + (Number(selectedOffer?.amount) || 0);
+  // const total =
+  //   subtotal + tax + platformFee + (Number(cartData?.total_price) || 0);
 
-  const convertTimeSlots = (slots, date) => {
-    return slots.map(slot => ({
-      ...slot,
-      formatted: `${moment(slot.start_time, 'HH:mm:ss').format(
-        'h:mm A',
-      )} - ${moment(slot.end_time, 'HH:mm:ss').format('h:mm A')}`,
-      date: date,
-    }));
-  };
 
   const onBooking = is_paid_key => {
     if (selectedTimes.length === 0) {
       ToastMsg('Please select at least one time slot.');
       return;
     }
-    console.log('Booking with times:', selectedTimes);
     if (is_paid_key) {
       initiateRazorpayPayment(is_paid_key);
     } else {
       handleSubmit(is_paid_key);
     }
   };
-  console.log(cartItems, 'cartItemscartItems');
 
   const handleSubmit = async is_paid_key => {
-    setLoading(true);
     try {
-      // const formattedTimes = selectedTimes.map(time => {
-      //   return time.includes(':') ? `${time}:00` : `${time}:00:00`;
-      // });
+      // console.log(cartValue, "DADADDD");
+
       const body = new FormData();
-      body.append('order_id', cartItems[0]?.cart_id);
+
       body.append('customer_id', userDetail?.id);
-      body.append('note', note);
-      body.append('vendor_id', businessData?.id);
-      body.append('service_id', cartItems[0]?.id);
-      body.append('amount', total);
+      body.append('amount', Paymentbreakdown?.final_amount);
+      body.append('is_paid_key', is_paid_key ? is_paid_key : "0");
       body.append('tax', '25');
       body.append('platform_fee', '75');
+      body.append('note', note);
+      body.append('vendor_id', shopData?.id);
       body.append('status', 'pending');
-      body.append('is_paid_key', is_paid_key);
+      body.append('date', dateStart);
+      body.append('order_id', cartValue[0]?.service_id);
+      cartValue?.map((time, index) => {
+        body.append(
+          `service_amounts[${index}]`,
+          time?.price,
+        );
+      });
+
+      cartValue?.map((time, index) => {
+        body.append(
+          `service_id[${index}]`,
+          time?.service_id || moment().format('YYYY/MM/DD'),
+        );
+      });
       selectedTimes.forEach((time, index) => {
         body.append(
           `schedule_time[${time}]`,
           dateStart || moment().format('YYYY/MM/DD'),
         );
       });
-      console.log(body, 'bodybodybody');
+      // console.log(body, 'bodybodybody');
+
       const orderResponse = await new Promise((resolve, reject) => {
         POST_FORM_DATA(
           CUSTOMER_BOOKINGS,
           body,
           success => {
-            console.log('Booking API Success:', success);
+            // console.log('Booking API Success:', success);
             setLoading(false);
             if (is_paid_key) {
+              // console.log("ORDER__KEY");
+
               resolve(success);
             } else {
+              console.log(success, "DAARTATATAT");
+
               ToastMsg(success?.message || 'Booking successful!');
               navigation.pop();
               navigation.navigate('BookingConfirmation', {
                 data: {
-                  selectedServices: cartItems,
-                  total: total,
+                  selectedServices: cartValue,
+                  total: Paymentbreakdown?.final_amount,
                   note,
                   selectedTimes,
                   bookingData: success,
-                  businessData,
+                  businessData: shopData,
                 },
               });
             }
@@ -230,7 +208,7 @@ const BookingScreen = ({navigation, route}) => {
       return orderResponse;
     } catch (error) {
       setLoading(false);
-      console.log('Order creation exception:', error);
+      // console.log('Order creation exception:', error);
       throw new Error('Failed to create order: ' + error.message);
     }
   };
@@ -239,7 +217,7 @@ const BookingScreen = ({navigation, route}) => {
   useEffect(() => {
     if (dateStart) {
       const availableTimes = generateTimeSlots();
-      console.log('Updated available times:', availableTimes);
+      // // console.log('Updated available times:', availableTimes);
     }
   }, [dateStart]);
 
@@ -256,24 +234,20 @@ const BookingScreen = ({navigation, route}) => {
   };
 
   const initiateRazorpayPayment = async is_paid_key => {
-    const amount = total;
+    const amount = Paymentbreakdown?.final_amount;
     if (!amount || amount <= 0) {
       ToastMsg('Please enter a valid amount');
       return;
     }
-
     setLoading(true);
-
     try {
       // Step 1: Create Razorpay order on your backend
       const orderData = await handleSubmit(is_paid_key);
-      console.log(orderData, 'orderData---==>');
-
-      // Check the response structure - it might be nested in data property
-      const orderId = orderData?.order_id || orderData?.data?.order_id;
+      const orderId = orderData?.order_id || orderData?.data?.razorpay_order_id;
+      const bookingID = orderData?.data?.booking?.id
 
       if (!orderId) {
-        console.log('Order data received:', orderData);
+        // // console.log('Order data received:', orderData);
         throw new Error(
           'Failed to create payment order - no order ID received',
         );
@@ -293,19 +267,17 @@ const BookingScreen = ({navigation, route}) => {
           contact: userdata?.phone_number || '9999999999',
           name: userdata?.name || 'User',
         },
-        theme: {color: COLOR.primary},
+        theme: { color: COLOR.primary },
       };
 
-      console.log('Razorpay options:', options);
+      // console.log('Razorpay options:', options);
 
       // Step 3: Open Razorpay checkout
       RazorpayCheckout.open(options)
         .then(data => {
-          // Payment successful
-          console.log('Payment Success:', data);
           // Step 4: Verify payment on your backend
           verifyPayment({
-            bookingId: orderData?.id,
+            bookingId: bookingID,
             razorpay_payment_id: data.razorpay_payment_id,
             razorpay_order_id: data.razorpay_order_id,
             razorpay_signature: data.razorpay_signature,
@@ -313,10 +285,7 @@ const BookingScreen = ({navigation, route}) => {
         })
         .catch(error => {
           setLoading(false);
-          console.log('Razorpay Payment Error:', error);
-          // Handle different error cases
           if (error.code === 2) {
-            // Payment cancelled by user
             ToastMsg('Payment was cancelled');
           } else if (error.code === 0) {
             // Network error
@@ -328,7 +297,6 @@ const BookingScreen = ({navigation, route}) => {
         });
     } catch (error) {
       setLoading(false);
-      console.log('Razorpay Init Error:', error);
       ToastMsg(
         error.message || 'Failed to initialize payment. Please try again.',
       );
@@ -346,25 +314,35 @@ const BookingScreen = ({navigation, route}) => {
       BOOKING_VERIFY, // This should be your payment verification endpoint
       formData,
       success => {
-        console.log(success, 'successsuccesssuccess');
+        // console.log(success, 'successsuccesssuccess');
         setLoading(false);
-        ToastMsg('Amount added to wallet successfully!');
+        ToastMsg(success?.message);
         navigation.pop();
+        // navigation.navigate('BookingConfirmation', {
+        //   data: {
+        //     selectedServices: cartItems,
+        //     total: total,
+        //     note,
+        //     selectedTimes,
+        //     bookingData: success,
+        //     businessData,
+        //   },
+        // });
         navigation.navigate('BookingConfirmation', {
           data: {
-            selectedServices: cartItems,
-            total: total,
+            selectedServices: cartValue,
+            total: Paymentbreakdown?.final_amount,
             note,
             selectedTimes,
             bookingData: success,
-            businessData,
+            businessData: shopData,
           },
         });
       },
       error => {
         console.log(error, 'errorerrorerrorerror');
         setLoading(false);
-        ToastMsg('Payment verification failed. Please contact support.');
+        ToastMsg(error?.data?.message);
       },
       fail => {
         setLoading(false);
@@ -372,9 +350,81 @@ const BookingScreen = ({navigation, route}) => {
       },
     );
   };
+
+
+  // useEffect(() => {
+  //   if (businessData?.daily_start_time && businessData?.daily_end_time) {
+  //     const generatedSlots = generateTimeSlots(
+  //       businessData.daily_start_time,
+  //       businessData.daily_end_time,
+  //     );
+  //     setTimes(generatedSlots);
+  //   }
+  // }, [businessData]);
+
+
+
+  const removeFromCart = (cartId) => {
+    POST_FORM_DATA(
+      `${REMOVE_TO_CART}${cartId}`,
+      null,
+      success => {
+        console.log('Removed from cart:', success);
+        ToastMsg(success?.message);
+        setLoading(null);
+        getCart();
+      },
+      error => {
+        setLoading(null);
+        ToastMsg(error?.message);
+      },
+      fail => {
+        console.log('Remove cart fail:', fail);
+        setLoading(null);
+        alert('Failed to remove service from cart. Please try again.');
+      },
+    );
+  };
+
+  useEffect(() => {
+    if (isFocus) {
+      getCart()
+    }
+  }, [isFocus])
+
+  const getCart = () => {
+    GET_WITH_TOKEN(
+      GET_CART,
+      success => {
+
+        const items = success?.data?.items || [];
+        settotalItemsVal(success?.data?.total_price)
+        setcartValue(items)
+        setPaymentbreakdown(success?.data?.payment_breakdown?.overall_breakdown)
+        let vendorInfo = null;
+
+        if (items?.length > 0 && items[0]?.service?.user) {
+          vendorInfo = items[0].service.user;
+        }
+        setShopData(vendorInfo)
+        const generatedSlots = generateTimeSlots(
+          vendorInfo?.daily_start_time,
+          vendorInfo.daily_end_time,
+        );
+        setTimes(generatedSlots);
+
+      },
+      error => {
+        console.log('Cart fetch error:', error);
+      },
+      fail => {
+        console.log('Cart fetch fail:', fail);
+      },
+    );
+  };
   return (
     <View style={styles.container}>
-      <View style={{paddingHorizontal: 15}}>
+      <View style={{ paddingHorizontal: 15 }}>
         <HomeHeader
           title="Available Services"
           leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
@@ -383,65 +433,65 @@ const BookingScreen = ({navigation, route}) => {
         />
       </View>
       <KeyboardAvoidingView
-        style={{flex: 1}}
+        style={{ flex: 1 }}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 40}
         behavior={
           Platform.OS === 'ios'
             ? 'padding'
             : isKeyboardVisible
-            ? 'height'
-            : undefined
+              ? 'height'
+              : undefined
         }>
         <ScrollView
           showsVerticalScrollIndicator={false}
-          style={{flex: 1, marginHorizontal: 20}}>
+          style={{ flex: 1, marginHorizontal: 20 }}>
           {/* Salon Card */}
           <View style={styles.salonCard}>
             <View>
               <Typography style={styles.salonName}>
-                {businessData?.business_name || 'Salon Name'}
+                {shopData?.business_name || 'Shop Name'}
               </Typography>
               <Typography style={styles.salonSubtitle}>
-                {businessData?.location_area_served || 'Salon Address'}
+                {shopData?.exact_location || 'Shop Address'}
               </Typography>
             </View>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={() => {
                 navigation.navigate('Support');
               }}
-              style={{flexDirection: 'row', alignItems: 'center'}}>
+              style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Image
                 source={images.support}
-                style={{height: 18, width: 18}}
+                style={{ height: 18, width: 18 }}
                 tintColor={COLOR.primary}
               />
               <Typography
                 size={16}
                 font={Font.semibold}
-                style={{marginLeft: 5}}
+                style={{ marginLeft: 5 }}
                 color={COLOR.primary}>
                 Support
               </Typography>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
 
           {/* Date Selector */}
           <Typography
             size={14}
             font={Font.semibold}
-            style={{marginTop: 20, marginBottom: 5}}>
+            style={{ marginTop: 20, marginBottom: 5 }}>
             Select Date & Time of Appoinment
           </Typography>
 
           <ScheduleCard
             selected_date={selectTime?.date || moment()?.format('YYYY-MM-DD')}
-            locationId={businessData?.id}
+            locationId={shopData?.id}
             onChangeDateVal={(val, month) => {
               let selected_date = `${month?.year}-${String(
                 month?.month + 1,
               ).padStart(2, '0')}-${String(val?.date).padStart(2, '0')}`;
               setDateStart(selected_date);
-              console.log('Selected date:', selected_date);
+              // console.log('Selected date:', selected_date);
               setSelectedTimes([]);
             }}
           />
@@ -457,16 +507,15 @@ const BookingScreen = ({navigation, route}) => {
               }}>
               <Typography font={Font.medium} size={14}>
                 {times.length > 0
-                  ? `Available time slots for ${
-                      dateStart
-                        ? moment(dateStart).format('DD/MM/YYYY')
-                        : 'selected date'
-                    }`
+                  ? `Available time slots for ${dateStart
+                    ? moment(dateStart).format('DD/MM/YYYY')
+                    : 'selected date'
+                  }`
                   : 'No available time slots for selected date'}
               </Typography>
               <Image
                 source={images.info}
-                style={{height: 15, width: 15, marginLeft: 5}}
+                style={{ height: 15, width: 15, marginLeft: 5 }}
               />
             </View>
           )}
@@ -521,7 +570,7 @@ const BookingScreen = ({navigation, route}) => {
               });
             }}
             style={styles.offerBtn}>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Image source={images.offer} style={styles.offerIcon} />
               <Typography style={styles.offerText}>Choose Offer</Typography>
             </View>
@@ -530,14 +579,14 @@ const BookingScreen = ({navigation, route}) => {
               source={{
                 uri: 'https://cdn-icons-png.flaticon.com/128/2985/2985179.png',
               }}
-              style={[styles.offerIcon, {marginRight: 0}]}
+              style={[styles.offerIcon, { marginRight: 0 }]}
             />
           </TouchableOpacity>
           {selectedOffer?.promo_code && (
             <View style={styles.offerApplied}>
-              <View style={{flexDirection: 'row'}}>
-                <Image source={images.offer} style={{height: 24, width: 24}} />
-                <View style={{marginLeft: 10}}>
+              <View style={{ flexDirection: 'row' }}>
+                <Image source={images.offer} style={{ height: 24, width: 24 }} />
+                <View style={{ marginLeft: 10 }}>
                   <Typography size={13} font={Font.medium}>
                     Offer Applied
                   </Typography>
@@ -545,14 +594,14 @@ const BookingScreen = ({navigation, route}) => {
                     size={14}
                     font={Font.semibold}
                     color={COLOR.primary}
-                    style={{marginTop: 3}}>
+                    style={{ marginTop: 3 }}>
                     {selectedOffer?.promo_code}
                   </Typography>
                 </View>
               </View>
 
-              <View style={{marginRight: 10}}>
-                <Image source={images.cross2} style={{height: 14, width: 14}} />
+              <View style={{ marginRight: 10 }}>
+                <Image source={images.cross2} style={{ height: 14, width: 14 }} />
               </View>
             </View>
           )}
@@ -568,7 +617,7 @@ const BookingScreen = ({navigation, route}) => {
                 marginVertical: 5,
               }}>
               <TouchableOpacity
-                style={{flexDirection: 'row', alignItems: 'center'}}
+                style={{ flexDirection: 'row', alignItems: 'center' }}
                 onPress={() => setShowServices(!showServices)}>
                 <Typography size={14} font={Font.semibold}>
                   Your Services
@@ -587,70 +636,107 @@ const BookingScreen = ({navigation, route}) => {
                   }}>
                   <Image
                     source={images.ArrowDown}
-                    style={{height: 10, width: 10}}
+                    style={{ height: 10, width: 10 }}
                   />
                 </TouchableOpacity>
               </TouchableOpacity>
               <Typography size={14} font={Font.semibold}>
-                ₹ {totalPrice ? Number(totalPrice || 0)?.toFixed(2) : '00.00'}
+                ₹ {totalItemsVal ? Number(totalItemsVal || 0)?.toFixed(2) : '00.00'}
               </Typography>
             </View>
 
             {/* Services List */}
             {showServices && (
               <View>
-                {cartItems?.map((item, index) => {
-                  return (
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        marginTop: 10,
-                        // justifyContent: 'space-around',
-                      }}>
-                      <View style={{alignItems: 'center'}}>
-                        <Image
-                          source={images.manhair}
-                          style={{height: 20, width: 20, marginBottom: 5}}
-                          tintColor={COLOR.primary}
-                        />
-                        {/* <Typography size={12} font={Font.semibold}>
-                          {selectedServices?.service.category?.name}
-                        </Typography> */}
-                      </View>
-                      <View>
-                        <Typography
-                          size={12}
-                          font={Font.semibold}
-                          style={{
-                            width: windowWidth * 0.65,
-                            borderBottomWidth: 1,
-                            paddingBottom: 5,
-                            borderBottomColor: COLOR.lightGrey,
-                            marginLeft: 15,
-                          }}>
-                          {cartItems[0]?.service?.category?.name}
-                        </Typography>
-                        <View style={styles.serviceRow}>
-                          <View>
-                            <Typography style={styles.serviceLabel}>
-                              {item?.name}
+                {cartValue?.length > 0 ? (
+                  cartValue?.map((item, index) => {
+                    const service = item?.service;
+                    const category = service?.category;
+                    const provider = service?.user;
+
+                    return (
+                      <View
+                        key={item.id || index}
+                        style={{
+                          flexDirection: 'row',
+                          marginTop: 10,
+                          alignItems: 'flex-start',
+                        }}>
+
+                        {/* Left Icon */}
+                        <View style={{ alignItems: 'center' }}>
+                          <Image
+                            source={images.manhair}
+                            style={{ height: 20, width: 20, marginBottom: 5 }}
+                            tintColor={COLOR.primary}
+                          />
+                        </View>
+
+                        {/* Right Content */}
+                        <View style={{ flex: 1, marginLeft: 15 }}>
+                          {/* Category Name */}
+                          <View style={{ flexDirection: "row", borderBottomWidth: 1, borderBottomColor: COLOR.lightGrey, justifyContent: "space-between" }}>
+                            <Typography
+                              size={12}
+                              font={Font.semibold}
+                              style={{
+                                paddingBottom: 5,
+                                borderBottomColor: COLOR.lightGrey,
+                              }}>
+                              {category?.name || 'Unknown Category'}
                             </Typography>
-                            <Typography style={styles.serviceSub}>
-                              From {CURRENCY}
-                              {item?.price}
-                            </Typography>
+                            <TouchableOpacity onPress={() => { removeFromCart(item?.id) }}>
+                              <Image source={{ uri: "https://cdn-icons-png.flaticon.com/128/3416/3416079.png" }} style={{ width: 18, height: 18 }} />
+                            </TouchableOpacity>
+
                           </View>
-                          {/* <TouchableOpacity>
-                            <Image
-                              source={images.cross2}
-                              style={styles.removeIcon}
-                            />
-                          </TouchableOpacity> */}
+
+                          {/* Service Name & Price */}
+                          <View style={styles.serviceRow}>
+                            <View>
+                              <Typography style={styles.serviceLabel}>
+                                {service?.name || 'Unnamed Service'}
+                              </Typography>
+                              <Typography style={styles.serviceSub}>
+                                From {CURRENCY}
+                                {service?.price || item?.price || '0.00'}
+                              </Typography>
+                            </View>
+
+                            {/* Optional Remove Button */}
+                            {/* 
+            <TouchableOpacity onPress={() => handleRemove(item.id)}>
+              <Image
+                source={images.cross2}
+                style={styles.removeIcon}
+              />
+            </TouchableOpacity> 
+            */}
+                          </View>
+
+                          {/* Optional Provider Details */}
+                          {provider?.business_name && (
+                            <Typography
+                              size={11}
+                              color={COLOR.grey}
+                              style={{ marginTop: 4 }}>
+                              Provided by: {provider.business_name}
+                            </Typography>
+                          )}
                         </View>
                       </View>
-                    </View>
-                  );
-                })}
+                    );
+                  })
+                ) : (
+                  <Typography
+                    size={14}
+                    font={Font.medium}
+                    color={COLOR.darkGrey}
+                    style={{ textAlign: 'center', marginTop: 20 }}>
+                    No items in cart
+                  </Typography>
+                )}
+
               </View>
             )}
 
@@ -669,30 +755,74 @@ const BookingScreen = ({navigation, route}) => {
               </View>
             )}
 
-            <View style={styles.offerAppliedRow}>
-              <Typography style={styles.offerAppliedText}>Tax</Typography>
-              <Typography style={styles.offerCode}>{CURRENCY}25.00</Typography>
-            </View>
-            <View style={styles.offerAppliedRow}>
-              <Typography style={styles.offerAppliedText}>
-                Platform Fee
-              </Typography>
-              <Typography style={styles.offerCode}>{CURRENCY}75.00</Typography>
-            </View>
 
-            {/* Total */}
-            <View style={styles.totalRow}>
-              <Typography style={styles.totalLabel}>Approx Total</Typography>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                {/* <Typography style={styles.strikePrice}>
-                  ₹{Number(total + 50).toFixed(2)}
-                </Typography> */}
-                <Typography style={styles.finalPrice}>
-                  {' '}
-                  ₹{Number(total).toFixed(2)}
+
+            <View>
+
+
+              {/* GST / Tax */}
+              <View style={styles.offerAppliedRow}>
+                <Typography style={styles.offerAppliedText}>GST</Typography>
+                <Typography style={styles.offerCode}>
+                  ₹{Paymentbreakdown?.gst_amount?.toFixed(2)}
                 </Typography>
               </View>
+
+              {/* Platform Fee */}
+              <View style={styles.offerAppliedRow}>
+                <Typography style={styles.offerAppliedText}>Platform Fee</Typography>
+                <Typography style={styles.offerCode}>
+                  ₹{Paymentbreakdown?.platform_fee?.toFixed(2)}
+                </Typography>
+              </View>
+
+              {/* Discount */}
+              {Paymentbreakdown?.discount_amount > 0 && (
+                <View style={styles.offerAppliedRow}>
+                  <Typography style={styles.offerAppliedText}>Discount</Typography>
+                  <Typography style={[styles.offerCode, { color: 'green' }]}>
+                    -₹{paymentBreakdown?.discount_amount && Paymentbreakdown?.discount_amount?.toFixed(2)}
+                  </Typography>
+                </View>
+              )}
+
+              <View style={styles.offerAppliedRow}>
+                <Typography style={styles.offerAppliedText}>QuickMySlot Discount</Typography>
+                <Typography style={styles.offerCode}>
+                  -₹{Paymentbreakdown?.total_discount_amount}
+                </Typography>
+              </View>
+              {/* Convenience Fee */}
+              <View style={styles.offerAppliedRow}>
+                <Typography style={styles.offerAppliedText}>Convenience Fee</Typography>
+                <Typography style={styles.offerCode}>
+                  ₹{Paymentbreakdown?.convenience_fee}
+                </Typography>
+              </View>
+
+              {/* Cashback */}
+
+
+              {/* Final Total */}
+              <View style={styles.totalRow}>
+                <Typography style={styles.totalLabel}>Final Amount</Typography>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Typography style={styles.finalPrice}>
+                    ₹{Paymentbreakdown?.final_amount}
+                  </Typography>
+                </View>
+              </View>
+              {Paymentbreakdown?.cashback_amount > 0 && (
+                <View style={styles.offerAppliedRow}>
+                  <Typography style={styles.offerAppliedText}>Book now and get cashback of
+                    <Typography style={[styles.offerCode, { color: 'green' }]}>
+                      {" "}₹{Paymentbreakdown?.cashback_amount}
+                    </Typography>
+                  </Typography>
+                </View>
+              )}
             </View>
+
           </View>
 
           {/* <LinearGradient
@@ -735,12 +865,12 @@ const BookingScreen = ({navigation, route}) => {
           </LinearGradient> */}
 
           <Typography
-            size={15}
+            size={13}
             font={Font.medium}
             color="gray"
             lineHeight={20}
-            style={{marginBottom: 15, marginTop: 15}}>
-            <Typography size={15} font={Font.semibold}>
+            style={{ marginBottom: 15, marginTop: 15 }}>
+            <Typography size={14} font={Font.semibold}>
               Note:
             </Typography>{' '}
             The total may vary after consultation depending on the length,
@@ -767,19 +897,19 @@ const BookingScreen = ({navigation, route}) => {
                 borderBottomWidth: 1,
                 borderBottomColor: COLOR.lightGrey,
               }}>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <Image source={images.info} style={{height: 18, width: 18.2}} />
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image source={images.info} style={{ height: 18, width: 18.2 }} />
                 <Typography
                   size={14}
                   font={Font.medium}
-                  style={{marginLeft: 10}}>
+                  style={{ marginLeft: 10 }}>
                   How to avail this offer ?
                 </Typography>
               </View>
               <View>
                 <Image
                   source={images.rightArrow}
-                  style={{height: 18, width: 18}}
+                  style={{ height: 18, width: 18 }}
                 />
               </View>
             </TouchableOpacity>
@@ -795,22 +925,22 @@ const BookingScreen = ({navigation, route}) => {
                 borderBottomColor: COLOR.lightGrey,
                 marginTop: 15,
               }}>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Image
                   source={images.calculator}
-                  style={{height: 18, width: 18.2}}
+                  style={{ height: 18, width: 18.2 }}
                 />
                 <Typography
                   size={14}
                   font={Font.medium}
-                  style={{marginLeft: 10}}>
+                  style={{ marginLeft: 10 }}>
                   Calculate your bill with offer
                 </Typography>
               </View>
               <View>
                 <Image
                   source={images.rightArrow}
-                  style={{height: 18, width: 18}}
+                  style={{ height: 18, width: 18 }}
                 />
               </View>
             </TouchableOpacity>
@@ -821,15 +951,15 @@ const BookingScreen = ({navigation, route}) => {
                 justifyContent: 'space-between',
                 marginTop: 15,
               }}>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Image
                   source={images.compose}
-                  style={{height: 18, width: 18.2}}
+                  style={{ height: 18, width: 18.2 }}
                 />
                 <Typography
                   size={14}
                   font={Font.medium}
-                  style={{marginLeft: 10}}>
+                  style={{ marginLeft: 10 }}>
                   Add a request
                 </Typography>
               </View>
@@ -839,7 +969,7 @@ const BookingScreen = ({navigation, route}) => {
               value={note}
               onChangeText={setNote}
               height={60}
-              inputContainer={{marginTop: -10}}
+              inputContainer={{ marginTop: -10 }}
               textAlignVertical="top"
               multiline={true}
             />
@@ -876,13 +1006,13 @@ const BookingScreen = ({navigation, route}) => {
                   borderWidth: 1,
                   borderColor: COLOR.primary,
                 }}
-                onPress={() => onBooking('0')}
+                onPress={() => onBooking()}
                 titleColor={COLOR.primary}
                 disabled={loading}
               />
               <Button
                 title={loading ? 'Booking...' : 'Pay Now'}
-                containerStyle={{marginBottom: 10, marginTop: 10, width: '38%'}}
+                containerStyle={{ marginBottom: 10, marginTop: 10, width: '38%' }}
                 onPress={() => onBooking('1')}
                 disabled={loading}
               />
@@ -891,40 +1021,14 @@ const BookingScreen = ({navigation, route}) => {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Rest of the modal code remains exactly the same */}
-      <SimpleModal
-        visible={availOffer}
-        onClose={() => setAvailOffer(false)}
-        overlay={{justifyContent: 'flex-end'}}
-        modalContainer={{
-          width: '100%',
-          borderRadius: 0,
-          borderTopRightRadius: 20,
-          borderTopLeftRadius: 20,
-          maxHeight: '70%',
-        }}>
-        {/* ... (modal content remains exactly the same) ... */}
-      </SimpleModal>
-
-      <SimpleModal
-        visible={calculate}
-        onClose={() => setCalculate(false)}
-        overlay={{justifyContent: 'flex-end'}}
-        modalContainer={{
-          width: '100%',
-          borderRadius: 0,
-          borderTopRightRadius: 20,
-          borderTopLeftRadius: 20,
-          maxHeight: '70%',
-        }}>
-        {/* ... (modal content remains exactly the same) ... */}
-      </SimpleModal>
+      <AvailOfferModal Paymentbreakdown={Paymentbreakdown} visible={availOffer} onClose={() => setAvailOffer(false)} />
+      <CalculateBillOffer Paymentbreakdown={Paymentbreakdown} visible={calculate} onClose={() => setCalculate(false)} sampleAmount={600} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: '#fff'},
+  container: { flex: 1, backgroundColor: '#fff' },
   salonCard: {
     backgroundColor: COLOR.white,
     padding: 15,
@@ -935,9 +1039,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3.84,
   },
-  salonName: {color: COLOR.primary, fontSize: 16, fontFamily: Font.semibold},
-  salonSubtitle: {color: COLOR.black, fontSize: 14, fontFamily: Font.medium},
+  salonName: { color: COLOR.primary, fontSize: 16, fontFamily: Font.semibold },
+  salonSubtitle: { color: COLOR.black, fontSize: 14, fontFamily: Font.medium },
 
   sectionTitle: {
     fontSize: 14,
@@ -956,7 +1064,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLOR.primary,
     paddingVertical: 8,
-    paddingHorizontal: 14,
+    paddingHorizontal: 7,
     borderRadius: 8,
     marginHorizontal: 5,
     marginBottom: 10,
@@ -964,9 +1072,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     fontFamily: Font.medium,
   },
-  selectedTimeBox: {backgroundColor: COLOR.primary, fontFamily: Font.medium},
-  timeText: {color: '#333', fontSize: 13, fontFamily: Font.semibold},
-  selectedTimeText: {color: '#fff', fontFamily: Font.medium},
+  selectedTimeBox: { backgroundColor: COLOR.primary, fontFamily: Font.medium },
+  timeText: { color: '#333', fontSize: 13, fontFamily: Font.semibold },
+  selectedTimeText: { color: '#fff', fontFamily: Font.medium },
   noSlotsContainer: {
     backgroundColor: '#f9f9f9',
     padding: 15,
@@ -988,12 +1096,24 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 10,
     marginBottom: 20,
-    elevation: 2,
     justifyContent: 'space-between',
     margin: 1,
+
+    // ✅ Android shadow
+    elevation: 3,
+
+    // ✅ iOS shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+
+    // ✅ Important for iOS to render shadow outside rounded corners
+    overflow: Platform.OS === 'android' ? 'hidden' : 'visible',
   },
-  offerIcon: {width: 24, height: 24, marginRight: 10},
-  offerText: {fontSize: 15, fontFamily: Font.semibold, color: COLOR.primary},
+
+  offerIcon: { width: 24, height: 24, marginRight: 10 },
+  offerText: { fontSize: 15, fontFamily: Font.semibold, color: COLOR.primary },
   billContainer: {
     backgroundColor: COLOR.white,
     padding: 15,
@@ -1001,17 +1121,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLOR.lightGrey,
   },
-  billTitle: {fontSize: 16, fontFamily: Font.semibold, marginBottom: 10},
+  billTitle: { fontSize: 16, fontFamily: Font.semibold, marginBottom: 10 },
   billRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 6,
   },
-  billLabel: {fontSize: 14, color: '#555'},
-  billValue: {fontSize: 14, fontFamily: Font.semibold},
-  totalLabel: {fontSize: 15, fontFamily: Font.semibold},
-  totalValue: {fontSize: 15, fontFamily: Font.semibold, color: COLOR.primary},
-  noteContainer: {marginBottom: 15},
+  billLabel: { fontSize: 14, color: '#555' },
+  billValue: { fontSize: 14, fontFamily: Font.semibold },
+  totalLabel: { fontSize: 15, fontFamily: Font.semibold },
+  totalValue: { fontSize: 15, fontFamily: Font.semibold, color: COLOR.primary },
+  noteContainer: { marginBottom: 15 },
   noteLabel: {
     fontSize: 15,
     fontFamily: Font.semibold,
@@ -1059,19 +1179,19 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     marginStart: 15,
   },
-  serviceLabel: {fontSize: 15, fontFamily: Font.semibold, color: '#333'},
-  serviceSub: {fontSize: 12, color: '#888', marginTop: 2},
-  removeIcon: {width: 14, height: 14, tintColor: '#444'},
+  serviceLabel: { fontSize: 15, fontFamily: Font.semibold, color: '#333' },
+  serviceSub: { fontSize: 12, color: '#888', marginTop: 2 },
+  removeIcon: { width: 14, height: 14, tintColor: '#444' },
 
   offerAppliedRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 12,
-    marginBottom: 8,
+    marginBottom: 0,
   },
-  offerAppliedText: {fontSize: 14, fontFamily: Font.medium, color: '#444'},
-  offerCode: {fontSize: 14, fontFamily: Font.semibold, color: '#222'},
+  offerAppliedText: { fontSize: 14, fontFamily: Font.medium, color: '#444' },
+  offerCode: { fontSize: 14, fontFamily: Font.semibold, color: '#222' },
 
   totalRow: {
     flexDirection: 'row',
@@ -1085,7 +1205,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
     marginRight: 6,
   },
-  finalPrice: {fontSize: 16, fontFamily: Font.semibold, color: COLOR.primary},
+  finalPrice: { fontSize: 16, fontFamily: Font.semibold, color: COLOR.primary },
 });
 
 export default BookingScreen;

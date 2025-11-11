@@ -1,8 +1,8 @@
 // Components/CustomModal.js
 import React from 'react';
-import {View, Modal, StyleSheet, TouchableWithoutFeedback} from 'react-native';
+import { View, Modal, StyleSheet, TouchableWithoutFeedback } from 'react-native';
 
-const SimpleModal = ({visible, onClose, children,modalContainer,overlay}) => {
+const SimpleModal = ({ visible, onClose, children, modalContainer, overlay }) => {
   return (
     <Modal
       visible={visible}
@@ -10,9 +10,9 @@ const SimpleModal = ({visible, onClose, children,modalContainer,overlay}) => {
       animationType="slide"
       onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={onClose}>
-        <View style={[styles.overlay,overlay]}>
+        <View style={[styles.overlay, overlay]}>
           <TouchableWithoutFeedback>
-            <View style={[styles.modalContainer,modalContainer]}>{children}</View>
+            <View style={[styles.modalContainer, modalContainer]}>{children}</View>
           </TouchableWithoutFeedback>
         </View>
       </TouchableWithoutFeedback>

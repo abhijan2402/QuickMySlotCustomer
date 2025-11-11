@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -8,20 +8,20 @@ import {
   ActivityIndicator,
   Keyboard,
 } from 'react-native';
-import {COLOR} from '../../../Constants/Colors';
+import { COLOR } from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
-import {Typography} from '../../../Components/UI/Typography';
-import {images} from '../../../Components/UI/images';
-import {windowHeight} from '../../../Constants/Dimensions';
-import {Font} from '../../../Constants/Font';
+import { Typography } from '../../../Components/UI/Typography';
+import { images } from '../../../Components/UI/images';
+import { windowHeight } from '../../../Constants/Dimensions';
+import { Font } from '../../../Constants/Font';
 import Input from '../../../Components/Input';
-import {GET_WITH_TOKEN} from '../../../Backend/Api';
-import {SERVICES} from '../../../Constants/ApiRoute';
-import {useIsFocused} from '@react-navigation/native';
-import {cleanImageUrl, windowWidth} from '../../../Backend/Utility';
-import {useSelector} from 'react-redux';
+import { GET_WITH_TOKEN } from '../../../Backend/Api';
+import { SERVICES } from '../../../Constants/ApiRoute';
+import { useIsFocused } from '@react-navigation/native';
+import { cleanImageUrl, windowWidth } from '../../../Backend/Utility';
+import { useSelector } from 'react-redux';
 
-const SearchServices = ({navigation, route}) => {
+const SearchServices = ({ navigation, route }) => {
   const ref = useRef();
   const [search, setSearch] = useState('');
   const [services, setServices] = useState([]);
@@ -37,18 +37,22 @@ const SearchServices = ({navigation, route}) => {
   const currentLocation = useSelector(state => state.currentLocation);
 
   const buildApiUrl = (page = 1, searchTerm = '') => {
-    let url = `${SERVICES}?service_category=${id}&page=${page}&per_page=${perPage}&lat=${currentLocation?.latitude}$long=${currentLocation?.longitude}`;
+    let url = `${SERVICES}?service_category=${id}&page=${page}&per_page=${perPage}&lat=${currentLocation?.coords?.latitude}$long=${currentLocation?.coords?.longitude}`;
+    console.log(url, "URLLLLLL");
+
     if (searchTerm.trim() !== '') {
       url += `&name=${encodeURIComponent(searchTerm.trim())}`;
     }
+
     return url;
   };
+
   const fetchServices = (page = 1, searchTerm = '', shouldAppend = false) => {
     setLoading(true);
     GET_WITH_TOKEN(
       buildApiUrl(page, searchTerm),
       success => {
-        console.log(success, 'successsuccesssuccesssuccesserwrewfd');
+        console.log(success?.data?.data, 'successsuccesssuccesssuccesserwrewfd');
 
         const responseData = success?.data?.data || [];
         const paginationInfo = success?.data?.last_page || {};
@@ -117,118 +121,97 @@ const SearchServices = ({navigation, route}) => {
     );
   };
 
-  const renderCard = ({item}) => (
-    <TouchableOpacity
-      activeOpacity={0.85}
-      onPress={() => navigation.navigate('ProviderDetails', {id: item?.id})}
-      style={styles.card}>
-      {console.log('Rendering item:', item.image)}
+  const renderCard = ({ item }) => {
+    return (
+      <TouchableOpacity
+        activeOpacity={0.85}
+        onPress={() => navigation.navigate('ProviderDetails', { id: item?.id })}
+        style={styles.card}>
+        {console.log('Rendering item:', item.image)}
 
-      <View style={styles.imageContainer}>
-        {item?.image ? (
-          <Image
-            source={{uri: cleanImageUrl(item?.image)}}
-            style={styles.cardImage}
-            defaultSource={images.placeholder}
-            onError={() => console.log('Image failed to load:', item?.image)}
-          />
-        ) : (
-          <View style={styles.placeholderImage}>
-            <Typography color={COLOR.grey}>No Image</Typography>
+        <View style={styles.imageContainer}>
+          {item?.portfolio_images?.length > 0 ? (
+            <Image
+              source={{ uri: cleanImageUrl(item?.portfolio_images[0]?.image_url) }}
+              style={styles.cardImage}
+              defaultSource={images.placeholder}
+              onError={() => console.log('Image failed to load:', item?.image)}
+            />
+          ) : (
+            <View style={styles.placeholderImage}>
+              <Typography color={COLOR.grey}>No Image</Typography>
+            </View>
+          )}
+        </View>
+        {
+          item?.is_cashback != "0" &&
+          <View style={{ backgroundColor: COLOR.blue, paddingVertical: 5, borderBottomLeftRadius: 10, borderBottomRightRadius: 10 }}>
+            <Typography size={14} color={COLOR.white} font={Font.semibold} style={{ textAlign: "center" }}>Get {item?.is_cashback} off via QuickMySlot</Typography>
           </View>
-        )}
-      </View>
+        }
+        <View style={[styles.cardContent]}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+            <Typography
+              size={14}
+              font={Font.semibold}
+              color={COLOR.black}
+              style={[styles.cardTitle, { width: "70%" }]}>
+              {item?.business_name || 'Unknown Business'}
+            </Typography>
+            <View style={{ flexDirection: "row" }}>
+              <Typography size={13}
+                font={Font.semibold}
+                color="#666">Unisex | ₹₹</Typography>
+            </View>
 
-      <View style={styles.cardContent}>
-        <Typography
-          size={16}
-          font={Font.semibold}
-          color={COLOR.black}
-          style={styles.cardTitle}>
-          {item?.business_name || 'Unknown Business'}
-        </Typography>
-
-        {item?.business_description && (
+          </View>
+          {/* {item?.business_description && (
           <Typography
+            numberOfLines={2}
             size={14}
             font={Font.regular}
             color={COLOR.darkGrey}
             style={styles.description}>
             {item.business_description}
           </Typography>
-        )}
+        )} */}
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+            <View style={{ width: "50%", }}>
+              {item?.exact_location && (
+                <>
+                  <View style={{ flexDirection: "row" }}>
+                    <Typography
+                      numberOfLines={1}
+                      size={13}
+                      color="#666"
+                      font={Font.medium}
+                      style={[styles.textRow, {}]}>
+                      {item.exact_location}
+                    </Typography>
+                    <Typography
+                      size={13}
+                      color="#666"
+                      font={Font.medium}
+                      style={[styles.textRow, {}]}
+                    >
+                      | {item?.km} kms
+                    </Typography>
 
-        {item?.exact_location && (
-          <Typography
-            size={13}
-            color="#666"
-            font={Font.medium}
-            style={styles.textRow}>
-            📍 {item.exact_location}
-          </Typography>
-        )}
-
-        {item?.years_of_experience && (
-          <Typography
-            size={13}
-            color="#666"
-            font={Font.medium}
-            style={styles.textRow}>
-            💼 {item.years_of_experience} years experience
-          </Typography>
-        )}
-
-        {item?.gender && (
-          <Typography
-            size={13}
-            color="#666"
-            font={Font.medium}
-            style={styles.textRow}>
-            👤 {item.gender}
-          </Typography>
-        )}
-
-        {item?.phone_number && (
-          <Typography
-            size={13}
-            color="#666"
-            font={Font.medium}
-            style={styles.textRow}>
-            📞 +91 {item.phone_number}
-          </Typography>
-        )}
-
-        <Typography
-          font={Font.semibold}
-          size={13}
-          color="#666"
-          style={styles.availability}>
-          ⏰ {item?.daily_start_time || 'N/A'} - {item?.daily_end_time || 'N/A'}
-        </Typography>
-
-        {item?.working_days && item.working_days.length > 0 && (
-          <View style={styles.workingDaysContainer}>
-            <Typography size={13} color="#666" font={Font.medium}>
-              Working days:{' '}
-            </Typography>
-            <View style={styles.daysList}>
-              {item.working_days.map((day, index) => (
-                <Typography
-                  key={index}
-                  size={12}
-                  color="#444"
-                  font={Font.medium}
-                  style={styles.dayText}>
-                  {day}
-                  {index < item.working_days.length - 1 ? ',' : ''}
-                </Typography>
-              ))}
+                  </View>
+                </>
+              )}
+            </View>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Image source={{ uri: "https://cdn-icons-png.flaticon.com/128/3334/3334338.png" }} style={{ width: 13, height: 13, marginRight: 2 }} />
+              <Typography size={14}
+                color="#666"
+                font={Font.semibold}>3.4</Typography>
             </View>
           </View>
-        )}
-      </View>
-    </TouchableOpacity>
-  );
+        </View>
+      </TouchableOpacity>
+    )
+  }
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
@@ -236,7 +219,7 @@ const SearchServices = ({navigation, route}) => {
       <Typography size={18} font={Font.medium} style={styles.emptyText}>
         {search ? 'No services found' : 'No services available'}
       </Typography>
-      <Typography size={14} color={COLOR.grey} style={{marginTop: 4}}>
+      <Typography size={14} color={COLOR.grey} style={{ marginTop: 4 }}>
         {search
           ? 'Try searching with a different keyword.'
           : 'Check back later for new services.'}
@@ -259,10 +242,10 @@ const SearchServices = ({navigation, route}) => {
           onChangeText={setSearch}
           leftIcon={images.search}
           placeholder="Search for services..."
-          inputContainer={{borderColor: COLOR.lightGrey}}
-          style={{marginLeft: 5}}
+          inputContainer={{ borderColor: COLOR.lightGrey }}
+          style={{ marginLeft: 5 }}
           rightIcon={search !== '' ? images.cross2 : ''}
-          rightIconStyle={{height: 14, width: 14}}
+          rightIconStyle={{ height: 14, width: 14 }}
           onRightIconPress={() => setSearch('')}
         />
       </View>
@@ -285,7 +268,7 @@ const SearchServices = ({navigation, route}) => {
       {loading && services.length === 0 && (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLOR.primary} />
-          <Typography size={14} color={COLOR.grey} style={{marginTop: 10}}>
+          <Typography size={14} color={COLOR.grey} style={{ marginTop: 10 }}>
             Loading services...
           </Typography>
         </View>
@@ -322,13 +305,20 @@ const styles = StyleSheet.create({
     backgroundColor: COLOR.white,
     borderRadius: 16,
     marginVertical: 8,
-    overflow: 'hidden',
-    elevation: 3,
+    overflow: Platform.OS === 'android' ? 'hidden' : 'visible', // keep iOS shadows visible
+    elevation: 4, // Android shadow
+
+    // iOS shadow
     shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 5,
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+
+    // Optional: subtle border to improve visual definition on light backgrounds
+    borderWidth: Platform.OS === 'ios' ? 0.3 : 0,
+    borderColor: 'rgba(0,0,0,0.05)',
   },
+
   imageContainer: {
     position: 'relative',
   },

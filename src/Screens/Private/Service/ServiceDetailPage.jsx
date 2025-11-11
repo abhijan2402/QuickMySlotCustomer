@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,11 +8,11 @@ import {
   ScrollView,
   Dimensions,
 } from 'react-native';
-import {COLOR} from '../../../Constants/Colors';
+import { COLOR } from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
 import ImageSwiper from './ServiceImageSwiper';
 import CouponCarousel from './CouponCarousel';
-import {FlatList} from 'react-native';
+import { FlatList } from 'react-native';
 import {
   handleCall,
   handleOpenMap,
@@ -20,30 +20,29 @@ import {
   openMapWithDirections,
 } from '../../../Constants/Utils';
 import SimpleModal from '../../../Components/UI/SimpleModal';
-import {Font} from '../../../Constants/Font';
+import { Font } from '../../../Constants/Font';
 import {
   ADD_TO_WISHLIST,
   PROMO_VENDOR,
+  REMOVE_TO_WISHLIST,
   VENDOR_DETAIL,
 } from '../../../Constants/ApiRoute';
-import {useIsFocused} from '@react-navigation/native';
-import {GET_WITH_TOKEN, POST_FORM_DATA} from '../../../Backend/Api';
-import {Typography} from '../../../Components/UI/Typography';
+import { useIsFocused } from '@react-navigation/native';
+import { GET_WITH_TOKEN, POST_FORM_DATA, POST_WITH_TOKEN } from '../../../Backend/Api';
+import { Typography } from '../../../Components/UI/Typography';
 import moment from 'moment';
-import {cleanImageUrl} from '../../../Backend/Utility';
+import { cleanImageUrl } from '../../../Backend/Utility';
 
-const ProviderDetails = ({navigation, route}) => {
+const ProviderDetails = ({ navigation, route }) => {
   const [activeTab, setActiveTab] = useState('Services');
-  const {width} = Dimensions.get('window');
+  const { width } = Dimensions.get('window');
   const [like, setLike] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [apiData, setApiData] = useState([]);
-  console.log('apidata', apiData);
   const [promoData, setPromoData] = useState([]);
   const isFocused = useIsFocused();
   const id = route?.params?.id;
-  console.log(id);
 
   useEffect(() => {
     if (isFocused) {
@@ -56,7 +55,6 @@ const ProviderDetails = ({navigation, route}) => {
     GET_WITH_TOKEN(
       PROMO_VENDOR + id,
       success => {
-        console.log(success, 'promo data--');
         setPromoData(success?.data);
         setLoading(false);
       },
@@ -81,21 +79,22 @@ const ProviderDetails = ({navigation, route}) => {
     'sunday',
   ];
 
-  const handleWishList = async () => {
+  const handleWishList = async (likeStatus) => {
     const formData = new FormData();
     formData.append('vendorId', id);
     console.log(formData);
 
     POST_FORM_DATA(
-      ADD_TO_WISHLIST,
+      likeStatus ? `${REMOVE_TO_WISHLIST}/${id}` : ADD_TO_WISHLIST,
       formData,
       success => {
         console.log('Calling API:', success);
         setLike(true);
+        ShopFetch()
         setLoading(null);
       },
       error => {
-        console.log(error);
+        console.log(error, "ERRORORRORORO");
 
         setLoading(null);
       },
@@ -106,14 +105,39 @@ const ProviderDetails = ({navigation, route}) => {
     );
   };
 
+  const removewishlist = async (id) => {
+    const formData = new FormData();
+    formData.append('vendorId', id);
+    console.log(formData);
+
+    POST_WITH_TOKEN(`${REMOVE_TO_WISHLIST}/${id}`,
+      {},
+      success => {
+        console.log('Calling API:', success);
+        setLike(false);
+        setLoading(null);
+        ShopFetch()
+      },
+      error => {
+        console.log(error, "ERRORORRORORO");
+
+        setLoading(null);
+      },
+      fail => {
+        console.log('Calling API:', fail);
+        setLoading(null);
+      },
+    );
+  };
+  // https://api.quickmyslot.com/public/api/customer/wishlist-remove/24
+
   const daysData = allDays.map(day => {
     const isWorking = apiData?.working_days?.includes(day);
     return {
       day: day.charAt(0).toUpperCase() + day.slice(1),
       time: isWorking
-        ? `${apiData?.daily_start_time || '09:00'} - ${
-            apiData?.daily_end_time || '18:00'
-          }`
+        ? `${apiData?.daily_start_time || '09:00'} - ${apiData?.daily_end_time || '18:00'
+        }`
         : 'Closed',
     };
   });
@@ -121,26 +145,29 @@ const ProviderDetails = ({navigation, route}) => {
   const adjustedDayIndex = (currentDayIndex + 6) % 7;
 
   const amenities = [
-    {id: '1', name: 'Air Conditioned'},
-    {id: '2', name: 'Wi-Fi'},
-    {id: '3', name: 'Parking'},
-    {id: '4', name: 'Swimming Pool'},
+    { id: '1', name: 'Air Conditioned' },
+    { id: '2', name: 'Wi-Fi' },
+    { id: '3', name: 'Parking' },
+    { id: '4', name: 'Swimming Pool' },
     // Add more as needed
   ];
-
+  const ShopFetch = () => {
+    setLoading(true);
+    GET_WITH_TOKEN(
+      VENDOR_DETAIL + `${id}`,
+      success => {
+        console.log(success?.data, 'dsadsadewrewretrefcbfdgdf');
+        setApiData(success?.data);
+        setLoading(false);
+      },
+      error => setLoading(false),
+      fail => setLoading(false)``,
+    );
+  }
   useEffect(() => {
     if (isFocused) {
       setLoading(true);
-      GET_WITH_TOKEN(
-        VENDOR_DETAIL + `${id}`,
-        success => {
-          console.log(success, 'dsadsadewrewretrefcbfdgdf');
-          setApiData(success?.data);
-          setLoading(false);
-        },
-        error => setLoading(false),
-        fail => setLoading(false),
-      );
+      ShopFetch()
     }
   }, [isFocused]);
   const [statusText, setStatusText] = useState('');
@@ -190,7 +217,7 @@ const ProviderDetails = ({navigation, route}) => {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={{paddingHorizontal: 15}}>
+      <View style={{ paddingHorizontal: 15 }}>
         <HomeHeader
           title="Provider Details"
           leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
@@ -199,8 +226,10 @@ const ProviderDetails = ({navigation, route}) => {
         />
       </View>
 
-      <ScrollView contentContainerStyle={{paddingBottom: 10}}>
-        <ImageSwiper data={[cleanImageUrl(apiData?.image)]} />
+      <ScrollView contentContainerStyle={{ paddingBottom: 10 }}>
+        {
+          apiData?.portfolio_images &&
+          <ImageSwiper data={apiData?.portfolio_images} />}
         {/* Provider Info */}
         <View style={styles.infoContainer}>
           <View
@@ -210,25 +239,35 @@ const ProviderDetails = ({navigation, route}) => {
               justifyContent: 'space-between',
               marginTop: 10,
             }}>
-            <Typography style={[styles.title, {width: '70%'}]}>
+            <Typography style={[styles.title, { width: '70%' }]}>
               {apiData?.business_name || apiData?.company_name}
             </Typography>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity onPress={() => handleWishList()}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <TouchableOpacity onPress={() => {
+                // console.log(apiData, "AARARARAR");
+
+                if (apiData?.iswishlist) {
+                  removewishlist(apiData?.wishlistData?.id)
+                } else {
+                  handleWishList(apiData?.iswishlist ? true : false)
+                }
+              }
+
+              }>
                 <Image
                   source={
-                    like
+                    apiData?.iswishlist
                       ? require('../../../assets/Images/heart.png')
                       : require('../../../assets/Images/like.png')
                   }
-                  style={{height: 24, width: 26, marginRight: 20}}
+                  style={{ height: 24, width: 26, marginRight: 20 }}
                 />
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => onShare('Glamour Touch Salon,Gurugram, Punjab')}>
+                onPress={() => onShare(apiData?.exact_location)}>
                 <Image
                   source={require('../../../assets/Images/share.png')}
-                  style={{height: 24, width: 24}}
+                  style={{ height: 24, width: 24 }}
                 />
               </TouchableOpacity>
             </View>
@@ -241,7 +280,7 @@ const ProviderDetails = ({navigation, route}) => {
             }}>
             <Typography
               style={[
-                {fontSize: 16, marginBottom: 2, fontFamily: Font.medium},
+                { fontSize: 14, marginBottom: 2, fontFamily: Font.medium },
               ]}>
               {apiData?.gender || 'Unisex'}
             </Typography>
@@ -287,7 +326,7 @@ const ProviderDetails = ({navigation, route}) => {
             </Typography>
             <Image
               source={require('../../../assets/Images/down-arrow.png')}
-              style={{height: 18, width: 10, marginLeft: 6}}
+              style={{ height: 18, width: 10, marginLeft: 6 }}
             />
           </TouchableOpacity>
 
@@ -313,7 +352,7 @@ const ProviderDetails = ({navigation, route}) => {
               }}>
               <Image
                 source={require('../../../assets/Images/direction.png')}
-                style={{height: 16, width: 16}}
+                style={{ height: 16, width: 16 }}
               />
               <Typography
                 style={{
@@ -343,7 +382,7 @@ const ProviderDetails = ({navigation, route}) => {
               </Typography>
               <Image
                 source={require('../../../assets/Images/rightarrow.png')}
-                style={{height: 18, width: 10}}
+                style={{ height: 18, width: 10 }}
               />
             </TouchableOpacity>
 
@@ -361,7 +400,7 @@ const ProviderDetails = ({navigation, route}) => {
               }}>
               <Image
                 source={require('../../../assets/Images/call.png')}
-                style={{height: 16, width: 16}}
+                style={{ height: 16, width: 16 }}
               />
               <Typography
                 style={{
@@ -374,17 +413,17 @@ const ProviderDetails = ({navigation, route}) => {
             </TouchableOpacity>
           </View>
         </View>
-        <View style={[styles.section, {marginTop: 0}]}>
+        <View style={[styles.section, { marginTop: 0 }]}>
           <Typography style={styles.sectionTitle}>Address</Typography>
           <Typography style={styles.sectionText}>
             {apiData?.exact_location || apiData?.location_area_served}
           </Typography>
           <TouchableOpacity
-            style={{flexDirection: 'row', alignItems: 'center', marginTop: 5}}
+            style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}
             onPress={() => openMapWithDirections(apiData?.exact_location)}>
             <Image
               source={require('../../../assets/Images/location.png')}
-              style={{height: 16, width: 16, tintColor: COLOR.primary}}
+              style={{ height: 16, width: 16, tintColor: COLOR.primary }}
             />
             <Typography
               style={[
@@ -401,15 +440,17 @@ const ProviderDetails = ({navigation, route}) => {
           </TouchableOpacity>
         </View>
         {/* About */}
-        <View style={[styles.section, {marginTop: 0}]}>
+        <View style={[styles.section, { marginTop: 0 }]}>
           <Typography style={styles.sectionTitle}>About</Typography>
           <Typography style={styles.sectionText}>
             {apiData?.business_description}
           </Typography>
         </View>
-        <CouponCarousel promoData={promoData} />
+        <CouponCarousel title={"Discount Available for you"} promoData={promoData} cashbackPercentage={apiData?.is_cashback} />
+
+        {/* <CouponCarousel title={"Coupons Available for you"} promoData={promoData} cashbackPercentage={apiData?.is_cashback} /> */}
         {/* Tabs */}
-        <View style={{paddingHorizontal: 20}}>
+        <View style={{ paddingHorizontal: 20 }}>
           <Typography style={styles.title}>Amenities</Typography>
           <View style={styles.amenityGrid}>
             {amenities.map(item => (
@@ -450,7 +491,7 @@ const ProviderDetails = ({navigation, route}) => {
         {/* Tab Content */}
         {activeTab === 'Services' && (
           <View style={styles.section}>
-            <Typography style={styles.sectionTitle}>Categories</Typography>
+            {/* <Typography style={styles.sectionTitle}>Categories</Typography> */}
             <View style={styles.categoryWrap}>
               {apiData?.sub_services?.length > 0 ? (
                 apiData.sub_services.map(sub => (
@@ -466,10 +507,11 @@ const ProviderDetails = ({navigation, route}) => {
                     }
                     style={styles.categoryCard}>
                     <Image
-                      source={{uri: sub.image_url}}
+                      source={{ uri: sub.image_url }}
                       style={styles.categoryImage}
+                    // resizeMode="stretch"
                     />
-                    <Text style={styles.categoryText}>{sub.name}</Text>
+                    <Text style={styles.categoryText} numberOfLines={2}>{sub.name}</Text>
                   </TouchableOpacity>
                 ))
               ) : (
@@ -483,7 +525,7 @@ const ProviderDetails = ({navigation, route}) => {
 
         {activeTab === 'Photos' && (
           <View style={styles.section}>
-            <Typography style={[styles.sectionTitle, {marginBottom: 0}]}>
+            <Typography style={[styles.sectionTitle, { marginBottom: 0 }]}>
               Gallery
             </Typography>
             <FlatList
@@ -491,8 +533,8 @@ const ProviderDetails = ({navigation, route}) => {
               keyExtractor={(item, index) => index.toString()}
               numColumns={3}
               showsHorizontalScrollIndicator={false}
-              renderItem={({item}) => (
-                <Image source={{uri: item}} style={styles.photo} />
+              renderItem={({ item }) => (
+                <Image source={{ uri: item }} style={styles.photo} />
               )}
             />
           </View>
@@ -521,12 +563,12 @@ const ProviderDetails = ({navigation, route}) => {
                       justifyContent: 'space-between',
                       alignItems: 'center',
                     }}>
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                       <Image
                         source={require('../../../assets/Images/userprofile.png')}
-                        style={{height: 14, width: 14}}
+                        style={{ height: 14, width: 14 }}
                       />
-                      <Text style={[styles.reviewUser, {marginLeft: 5}]}>
+                      <Text style={[styles.reviewUser, { marginLeft: 5 }]}>
                         Priya Sharma
                       </Text>
                     </View>
@@ -571,7 +613,7 @@ const ProviderDetails = ({navigation, route}) => {
       </ScrollView>
       <SimpleModal
         visible={isModalVisible}
-        modalContainer={{padding: 0}}
+        modalContainer={{ padding: 0 }}
         onClose={() => setModalVisible(false)}>
         <View>
           <View
@@ -589,18 +631,18 @@ const ProviderDetails = ({navigation, route}) => {
                 style={{height: 24, width: 24}}
               />
             </TouchableOpacity> */}
-            <View style={{alignItems: 'center'}}>
-              <Text style={{fontSize: 16, fontWeight: '500'}}>Timings</Text>
-              <Text style={{fontSize: 16, marginTop: 5, color: COLOR.white}}>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: 16, fontWeight: '500' }}>Timings</Text>
+              <Text style={{ fontSize: 16, marginTop: 5, color: COLOR.white }}>
                 All Timings Are In IST
               </Text>
             </View>
           </View>
-          <View style={{padding: 10}}>
+          <View style={{ padding: 10 }}>
             <FlatList
               data={daysData}
               keyExtractor={item => item.day}
-              renderItem={({item, index}) => (
+              renderItem={({ item, index }) => (
                 <View style={[styles.row]}>
                   <Text
                     style={[
@@ -705,21 +747,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginTop: 10,
+    // alignItems: "center",
+    // alignSelf: "center",
+    // justifyContent: "center"
   },
   categoryCard: {
-    width: '20%',
+    width: '21%',
     backgroundColor: '#f9f9f9',
     padding: 8,
     paddingHorizontal: 5,
     margin: 5,
     borderRadius: 10,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   categoryImage: {
-    width: 20,
-    height: 20,
+    width: 50,
+    height: 50,
     marginBottom: 6,
+    borderRadius: 10
   },
   categoryText: {
     fontSize: 11,

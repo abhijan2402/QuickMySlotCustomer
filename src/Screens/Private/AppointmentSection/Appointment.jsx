@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -7,18 +7,18 @@ import {
   Image,
 } from 'react-native';
 import HomeHeader from '../../../Components/HomeHeader';
-import {COLOR} from '../../../Constants/Colors';
-import {Typography} from '../../../Components/UI/Typography';
-import {images} from '../../../Components/UI/images';
-import {windowHeight} from '../../../Constants/Dimensions';
-import {Font} from '../../../Constants/Font';
-import {useIsFocused} from '@react-navigation/native';
-import {GET_WITH_TOKEN} from '../../../Backend/Api';
-import {GET_BOOKING_LIST} from '../../../Constants/ApiRoute';
+import { COLOR } from '../../../Constants/Colors';
+import { Typography } from '../../../Components/UI/Typography';
+import { images } from '../../../Components/UI/images';
+import { windowHeight } from '../../../Constants/Dimensions';
+import { Font } from '../../../Constants/Font';
+import { useIsFocused } from '@react-navigation/native';
+import { GET_WITH_TOKEN } from '../../../Backend/Api';
+import { GET_BOOKING_LIST } from '../../../Constants/ApiRoute';
 import moment from 'moment';
-import {cleanImageUrl} from '../../../Backend/Utility';
+import { cleanImageUrl } from '../../../Backend/Utility';
 
-const Appointment = ({navigation}) => {
+const Appointment = ({ navigation }) => {
   const [selectedFilter, setSelectedFilter] = useState('All');
   const isFocused = useIsFocused();
   const [loading, setLoading] = useState(false);
@@ -55,10 +55,10 @@ const Appointment = ({navigation}) => {
   };
 
   const filters = [
-    {label: 'All'},
-    {label: 'pending'},
-    {label: 'accepted'},
-    {label: 'cancelled'},
+    { label: 'All' },
+    { label: 'pending' },
+    { label: 'accepted' },
+    { label: 'rejected' },
   ];
 
   const getStatusColor = status => {
@@ -67,24 +67,21 @@ const Appointment = ({navigation}) => {
         return '#FFD700';
       case 'accepted':
         return '#4CAF50';
-      case 'cancelled':
+      case 'rejected':
         return '#E53935';
       default:
         return '#555';
     }
   };
 
-  const renderAppointment = ({item}) => {
+  const renderAppointment = ({ item }) => {
     const status = getStatus(item);
     const timeKeys = Object.keys(item?.schedule_time);
-    const dateKeys = moment(
-      Object.values(item?.schedule_time || {})[0],
-      'DD-MM-YYYY',
-    ).format('DD MMM, YYYY');
+    const dateKeys = Object?.values(item?.schedule_time || {})[0];
     return (
       <TouchableOpacity
         onPress={() =>
-          navigation.navigate('AppointmentDetail', {appointment: item})
+          navigation.navigate('AppointmentDetail', { appointment: item })
         }
         style={styles.card}>
         <View style={styles.topRow}>
@@ -92,20 +89,20 @@ const Appointment = ({navigation}) => {
             <Image
               source={{
                 uri:
-                  cleanImageUrl(item?.vendor?.image || item?.service?.image) ||
+                  cleanImageUrl(item?.vendor?.portfolio_images[0]?.image_url || item?.service?.image) ||
                   'https://via.placeholder.com/55',
               }}
               style={styles.serviceImage}
             />
-            <View style={{marginLeft: 12, flex: 1}}>
+            <View style={{ marginLeft: 12, flex: 1 }}>
               <Typography
                 font={Font.medium}
                 style={styles.title}
                 numberOfLines={1}>
-                {item?.service?.name || 'Service'}
+                {item?.vendor?.business_name || 'Service'}
               </Typography>
               <Typography style={styles.salonName}>
-                {item?.vendor?.name || 'Vendor'}
+                {item?.services[0]?.name || 'Vendor'}
               </Typography>
             </View>
           </View>
@@ -141,14 +138,14 @@ const Appointment = ({navigation}) => {
           <Typography style={styles.salonService}>
             {item.service_description || 'Service description'}
           </Typography>
-          <Typography style={styles.amount}>₹{item.amount || '0'}</Typography>
+          <Typography style={styles.amount}>₹{item.final_amount || '0'}</Typography>
         </View>
         <View style={styles.infoRow}>
-          <Image source={images.calendar} style={{height: 16, width: 16}} />
-          <Typography style={styles.dateText}>{dateKeys}</Typography>
+          <Image source={images.calendar} style={{ height: 16, width: 16 }} />
+          <Typography style={styles.dateText}>{moment(dateKeys).format("DD MMM, YYYY")}</Typography>
         </View>
         <View style={styles.infoRow}>
-          <Image source={images.clock} style={{height: 16, width: 16}} />
+          <Image source={images.clock} style={{ height: 16, width: 16 }} />
           <Typography style={styles.dateText}>
             {timeKeys?.map((v, index) => {
               return (
@@ -161,7 +158,7 @@ const Appointment = ({navigation}) => {
         <View style={styles.infoSection}>
           {item.vendor?.exact_location && (
             <View style={styles.infoRow}>
-              <Image source={images.mark} style={{height: 16, width: 16}} />
+              <Image source={images.mark} style={{ height: 16, width: 16 }} />
               <Typography style={styles.details} numberOfLines={2}>
                 {item.vendor?.exact_location || 'Address not available'}
               </Typography>
@@ -169,7 +166,7 @@ const Appointment = ({navigation}) => {
           )}
           {item.vendor?.phone_number && (
             <View style={styles.infoRow}>
-              <Image source={images.call} style={{height: 14, width: 14}} />
+              <Image source={images.call} style={{ height: 14, width: 14 }} />
               <Typography style={styles.details}>
                 {item.vendor?.phone_number || 'Contact not available'}
               </Typography>
@@ -185,7 +182,7 @@ const Appointment = ({navigation}) => {
     selectedFilter === 'All'
       ? appointments
       : appointments.filter(item => getStatus(item) === selectedFilter);
-  console.log(appointments, 'appointmentsappointments--->');
+  // console.log(appointments, 'appointmentsappointments--->');
   return (
     <View style={styles.container}>
       <HomeHeader
@@ -228,7 +225,7 @@ const Appointment = ({navigation}) => {
         data={filteredAppointments}
         keyExtractor={item => item.id.toString()}
         renderItem={renderAppointment}
-        contentContainerStyle={{paddingBottom: 20}}
+        contentContainerStyle={{ paddingBottom: 20 }}
         refreshing={loading}
         onRefresh={getBookingList}
         ListEmptyComponent={() => {
@@ -252,7 +249,7 @@ const Appointment = ({navigation}) => {
                 marginTop: windowHeight * 0.3,
               }}>
               <Image source={images.noData} />
-              <Typography size={20} fontWeight={'500'} style={{marginTop: 10}}>
+              <Typography size={20} fontWeight={'500'} style={{ marginTop: 10 }}>
                 No Appointments found
               </Typography>
             </View>
@@ -297,7 +294,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.08,
     shadowRadius: 6,
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     elevation: 3,
   },
   topRow: {

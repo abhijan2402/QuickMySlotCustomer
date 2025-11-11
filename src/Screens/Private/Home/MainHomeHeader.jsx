@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,25 +13,25 @@ import {
   Dimensions,
 } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
-import {useIsFocused, useNavigation} from '@react-navigation/native';
-import {COLOR} from '../../../Constants/Colors';
-import {images} from '../../../Components/UI/images';
-import {Typography} from '../../../Components/UI/Typography';
-import {Font} from '../../../Constants/Font';
-import {GOOGLE_API} from '../../../Backend/Utility';
-import {useDispatch, useSelector} from 'react-redux';
-import {currentLocation} from '../../../Redux/action';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
+import { COLOR } from '../../../Constants/Colors';
+import { images } from '../../../Components/UI/images';
+import { Typography } from '../../../Components/UI/Typography';
+import { Font } from '../../../Constants/Font';
+import { GOOGLE_API } from '../../../Backend/Utility';
+import { useDispatch, useSelector } from 'react-redux';
+import { currentLocation } from '../../../Redux/action';
 import SimpleModal from '../../../Components/UI/SimpleModal';
-import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const MainHomeHeader = () => {
   const navigation = useNavigation();
   const userdata = useSelector(store => store.userDetails);
   const storedLocation = useSelector(store => store.currentLocation);
 
-  console.log(userdata, 'userdatauserdatauserdata');
+  // console.log(userdata, 'userdatauserdatauserdata');
 
   const [location, setLocation] = useState('Getting location...');
   const [isLoading, setIsLoading] = useState(false);
@@ -121,7 +121,7 @@ const MainHomeHeader = () => {
       });
 
       dispatch(
-        currentLocation({address: address, coords: locationData.coords}),
+        currentLocation({ address: address, coords: locationData.coords }),
       );
     } catch (error) {
       console.log(error, 'error----->>');
@@ -142,7 +142,7 @@ const MainHomeHeader = () => {
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
           query,
-        )}&key=${GOOGLE_API}&components=country:us`, // Adjust country code as needed
+        )}&key=${GOOGLE_API}&components=country:in`, // Adjust country code as needed
       );
       const data = await response.json();
       if (data.predictions) {
@@ -161,7 +161,7 @@ const MainHomeHeader = () => {
       );
       const data = await response.json();
       if (data.result && data.result.geometry) {
-        const {location} = data.result.geometry;
+        const { location } = data.result.geometry;
         setMapRegion({
           latitude: location.lat,
           longitude: location.lng,
@@ -185,8 +185,8 @@ const MainHomeHeader = () => {
   };
 
   const handleMarkerDragEnd = e => {
-    const {latitude, longitude} = e.nativeEvent.coordinate;
-    setSelectedLocation({latitude, longitude});
+    const { latitude, longitude } = e.nativeEvent.coordinate;
+    setSelectedLocation({ latitude, longitude });
     updateAddressFromCoordinates(latitude, longitude);
   };
 
@@ -255,7 +255,7 @@ const MainHomeHeader = () => {
         disabled={isLoading}>
         <Image
           source={images.mark}
-          style={[styles.icon, {tintColor: COLOR.primary}]}
+          style={[styles.icon, { tintColor: COLOR.primary }]}
         />
         <View style={styles.locationTextContainer}>
           <Text style={styles.locationTitle} numberOfLines={1}>
@@ -291,7 +291,7 @@ const MainHomeHeader = () => {
             }}>
             <Image
               source={images.offer}
-              style={[styles.icon, {marginRight: 10}]}
+              style={[styles.icon, { marginRight: 10 }]}
             />
             <Typography>Offers</Typography>
           </View>
@@ -304,12 +304,12 @@ const MainHomeHeader = () => {
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/2529/2529521.png',
             }}
-            style={[styles.icon, {marginRight: 10, tintColor: COLOR.primary}]}
+            style={[styles.icon, { marginRight: 10, tintColor: COLOR.primary }]}
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('EditProfile')}>
           <Image
-            source={userdata?.image ? {uri: userdata?.image} : images.profile}
+            source={userdata?.image ? { uri: userdata?.image } : images.profile}
             style={[
               styles.icon,
               {
@@ -327,16 +327,16 @@ const MainHomeHeader = () => {
         modalContainer={{
           width: '90%',
         }}
-        //   onClose={() => setModalVisible(false)}
+      //   onClose={() => setModalVisible(false)}
       >
         <View style={styles.modalContent}>
-          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={styles.modalTitle}>Select Location</Text>
             <TouchableOpacity
               onPress={() => {
                 setModalVisible(false);
               }}>
-              <Image source={images.close} style={{height: 20, width: 20}} />
+              <Image source={images.close} style={{ height: 20, width: 20 }} />
             </TouchableOpacity>
           </View>
           {/* Search Input */}
@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     backgroundColor: '#fff',
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 1},
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 1.5,
   },

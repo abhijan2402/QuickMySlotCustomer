@@ -1,31 +1,32 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
   TouchableOpacity,
   ScrollView,
   Image,
+  Linking,
 } from 'react-native';
 import HomeHeader from '../../../Components/HomeHeader';
-import {COLOR} from '../../../Constants/Colors';
-import {handleCall, handleOpenMap} from '../../../Constants/Utils';
-import {Typography} from '../../../Components/UI/Typography';
+import { COLOR } from '../../../Constants/Colors';
+import { handleCall, handleOpenMap } from '../../../Constants/Utils';
+import { Typography } from '../../../Components/UI/Typography';
 import ConfirmModal from '../../../Components/UI/ConfirmModel';
 import Button from '../../../Components/UI/Button';
-import {Font} from '../../../Constants/Font';
-import {useIsFocused} from '@react-navigation/native';
-import {GET_WITH_TOKEN, POST_WITH_TOKEN} from '../../../Backend/Api';
-import {CANCEL_BOOKING, GET_BOOKING_DETAILS} from '../../../Constants/ApiRoute';
-import {images} from '../../../Components/UI/images';
+import { Font } from '../../../Constants/Font';
+import { useIsFocused } from '@react-navigation/native';
+import { GET_WITH_TOKEN, POST_WITH_TOKEN } from '../../../Backend/Api';
+import { CANCEL_BOOKING, GET_BOOKING_DETAILS } from '../../../Constants/ApiRoute';
+import { images } from '../../../Components/UI/images';
 import moment from 'moment';
-import {cleanImageUrl} from '../../../Backend/Utility';
+import { cleanImageUrl } from '../../../Backend/Utility';
 
-const AppointmentDetail = ({route, navigation}) => {
+const AppointmentDetail = ({ route, navigation }) => {
   const [cancelAppointment, setCancelAppointment] = useState(false);
   const isFocused = useIsFocused();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(false);
-  console.log(data, 'data--->');
+  // console.log(data, 'data--->');
 
   const id = route?.params?.appointment?.id || '';
   useEffect(() => {
@@ -39,7 +40,7 @@ const AppointmentDetail = ({route, navigation}) => {
     GET_WITH_TOKEN(
       GET_BOOKING_DETAILS + id,
       success => {
-        console.log(success, 'booking details');
+        console.log(success?.data, 'booking details');
         setData(success?.data);
         setLoading(false);
       },
@@ -76,12 +77,11 @@ const AppointmentDetail = ({route, navigation}) => {
   };
 
   const [time, date] = Object.entries(data?.schedule_time ?? {})[0] || [];
-  const dateKeys = moment(
+  const dateKeys =
     Object.values(
       data?.schedule_time || route?.params?.appointment?.schedule_time || {},
-    )[0],
-    'DD-MM-YYYY',
-  ).format('DD MMM, YYYY');
+    )[0]
+
   const timeKeys = Object.keys(
     data?.schedule_time || route?.params?.appointment?.schedule_time,
   );
@@ -103,8 +103,8 @@ const AppointmentDetail = ({route, navigation}) => {
     date: 'June 20, 2025',
     time: '2:00 PM',
     services: [
-      {name: 'Haircut', price: 400},
-      {name: 'Hair Wash', price: 200},
+      { name: 'Haircut', price: 400 },
+      { name: 'Hair Wash', price: 200 },
     ],
     subTotal: 600,
     tax: 60,
@@ -121,24 +121,24 @@ const AppointmentDetail = ({route, navigation}) => {
       />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{paddingHorizontal: 5, paddingBottom: 10}}>
+        contentContainerStyle={{ paddingHorizontal: 5, paddingBottom: 10 }}>
         {/* Shop Info */}
         <View style={styles.card}>
           <Typography style={styles.sectionTitle}>Shop Details</Typography>
           <Image
             source={{
               uri:
-                cleanImageUrl(data?.vendor?.image) ||
+                cleanImageUrl(data?.vendor?.portfolio_images[0]?.image_url) ||
                 cleanImageUrl(data?.service?.image),
             }}
             style={styles.shopImg}
           />
-          <Typography style={styles.shopName}>{data?.vendor?.name}</Typography>
+          <Typography style={styles.shopName}>{data?.vendor?.business_name}</Typography>
           <TouchableOpacity onPress={() => handleOpenMap('')}>
             <View style={styles.infoRow}>
               <Image
                 source={images.mark}
-                style={{height: 16, width: 16, marginTop: 5}}
+                style={{ height: 16, width: 16, marginTop: 5 }}
               />
               <Typography style={styles.details} numberOfLines={2}>
                 {data.vendor?.exact_location || 'Address not available'}
@@ -149,7 +149,7 @@ const AppointmentDetail = ({route, navigation}) => {
             <View style={styles.infoRow}>
               <Image
                 source={images.call}
-                style={{height: 16, width: 16, marginTop: 5}}
+                style={{ height: 16, width: 16 }}
               />
               <Typography style={styles.details} numberOfLines={2}>
                 {data.vendor?.phone_number || 'Address not available'}
@@ -158,7 +158,7 @@ const AppointmentDetail = ({route, navigation}) => {
           </TouchableOpacity>
           {/* <TouchableOpacity style={styles.chatBtn}>
             <Typography style={styles.chatBtnText}>💬 Chat</Typography>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
           <Button
             title={'Chat'}
             containerStyle={{
@@ -170,7 +170,7 @@ const AppointmentDetail = ({route, navigation}) => {
               marginBottom: 0,
             }}
             titleColor={COLOR.primary}
-          />
+          /> */}
         </View>
 
         {/* Customer Info */}
@@ -181,7 +181,7 @@ const AppointmentDetail = ({route, navigation}) => {
             <View style={styles.infoRow}>
               <Image
                 source={images.call}
-                style={{height: 16, width: 16, marginTop: 5}}
+                style={{ height: 16, width: 16 }}
               />
               <Typography style={styles.details} numberOfLines={2}>
                 {data.vendor?.phone_number || 'Address not available'}
@@ -192,7 +192,7 @@ const AppointmentDetail = ({route, navigation}) => {
             <View style={styles.infoRow}>
               <Image
                 source={images.mark}
-                style={{height: 16, width: 16, marginTop: 5}}
+                style={{ height: 16, width: 16, marginTop: 5 }}
               />
               <Typography style={styles.details} numberOfLines={2}>
                 {data?.customer?.address || 'Address not available'}
@@ -204,10 +204,10 @@ const AppointmentDetail = ({route, navigation}) => {
         {/* Service Date/Time */}
         <View style={styles.card}>
           <Typography style={styles.sectionTitle}>Service Schedule</Typography>
-          <Typography style={[styles.text, {marginTop: 5}]}>
-            📅 {dateKeys}
+          <Typography style={[styles.text, { marginTop: 5 }]}>
+            📅 {moment(dateKeys).format("DD MMM, YYYY")}
           </Typography>
-          <Typography style={[styles.text, {marginTop: 5}]}>
+          <Typography style={[styles.text, { marginTop: 5 }]}>
             ⏰{' '}
             {timeKeys?.map((v, index) => {
               return (
@@ -221,34 +221,47 @@ const AppointmentDetail = ({route, navigation}) => {
         {/* Services Breakdown */}
         <View style={styles.card}>
           <Typography style={styles.sectionTitle}>Services</Typography>
-          {/* {appointment.services.map((service, index) => ( */}
-          <View style={styles.serviceRow}>
-            <Typography style={styles.text}>{data?.service?.name}</Typography>
-            <Typography style={styles.text}>₹{data?.service?.price}</Typography>
-          </View>
-          <Typography>{data?.note}</Typography>
-          {/* ))} */}
+
+          {Array.isArray(data?.services) && (
+            data.services.map((service, index) => (
+              <View key={index} style={styles.serviceRow}>
+                <Typography style={styles.text}>{service?.name}</Typography>
+                <Typography style={styles.text}>₹{service?.price}</Typography>
+              </View>
+            ))
+          )}
+
+          {data?.note ? <Typography style={{ borderTopWidth: 1, borderTopColor: COLOR.primary }}>Note: {data.note}</Typography> : null}
         </View>
+
 
         {/* Price Details */}
         <View style={styles.priceCard}>
           <Typography style={styles.priceTitle}>Price Details</Typography>
           <View style={styles.serviceRow}>
             <Typography style={styles.text}>Sub Total</Typography>
-            <Typography style={styles.text}>₹{data?.amount}</Typography>
+            <Typography style={styles.text}>₹{data?.calculation_breakdown?.subtotal}</Typography>
           </View>
+
+          {
+            data?.gst_amount != "0.00" &&
+            <View style={styles.serviceRow}>
+              <Typography style={styles.text}>Taxes (GST)</Typography>
+              <Typography style={styles.text}>₹{data?.tax}</Typography>
+            </View>
+          }
           <View style={styles.serviceRow}>
-            <Typography style={styles.text}>Taxes (GST)</Typography>
-            <Typography style={styles.text}>₹{data?.tax}</Typography>
+            <Typography style={styles.text}>Convenience fee</Typography>
+            <Typography style={styles.text}>₹{data?.convenience_fee}</Typography>
           </View>
           <View style={styles.serviceRow}>
             <Typography style={styles.text}>Platform Fee</Typography>
-            <Typography style={styles.text}>₹{data.platform_fee}</Typography>
+            <Typography style={styles.text}>₹{data?.calculation_breakdown?.platform_fee}</Typography>
           </View>
           <View style={styles.divider} />
           <View style={styles.serviceRow}>
             <Typography style={styles.grandTotal}>Grand Total</Typography>
-            <Typography style={styles.grandTotal}>₹{grandTotal}</Typography>
+            <Typography style={styles.grandTotal}>₹{data?.final_amount}</Typography>
           </View>
         </View>
 
@@ -271,6 +284,18 @@ const AppointmentDetail = ({route, navigation}) => {
             borderColor: COLOR.red,
             backgroundColor: 'white',
             marginTop: 20,
+          }}
+        />
+
+        <Button
+          onPress={() => Linking.openURL(data?.invoice_pdf)}
+          title={'Download Invoice'}
+          titleColor={COLOR.white}
+          containerStyle={{
+            borderWidth: 1,
+            borderColor: COLOR.red,
+            backgroundColor: COLOR.primary,
+            marginTop: 10,
           }}
         />
       </ScrollView>
@@ -305,7 +330,7 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
     shadowColor: '#000',
     shadowOpacity: 0.05,
-    shadowOffset: {width: 0, height: 1},
+    shadowOffset: { width: 0, height: 1 },
     shadowRadius: 2,
     elevation: 2,
   },

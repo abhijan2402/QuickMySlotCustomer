@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Image,
@@ -9,11 +9,11 @@ import {
   FlatList,
 } from 'react-native';
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
-const ImageSwiper = ({data}) => {
-  console.log(data, 'data in image swiper');
-  
+const ImageSwiper = ({ data }) => {
+  // console.log(data, 'data in image swiper');
+
   const originalImages = [...data
     // 'https://images.pexels.com/photos/3058864/pexels-photo-3058864.jpeg?auto=compress&cs=tinysrgb&w=600',
     // 'https://images.pexels.com/photos/3992875/pexels-photo-3992875.jpeg?auto=compress&cs=tinysrgb&w=600',
@@ -23,6 +23,7 @@ const ImageSwiper = ({data}) => {
 
   // Duplicate list for looping
   const images = [...originalImages, ...originalImages];
+  // console.log(images, "IMAGESSSSSS");
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -46,7 +47,7 @@ const ImageSwiper = ({data}) => {
       useNativeDriver: false,
     });
 
-    progressAnim.current.start(({finished}) => {
+    progressAnim.current.start(({ finished }) => {
       if (finished) {
         let nextIndex = (currentIndex + 1) % originalImages?.length;
         nextIndex;
@@ -81,16 +82,16 @@ const ImageSwiper = ({data}) => {
     }
   }, [currentIndex]);
 
-  const renderItem = ({item}) => (
+  const renderItem = ({ item }) => (
     <View style={styles.imageContainer}>
       <View style={styles.ratingOverlay}>
-        <Image
+        {/* <Image
           source={require('../../../assets/Images/star.png')}
           style={styles.starIcon}
-        />
-        <Text style={styles.ratingText}>(4.6)</Text>
+        /> */}
+        {/* <Text style={styles.ratingText}>(4.6)</Text> */}
       </View>
-      <Image source={{uri: item}} style={styles.mainImage} />
+      <Image source={{ uri: item?.image_url }} style={styles.mainImage} />
     </View>
   );
 
@@ -115,7 +116,7 @@ const ImageSwiper = ({data}) => {
                     ]}
                   />
                 ) : i < currentIndex ? (
-                  <View style={[styles.progressBarFill, {width: '100%'}]} />
+                  <View style={[styles.progressBarFill, { width: '100%' }]} />
                 ) : null}
               </View>
             );
@@ -136,8 +137,8 @@ const ImageSwiper = ({data}) => {
         scrollEnabled={false}
         showsHorizontalScrollIndicator={false}
         onScroll={Animated.event(
-          [{nativeEvent: {contentOffset: {x: scrollX}}}],
-          {useNativeDriver: true},
+          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+          { useNativeDriver: true },
         )}
         onMomentumScrollEnd={event => {
           const newIndex = Math.floor(

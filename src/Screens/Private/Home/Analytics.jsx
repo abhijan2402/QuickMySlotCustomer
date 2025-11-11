@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -6,18 +6,18 @@ import {
   Dimensions,
   ScrollView,
 } from 'react-native';
-import {COLOR} from '../../../Constants/Colors';
+import { COLOR } from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
-import {Typography} from '../../../Components/UI/Typography';
-import {Font} from '../../../Constants/Font';
-import {useIsFocused} from '@react-navigation/native';
-import {GET_ANALYTICS} from '../../../Constants/ApiRoute';
-import {GET_WITH_TOKEN} from '../../../Backend/Api';
-import {CURRENCY} from '../../../Backend/Utility';
+import { Typography } from '../../../Components/UI/Typography';
+import { Font } from '../../../Constants/Font';
+import { useIsFocused } from '@react-navigation/native';
+import { GET_ANALYTICS } from '../../../Constants/ApiRoute';
+import { GET_WITH_TOKEN } from '../../../Backend/Api';
+import { CURRENCY } from '../../../Backend/Utility';
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
-const MyAnalytics = ({navigation}) => {
+const MyAnalytics = ({ navigation }) => {
   const [data, setData] = useState();
   const isFocused = useIsFocused();
   const [loading, setLoading] = useState(false);
@@ -56,7 +56,7 @@ const MyAnalytics = ({navigation}) => {
       />
 
       <ScrollView
-        contentContainerStyle={{paddingHorizontal: 10, paddingVertical: 15}}>
+        contentContainerStyle={{ paddingHorizontal: 10, paddingVertical: 15 }}>
         {/* Spending & Savings */}
         <View style={styles.card}>
           <Typography style={styles.sectionTitle}>
@@ -67,26 +67,26 @@ const MyAnalytics = ({navigation}) => {
             <View style={styles.box}>
               <Typography style={styles.amount}>
                 {CURRENCY}
-                {data?.spend_this_month || '5000.00'}
+                {data?.spend_this_month || '0.00'}
               </Typography>
               <Typography style={styles.label}>Spent This Month</Typography>
             </View>
             <View style={styles.box}>
               <Typography style={styles.amount}>
                 {CURRENCY}
-                {data?.saved_this_month || '2050.00'}
+                {data?.saved_this_month || '0.00'}
               </Typography>
               <Typography style={styles.label}>Saved This Month</Typography>
             </View>
             <View style={styles.box}>
               <Typography style={styles.amount}>
-                {data?.total_bookings || "3"}
+                {data?.total_bookings || "0"}
               </Typography>
               <Typography style={styles.label}>Total Bookings</Typography>
             </View>
             <View style={styles.box}>
               <Typography style={styles.amount}>
-                {data?.favorite_providers || '4'}
+                {data?.favorite_providers || '0'}
               </Typography>
               <Typography style={styles.label}>Favorite Providers</Typography>
             </View>
@@ -96,7 +96,7 @@ const MyAnalytics = ({navigation}) => {
         <View style={styles.cashbackCard}>
           <Typography style={styles.cashbackAmount}>
             {CURRENCY}
-            {data?.cashback_earned || '570.00'}
+            {data?.cashback_earned || '0.00'}
           </Typography>
           <Typography style={styles.cashbackText}>
             Cashback Earned This Month{'\n'}from wallet recharges and bookings!

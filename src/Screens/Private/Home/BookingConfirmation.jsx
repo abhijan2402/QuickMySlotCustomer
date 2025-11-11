@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -6,13 +6,13 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import {COLOR} from '../../../Constants/Colors';
+import { COLOR } from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
-import {Typography} from '../../../Components/UI/Typography';
+import { Typography } from '../../../Components/UI/Typography';
 import Button from '../../../Components/UI/Button';
-import {images} from '../../../Components/UI/images';
+import { images } from '../../../Components/UI/images';
 import ConfirmModal from '../../../Components/UI/ConfirmModel';
-import {handleCall, openMapWithDirections} from '../../../Constants/Utils';
+import { handleCall, openMapWithDirections } from '../../../Constants/Utils';
 import moment from 'moment';
 import {
   cleanImageUrl,
@@ -20,25 +20,23 @@ import {
   isShopOpen,
   ToastMsg,
 } from '../../../Backend/Utility';
-import {Font} from '../../../Constants/Font';
-import {CANCEL_BOOKING, GET_BOOKING_DETAILS} from '../../../Constants/ApiRoute';
-import {POST_WITH_TOKEN} from '../../../Backend/Api';
+import { Font } from '../../../Constants/Font';
+import { CANCEL_BOOKING, GET_BOOKING_DETAILS } from '../../../Constants/ApiRoute';
+import { POST_WITH_TOKEN } from '../../../Backend/Api';
 
-const BookingConfirmation = ({navigation, route}) => {
+const BookingConfirmation = ({ navigation, route }) => {
   const [cancelBooking, setCancelBooking] = useState(false);
   const data = route?.params?.data;
-  console.log('Booking Data:--->>>>', data);
-  const timeKeys = Object.keys(data?.bookingData?.data?.schedule_time);
-  console.log('Time keys:', timeKeys); // Output: ["10:00", "10:30"]
+  // console.log('ABBBBB', data?.bookingData?.data?.booking?.id);
   const [shopStatus, setShopStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const [cancelAppointment, setCancelAppointment] = useState(false);
 
-  useEffect(() => {
-    if (data?.businessData) {
-      calculateShopStatus();
-    }
-  }, [data?.businessData]);
+  // useEffect(() => {
+  //   if (data?.businessData) {
+  //     calculateShopStatus();
+  //   }
+  // }, [data?.businessData]);
 
   const calculateShopStatus = () => {
     const status = isShopOpen(
@@ -52,10 +50,10 @@ const BookingConfirmation = ({navigation, route}) => {
   const CancelBooking = () => {
     setLoading(true);
     POST_WITH_TOKEN(
-      CANCEL_BOOKING + data?.bookingData?.data?.id,
+      CANCEL_BOOKING + data?.bookingData?.data?.booking?.id,
       {},
       success => {
-        console.log(success, 'dsaddasdadasdadsadas');
+        // console.log(success, 'dsaddasdadasdadsadas');
         setLoading(false);
         setCancelAppointment(false);
         navigation.replace('BottomNavigation');
@@ -84,7 +82,7 @@ const BookingConfirmation = ({navigation, route}) => {
         />
         <ScrollView
           showsVerticalScrollIndicator={false}
-          style={{marginHorizontal: 5}}>
+          style={{ marginHorizontal: 5 }}>
           <>
             {/* <View style={styles.noticeContainer}>
               <Image
@@ -159,11 +157,12 @@ const BookingConfirmation = ({navigation, route}) => {
               <Typography style={styles.salonName}>
                 {data?.businessData?.business_name}
               </Typography>
+
               <View style={styles.salonRow}>
-                <Image
-                  source={{uri: cleanImageUrl(data?.businessData?.image)}}
+                {/* <Image
+                  source={{ uri: cleanImageUrl(data?.businessData?.image) }}
                   style={styles.salonLogo}
-                />
+                /> */}
                 <Typography style={styles.salonAddress}>
                   {data?.businessData?.exact_location}
                 </Typography>
@@ -208,24 +207,23 @@ const BookingConfirmation = ({navigation, route}) => {
               <Typography style={styles.sectionTitle}>
                 Appointment Details
               </Typography>
-              <Typography style={styles.detailText}>
+              {/* <Typography style={styles.detailText}>
                 Appointment Id: {data?.bookingData?.data?.order_id}
-              </Typography>
+              </Typography> */}
               <Typography style={styles.detailText}>
                 Date:{' '}
                 {moment(
                   Object.values(
-                    data?.bookingData?.data?.schedule_time || {},
-                  )[0],
-                  'DD-MM-YYYY',
+                    data?.bookingData?.data?.booking?.schedule_time || {},
+                  )[0]
                 ).format('DD MMM, YYYY') || 'N/A'}
               </Typography>
-              <Typography style={styles.detailText}>
+              {/* <Typography style={styles.detailText}>
                 Time:{' '}
                 {timeKeys?.map(v => {
                   return moment(v, 'HH:mm').format('hh:mm A') + ', ';
                 })}
-              </Typography>
+              </Typography> */}
             </View>
 
             {/* Services Booked */}
@@ -233,24 +231,21 @@ const BookingConfirmation = ({navigation, route}) => {
               <Typography style={styles.sectionTitle}>
                 Services Booked
               </Typography>
-              {data?.selectedServices?.map((service, index) => (
-                <View style={styles.serviceRow}>
-                  <Image
-                    source={{
-                      uri: cleanImageUrl(service?.service?.image),
-                    }}
-                    style={styles.serviceIcon}
-                  />
-                  <View>
-                    <Typography style={styles.serviceName}>
-                      {service?.service?.name}
-                    </Typography>
-                    <Typography style={styles.serviceSubText}>
-                      {service?.service?.description}
-                    </Typography>
+              {data?.selectedServices?.map((service, index) => {
+                return (
+                  <View style={styles.serviceRow}>
+
+                    <View>
+                      <Typography style={styles.serviceName}>
+                        {service?.service?.name}
+                      </Typography>
+                      <Typography style={styles.serviceSubText}>
+                        {service?.service?.description}
+                      </Typography>
+                    </View>
                   </View>
-                </View>
-              ))}
+                )
+              })}
             </View>
 
             {/* Cancel & Reschedule */}
@@ -312,18 +307,18 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
   },
-  noticeIcon: {width: 28, height: 28, marginRight: 8},
-  noticeText: {flex: 1, color: '#d98c00', fontSize: 14},
+  noticeIcon: { width: 28, height: 28, marginRight: 8 },
+  noticeText: { flex: 1, color: '#d98c00', fontSize: 14 },
   section: {
     paddingVertical: 15,
     borderBottomWidth: 0.5,
     borderColor: '#ddd',
     paddingHorizontal: 5,
   },
-  sectionTitle: {fontSize: 16, fontWeight: 'bold', marginBottom: 8},
-  listItem: {fontSize: 14, color: '#444', marginVertical: 2},
-  salonName: {fontSize: 15, fontWeight: '600', marginBottom: 10},
-  salonRow: {flexDirection: 'row', alignItems: 'center'},
+  sectionTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 8 },
+  listItem: { fontSize: 14, color: '#444', marginVertical: 2 },
+  salonName: { fontSize: 15, fontWeight: '600', marginBottom: 10 },
+  salonRow: { flexDirection: 'row', alignItems: 'center' },
   salonLogo: {
     width: 80,
     height: '100%',
@@ -332,7 +327,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 10,
   },
-  salonAddress: {flex: 1, fontSize: 13, color: '#555'},
+  salonAddress: { flex: 1, fontSize: 13, color: '#555' },
   actionRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -342,9 +337,9 @@ const styles = StyleSheet.create({
     borderColor: COLOR?.primaryLight,
     borderRadius: 8,
   },
-  actionBtn: {alignItems: 'center'},
-  actionIcon: {width: 22, height: 22, marginBottom: 4},
-  actionText: {fontSize: 13, fontWeight: '500', marginTop: 2},
+  actionBtn: { alignItems: 'center' },
+  actionIcon: { width: 22, height: 22, marginBottom: 4 },
+  actionText: { fontSize: 13, fontWeight: '500', marginTop: 2 },
   callBtn: {
     borderWidth: 1,
     borderColor: COLOR.primary,
@@ -352,17 +347,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginTop: 15,
   },
-  callText: {textAlign: 'center', color: COLOR.primary, fontWeight: '600'},
-  callSubText: {textAlign: 'center', fontSize: 12, color: '#888'},
+  callText: { textAlign: 'center', color: COLOR.primary, fontWeight: '600' },
+  callSubText: { textAlign: 'center', fontSize: 12, color: '#888' },
   payBtn: {
     backgroundColor: COLOR.primary,
     padding: 15,
     borderRadius: 8,
     marginTop: 12,
   },
-  payText: {textAlign: 'center', color: '#fff', fontWeight: '600'},
-  detailText: {fontSize: 14, color: '#444', marginVertical: 3},
-  serviceRow: {flexDirection: 'row', alignItems: 'center', marginTop: 10},
+  payText: { textAlign: 'center', color: '#fff', fontWeight: '600' },
+  detailText: { fontSize: 14, color: '#444', marginVertical: 3 },
+  serviceRow: { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
   serviceIcon: {
     width: 40,
     height: 40,
@@ -370,8 +365,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderRadius: 8,
   },
-  serviceName: {fontSize: 15, fontWeight: '600'},
-  serviceSubText: {fontSize: 13, color: '#888', marginTop: 2},
+  serviceName: { fontSize: 15, fontWeight: '600' },
+  serviceSubText: { fontSize: 13, color: '#888', marginTop: 2 },
   footerRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -384,14 +379,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderRadius: 8,
   },
-  cancelText: {color: 'red', fontWeight: '600'},
+  cancelText: { color: 'red', fontWeight: '600' },
   rescheduleBtn: {
     backgroundColor: '#c9d8f5',
     paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 8,
   },
-  rescheduleText: {color: '#333', fontWeight: '600'},
+  rescheduleText: { color: '#333', fontWeight: '600' },
   closedBanner: {
     backgroundColor: '#fff3cd',
     borderColor: '#ffeaa7',

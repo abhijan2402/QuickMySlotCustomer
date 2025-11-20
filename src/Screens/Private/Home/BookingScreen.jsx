@@ -50,7 +50,7 @@ const BookingScreen = ({ navigation, route }) => {
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [dateStart, setDateStart] = useState(null);
   const { isKeyboardVisible } = useKeyboard();
-  const [showServices, setShowServices] = useState(false);
+  const [showServices, setShowServices] = useState(true);
   const [selectedOffer, setSelectedOffer] = useState('');
   const [times, setTimes] = useState([]);
   const [cartValue, setcartValue] = useState([])
@@ -392,10 +392,25 @@ const BookingScreen = ({ navigation, route }) => {
     }
   }, [isFocus])
 
+
+  useEffect(() => {
+    if (selectedOffer == null) {
+      console.log("JOOOOO");
+
+      getCart()
+    }
+  }, [selectedOffer])
+
+
   const getCart = () => {
+    const promoCode = selectedOffer?.promo_code
+      ? `?promo_code=${selectedOffer?.promo_code}`
+      : "";
+
     GET_WITH_TOKEN(
-      GET_CART,
+      `${GET_CART}${promoCode}`,
       success => {
+        console.log(success, "DATTATAT");
 
         const items = success?.data?.items || [];
         settotalItemsVal(success?.data?.total_price)
@@ -406,6 +421,7 @@ const BookingScreen = ({ navigation, route }) => {
         if (items?.length > 0 && items[0]?.service?.user) {
           vendorInfo = items[0].service.user;
         }
+
         setShopData(vendorInfo)
         const generatedSlots = generateTimeSlots(
           vendorInfo?.daily_start_time,
@@ -566,7 +582,7 @@ const BookingScreen = ({ navigation, route }) => {
           <TouchableOpacity
             onPress={() => {
               navigation.navigate('OffersScreen', {
-                businessId: businessData?.id,
+                businessId: shopData?.id,
               });
             }}
             style={styles.offerBtn}>
@@ -600,9 +616,13 @@ const BookingScreen = ({ navigation, route }) => {
                 </View>
               </View>
 
-              <View style={{ marginRight: 10 }}>
+              <TouchableOpacity style={{ marginRight: 10 }} onPress={() => {
+                setSelectedOffer(null)
+                // getCart()
+                getSelectedOffer(null);
+              }}>
                 <Image source={images.cross2} style={{ height: 14, width: 14 }} />
-              </View>
+              </TouchableOpacity>
             </View>
           )}
 
@@ -670,6 +690,7 @@ const BookingScreen = ({ navigation, route }) => {
                             style={{ height: 20, width: 20, marginBottom: 5 }}
                             tintColor={COLOR.primary}
                           />
+                          <Typography style={{ textTransform: "capitalize" }} size={9}>{service?.gender}</Typography>
                         </View>
 
                         {/* Right Content */}
@@ -739,17 +760,20 @@ const BookingScreen = ({ navigation, route }) => {
 
               </View>
             )}
+            {
+              console.log(Paymentbreakdown, "BRESLLALL")
 
+            }
             {/* Offer Applied */}
-            {selectedOffer?.amount > 0 && (
+            {Paymentbreakdown?.promo_discount_amount > 0 && (
               <View style={styles.offerAppliedRow}>
                 <Typography style={styles.offerAppliedText}>
                   Offer Applied
                 </Typography>
                 <Typography style={styles.offerCode}>
-                  {CURRENCY}
-                  {selectedOffer?.amount > 0
-                    ? Number(selectedOffer?.amount).toFixed(2)
+                  -{CURRENCY}
+                  {Paymentbreakdown?.promo_discount_amount > 0
+                    ? Number(Paymentbreakdown?.promo_discount_amount).toFixed(2)
                     : '0.00'}
                 </Typography>
               </View>

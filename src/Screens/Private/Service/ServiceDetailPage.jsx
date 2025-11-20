@@ -32,6 +32,8 @@ import { GET_WITH_TOKEN, POST_FORM_DATA, POST_WITH_TOKEN } from '../../../Backen
 import { Typography } from '../../../Components/UI/Typography';
 import moment from 'moment';
 import { cleanImageUrl } from '../../../Backend/Utility';
+import Divider from '../../../Components/Divider';
+import CartModal from '../../../Components/CartModal';
 
 const ProviderDetails = ({ navigation, route }) => {
   const [activeTab, setActiveTab] = useState('Services');
@@ -43,7 +45,8 @@ const ProviderDetails = ({ navigation, route }) => {
   const [promoData, setPromoData] = useState([]);
   const isFocused = useIsFocused();
   const id = route?.params?.id;
-
+  const km = route?.params?.km
+  const [category, setCategory] = useState(null)
   useEffect(() => {
     if (isFocused) {
       getPromo();
@@ -148,7 +151,7 @@ const ProviderDetails = ({ navigation, route }) => {
     { id: '1', name: 'Air Conditioned' },
     { id: '2', name: 'Wi-Fi' },
     { id: '3', name: 'Parking' },
-    { id: '4', name: 'Swimming Pool' },
+    { id: '4', name: 'Multiple Payment Option' },
     // Add more as needed
   ];
   const ShopFetch = () => {
@@ -156,7 +159,7 @@ const ProviderDetails = ({ navigation, route }) => {
     GET_WITH_TOKEN(
       VENDOR_DETAIL + `${id}`,
       success => {
-        console.log(success?.data, 'dsadsadewrewretrefcbfdgdf');
+        setCategory(success?.data?.service_category)
         setApiData(success?.data);
         setLoading(false);
       },
@@ -230,6 +233,12 @@ const ProviderDetails = ({ navigation, route }) => {
         {
           apiData?.portfolio_images &&
           <ImageSwiper data={apiData?.portfolio_images} />}
+
+        <View style={{ flexDirection: "row", alignItems: "center", position: "absolute", backgroundColor: COLOR.buttonDisabled, padding: 5, borderRadius: 5, right: 10, top: 15, paddingHorizontal: 10 }}>
+          <Typography size={14} style={{ marginRight: 5 }}>3.4</Typography>
+          <Image source={{ uri: "https://cdn-icons-png.flaticon.com/128/2107/2107957.png" }} style={{ width: 15, height: 15 }} />
+
+        </View>
         {/* Provider Info */}
         <View style={styles.infoContainer}>
           <View
@@ -378,7 +387,7 @@ const ProviderDetails = ({ navigation, route }) => {
                   marginBottom: 2,
                   fontFamily: Font.regular,
                 }}>
-                194.04 Kms
+                {km} Kms
               </Typography>
               <Image
                 source={require('../../../assets/Images/rightarrow.png')}
@@ -503,6 +512,7 @@ const ProviderDetails = ({ navigation, route }) => {
                         services: apiData.services,
                         subServicesId: sub.id,
                         apiData: apiData,
+                        category: category
                       })
                     }
                     style={styles.categoryCard}>
@@ -520,21 +530,89 @@ const ProviderDetails = ({ navigation, route }) => {
                 </Typography>
               )}
             </View>
+            <Divider />
+            <Typography style={[styles.sectionTitle, { marginBottom: 0 }]}>
+              Gallery
+            </Typography>
+            <FlatList
+              data={apiData?.portfolio_images}
+              keyExtractor={(item, index) => index.toString()}
+              numColumns={3}
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <Image source={{ uri: item?.image_url }} style={styles.photo} />
+              )}
+            />
+            <Divider />
+
+            <Typography style={styles.sectionTitle}>About Us</Typography>
+            <Typography style={styles.sectionText}>
+              {apiData?.business_description}
+            </Typography>
+            <Divider />
+
+            <Text style={styles.sectionTitle}>Customer Reviews</Text>
+            <FlatList
+              data={[1, 2]}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={() => (
+                <View style={styles.reviewCard}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Image
+                        source={require('../../../assets/Images/userprofile.png')}
+                        style={{ height: 14, width: 14 }}
+                      />
+                      <Text style={[styles.reviewUser, { marginLeft: 5 }]}>
+                        Priya Sharma
+                      </Text>
+                    </View>
+                    <View>
+                      <Text style={[styles.sectionText]}>17th Sep, 2025</Text>
+                    </View>
+                  </View>
+                  <FlatList
+                    data={[1, 2, 3, 4, 5]}
+                    keyExtractor={(item, index) => index.toString()}
+                    horizontal
+                    renderItem={() => (
+                      <Image
+                        source={require('../../../assets/Images/star.png')}
+                        style={{
+                          height: 14,
+                          width: 14,
+                          marginTop: 5,
+                          marginRight: 5,
+                        }}
+                      />
+                    )}
+                  />
+                  <Typography style={styles.reviewText}>
+                    Amazing service and very friendly staff! Highly recommend
+                    this salon.
+                  </Typography>
+                </View>
+              )}
+            />
           </View>
         )}
-
         {activeTab === 'Photos' && (
           <View style={styles.section}>
             <Typography style={[styles.sectionTitle, { marginBottom: 0 }]}>
               Gallery
             </Typography>
             <FlatList
-              data={[cleanImageUrl(apiData?.image)]}
+              data={apiData?.portfolio_images}
               keyExtractor={(item, index) => index.toString()}
               numColumns={3}
               showsHorizontalScrollIndicator={false}
               renderItem={({ item }) => (
-                <Image source={{ uri: item }} style={styles.photo} />
+                <Image source={{ uri: item?.image_url }} style={styles.photo} />
               )}
             />
           </View>
@@ -602,14 +680,7 @@ const ProviderDetails = ({ navigation, route }) => {
           </View>
         )}
 
-        {/* Checkout Button */}
-        {/* <CustomButton
-          title={'Checkout Services'}
-          onPress={() => {
-            navigation.navigate('BookingScreen');
-          }}
-          style={{margin: 15}}
-        /> */}
+
       </ScrollView>
       <SimpleModal
         visible={isModalVisible}
@@ -666,6 +737,8 @@ const ProviderDetails = ({ navigation, route }) => {
           </View>
         </View>
       </SimpleModal>
+      <View style={{ marginTop: 40 }}></View>
+      <CartModal />
     </View>
   );
 };
@@ -773,7 +846,7 @@ const styles = StyleSheet.create({
   },
   photo: {
     width: '31.5%',
-    height: 100,
+    height: 80,
     borderRadius: 8,
     marginRight: 10,
     marginTop: 10,

@@ -8,6 +8,7 @@ import {
   Text,
   FlatList,
 } from 'react-native';
+import { windowWidth } from '../../../Backend/Utility';
 
 const { width, height } = Dimensions.get('window');
 
@@ -173,12 +174,14 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width,
-    height: height / 3,
+    height: height / 3.8,
     position: 'relative',
   },
   mainImage: {
-    width: '100%',
+    width: windowWidth,
     height: '100%',
+    height: 230,
+
     resizeMode: 'cover',
   },
   pagination: {

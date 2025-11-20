@@ -96,21 +96,10 @@ const AvailOfferModal = ({ visible, onClose, Paymentbreakdown }) => {
                             </Text>
                             <View style={styles.paymentRow}>
                                 <Image
-                                    source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg' }}
+                                    source={{ uri: 'https://d6xcmfyh68wv8.cloudfront.net/newsroom-content/uploads/2024/05/Razorpay-Logo.jpg' }}
                                     style={styles.paymentIcon}
                                 />
-                                <Image
-                                    source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/5/5a/Google_Pay_Logo.svg' }}
-                                    style={styles.paymentIcon}
-                                />
-                                <Image
-                                    source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/0/09/Paytm_logo.png' }}
-                                    style={styles.paymentIcon}
-                                />
-                                <Image
-                                    source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/3/39/PhonePe_Logo.svg' }}
-                                    style={styles.paymentIcon}
-                                />
+
                             </View>
                         </View>
 
@@ -125,7 +114,7 @@ const AvailOfferModal = ({ visible, onClose, Paymentbreakdown }) => {
 
                             <View style={styles.billRow}>
                                 <Text style={styles.billSubText}>Discount Voucher</Text>
-                                <Text style={styles.billSubText}>- ₹{Paymentbreakdown?.discount_amount}</Text>
+                                <Text style={styles.billSubText}>- ₹{Paymentbreakdown?.promo_discount_amount}</Text>
                             </View>
 
                             <View style={styles.billRow}>
@@ -134,7 +123,7 @@ const AvailOfferModal = ({ visible, onClose, Paymentbreakdown }) => {
                             </View>
                             <View style={styles.billRow}>
                                 <Text style={styles.billSubText}>Convenience Fee </Text>
-                                <Text style={styles.billSubText}>- ₹{Paymentbreakdown?.convenience_fee}</Text>
+                                <Text style={styles.billSubText}>+ ₹{Paymentbreakdown?.convenience_fee}</Text>
                             </View>
                             <View style={styles.billRow}>
                                 <Text style={styles.billSubText}>Platform Fee</Text>
@@ -228,12 +217,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginTop: 10,
+        alignSelf: "center"
     },
     paymentIcon: {
-        width: 40,
-        height: 20,
+        width: 250,
+        height: 60,
         resizeMode: 'contain',
         marginRight: 10,
+        alignContent: "center",
+        borderRadius: 20
     },
     note: {
         fontSize: 12,

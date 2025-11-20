@@ -7,6 +7,7 @@ import {
   Image,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { COLOR } from '../../../Constants/Colors';
 import HomeHeader from '../../../Components/HomeHeader';
@@ -14,14 +15,16 @@ import { Typography } from '../../../Components/UI/Typography';
 import { Font } from '../../../Constants/Font';
 import {
   ADD_TO_CART,
+  CLEAR_CART,
   GET_CART,
   REMOVE_TO_CART,
 } from '../../../Constants/ApiRoute';
 import { GET_WITH_TOKEN, POST_FORM_DATA } from '../../../Backend/Api';
 import { images } from '../../../Components/UI/images';
-import { ToastMsg } from '../../../Backend/Utility';
+import { ToastMsg, windowWidth } from '../../../Backend/Utility';
 import AddonModal from '../../../Components/UI/AddonModal';
 import { useIsFocused } from '@react-navigation/native';
+import CartModal from '../../../Components/CartModal';
 
 const ServiceList = ({ navigation, route }) => {
   const selectedServiceId = route.params?.subServicesId || null;
@@ -39,6 +42,11 @@ const ServiceList = ({ navigation, route }) => {
   const subServices = route.params?.subServices || [];
   const services = route.params?.services || [];
   const apiData = route.params?.apiData || {};
+  const [selectedGender, setSelectedGender] = useState("male"); // default male
+  const [cartLoader, setcartLoader] = useState(false)
+  const category = route?.params?.category;
+  console.log(category, "IMMM_____");
+
   const isFocus = useIsFocused()
   useEffect(() => {
     if (isFocus) {
@@ -52,9 +60,11 @@ const ServiceList = ({ navigation, route }) => {
   };
 
   const getCart = () => {
+    setcartLoader(true)
     GET_WITH_TOKEN(
       GET_CART,
       success => {
+        setcartLoader(false)
         const items = success?.data?.items || [];
         setCartItemVal(items)
         if (items.length > 0) {
@@ -80,13 +90,13 @@ const ServiceList = ({ navigation, route }) => {
         setLoading(null);
       },
       error => {
-        console.log('Cart fetch error:', error);
+        setcartLoader(false)
         setSelectedService([]);
         setCartData(null);
         setLoading(null);
       },
       fail => {
-        console.log('Cart fetch fail:', fail);
+        setcartLoader(false)
         setSelectedService([]);
         setCartData(null);
         setLoading(null);
@@ -148,13 +158,11 @@ const ServiceList = ({ navigation, route }) => {
       formData.append(`addons[${key}]`, value);
 
     }
-    console.log(formData, "NH");
     POST_FORM_DATA(
       ADD_TO_CART,
       formData,
       success => {
         // getCart()
-        console.log('Added to cart:', success);
         const newCartItem = {
           id: service.id,
           name: service.name,
@@ -200,15 +208,32 @@ const ServiceList = ({ navigation, route }) => {
       },
     );
   };
+  const filteredServices = services.filter(serv => {
+    const isCategoryMatch = String(serv.service_id) === String(selectedCategory);
 
-  // Filter services for selected category
-  const filteredServices = services.filter(
-    serv => String(serv.service_id) === String(selectedCategory),
-  );
+    // Apply gender filter only if category is 1, 2, or 3
+    if (
+      String(category) === "1" ||
+      String(category) === "2" ||
+      String(category) === "3"
+    ) {
+      const isGenderMatch =
+        String(serv.gender) === String(selectedGender) ||
+        String(serv.gender) === "unisex";
+
+      return isCategoryMatch && isGenderMatch;
+    }
+
+    // For all other categories, return only category match
+    return isCategoryMatch;
+  });
+
+
 
   // Calculate total items and price - For single selection
   const totalItems = selectedService ? 1 : 0;
   const totalPrice = selectedService ? selectedService.price || 0 : 0;
+
 
   return (
     <View style={styles.container}>
@@ -255,6 +280,72 @@ const ServiceList = ({ navigation, route }) => {
 
         {/* Right Side Services */}
         <View style={styles.rightPane}>
+          {
+            String(category) == "1" ||
+              String(category) == "2" ||
+              String(category) === "3" ?
+              <View style={{ flexDirection: "row", marginBottom: 10 }}>
+
+                {/* Male Button */}
+                <TouchableOpacity
+                  onPress={() => setSelectedGender("male")}
+                  style={{
+                    flexDirection: "row",
+                    borderWidth: 1,
+                    borderColor: COLOR.primary,
+                    width: windowWidth / 3,
+                    marginRight: 10,
+                    borderRadius: 5,
+                    padding: 5,
+                    justifyContent: "center",
+                    backgroundColor: selectedGender === "male" ? COLOR.primary : "white"
+                  }}
+                >
+                  <Image
+                    source={{ uri: "https://cdn-icons-png.flaticon.com/128/3741/3741578.png" }}
+                    style={{
+                      width: 18,
+                      height: 18,
+                      marginRight: 10,
+                      tintColor: selectedGender === "male" ? "white" : COLOR.primary
+                    }}
+                  />
+                  <Typography style={{ color: selectedGender === "male" ? "white" : COLOR.primary }}>
+                    Male
+                  </Typography>
+                </TouchableOpacity>
+
+                {/* Female Button */}
+                <TouchableOpacity
+                  onPress={() => setSelectedGender("female")}
+                  style={{
+                    flexDirection: "row",
+                    borderWidth: 1,
+                    borderColor: COLOR.primary,
+                    width: windowWidth / 3,
+                    marginRight: 10,
+                    borderRadius: 5,
+                    padding: 5,
+                    justifyContent: "center",
+                    backgroundColor: selectedGender === "female" ? COLOR.primary : "white"
+                  }}
+                >
+                  <Image
+                    source={{ uri: "https://cdn-icons-png.flaticon.com/128/3741/3741715.png" }}
+                    style={{
+                      width: 18,
+                      height: 18,
+                      marginRight: 10,
+                      tintColor: selectedGender === "female" ? "white" : COLOR.primary
+                    }}
+                  />
+                  <Typography style={{ color: selectedGender === "female" ? "white" : COLOR.primary }}>
+                    Female
+                  </Typography>
+                </TouchableOpacity>
+
+              </View> : null
+          }
           <Typography size={17} font={Font.semibold} style={styles.heading}>
             {subServices.find(s => s.id === selectedCategory)?.name ||
               'Services'}
@@ -338,7 +429,7 @@ const ServiceList = ({ navigation, route }) => {
         </View>
       </View>
 
-      {CartItemVal?.length > 0 && ( // Show only when a service is selected
+      {/* {CartItemVal?.length > 0 && ( // Show only when a service is selected
         <TouchableOpacity
           onPress={() =>
             navigation.navigate('BookingScreen', {
@@ -355,55 +446,34 @@ const ServiceList = ({ navigation, route }) => {
               alignItems: 'center',
               justifyContent: 'space-between',
             }}>
-            {/* {apiData?.business_name && (
-              <Typography
-                style={{
-                  left: 20,
-                  fontSize: 20,
-                  fontFamily: Font.semibold,
-                  color: COLOR.white,
-                  marginBottom: 10,
-                  alignSelf: 'flex-start',
-                  width: '80%',
-                }}>
-                {apiData?.business_name || 'Your Selected'}
-              </Typography>
-            )} */}
-            {/* <View
-              style={{
-                right: 20,
-                borderWidth: 1,
-                borderColor: COLOR.white,
-                padding: 5,
-                borderRadius: 50,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                marginBottom: 10,
-              }}>
-              <Image
-                source={images.rightArrow}
-                style={{ height: 20, width: 20 }}
-              />
-            </View> */}
           </View>
           <View style={styles.bookNowContent}>
-            <Typography size={14} font={Font.semibold} color={COLOR.white}>
+            <Typography size={16} font={Font.semibold} color={COLOR.white}>
               Book Now ({totalLength})
             </Typography>
-            <Typography size={20} font={Font.medium} color={COLOR.white}>
-              ₹{totalAmountVal || 0}
-            </Typography>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Typography size={20} font={Font.medium} color={COLOR.white}>
+                ₹{totalAmountVal || 0}
+              </Typography>
+              <TouchableOpacity style={{ borderWidth: 1, padding: 0, borderRadius: 5, borderColor: COLOR.white, marginLeft: 15 }} onPress={handleClearCart}>
+                <Image source={{ uri: "https://cdn-icons-png.flaticon.com/128/1828/1828843.png" }} style={{ width: 25, height: 25 }} />
+              </TouchableOpacity>
+
+            </View>
           </View>
+
         </TouchableOpacity>
-      )}
+      )} */}
+      {
+        !cartLoader ?
+          <CartModal onCartCall={getCart} /> : null
+      }
 
       <AddonModal
         onAddService={(val, key, value) => { handleCart(val, true, key, value); setshowAddonModal(false) }}
         visible={showAddonModal}
         onClose={() => setshowAddonModal(false)}
         selectedAddon={selectedAddon} />
-
     </View>
   );
 };

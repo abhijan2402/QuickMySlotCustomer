@@ -47,6 +47,7 @@ const MainHomeHeader = () => {
   });
   const dispatch = useDispatch();
   const isFocus = useIsFocused();
+  const [showPred, setshowPred] = useState(false)
 
   const getCurrentLocation = async () => {
     const requestPermissions = async () => {
@@ -237,7 +238,12 @@ const MainHomeHeader = () => {
         longitudeDelta: 0.0421,
       });
     }
+    setSearchQuery(null)
+    setshowPred(false)
   }, [isFocus]);
+  useEffect(() => {
+    setshowPred(false)
+  }, [modalVisible])
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -339,6 +345,10 @@ const MainHomeHeader = () => {
               <Image source={images.close} style={{ height: 20, width: 20 }} />
             </TouchableOpacity>
           </View>
+          <TouchableOpacity onPress={fetchLocation} style={{ padding: 10, borderWidth: 1, alignItems: "center", marginVertical: 10, borderRadius: 10, borderColor: COLOR.primary }}>
+            <Typography color={COLOR.primary} fontFamily={Font.semibold}>Use your current location</Typography>
+          </TouchableOpacity>
+          <Typography textAlign={"center"} style={{ marginBottom: 10 }}>Or</Typography>
           {/* Search Input */}
           <View style={styles.searchContainer}>
             <TextInput
@@ -346,18 +356,20 @@ const MainHomeHeader = () => {
               placeholder="Search for a location..."
               placeholderTextColor={COLOR.lightGrey}
               value={searchQuery}
-              onChangeText={setSearchQuery}
+              onChangeText={(val) => {
+                setSearchQuery(val)
+                setshowPred(true)
+              }}
             />
           </View>
 
-          {/* Predictions List */}
-          {predictions.length > 0 && (
+          {showPred && predictions?.length > 0 && (
             <View style={styles.predictionsContainer}>
               {predictions.map(prediction => (
                 <TouchableOpacity
                   key={prediction.place_id}
                   style={styles.predictionItem}
-                  onPress={() => selectPrediction(prediction.place_id)}>
+                  onPress={() => { selectPrediction(prediction.place_id); setshowPred(false) }}>
                   <Text style={styles.predictionText}>
                     {prediction.description}
                   </Text>
@@ -374,6 +386,7 @@ const MainHomeHeader = () => {
               region={mapRegion}
               onRegionChangeComplete={handleMapRegionChange}
               showsUserLocation={true}
+
               showsMyLocationButton={true}>
               {selectedLocation && (
                 <Marker

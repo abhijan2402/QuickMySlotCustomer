@@ -10,6 +10,7 @@ import {
   SafeAreaView,
   StatusBar,
   BackHandler,
+  Alert,
 } from 'react-native';
 import { COLOR } from '../../../Constants/Colors';
 import { Typography } from '../../../Components/UI/Typography';
@@ -18,10 +19,11 @@ import { images } from '../../../Components/UI/images';
 import Input from '../../../Components/Input';
 import { useIsFocused } from '@react-navigation/native';
 import { GET, GET_WITH_TOKEN } from '../../../Backend/Api';
-import { GET_CART, GET_PROFILE, HOME } from '../../../Constants/ApiRoute';
+import { CLEAR_CART, GET_CART, GET_PROFILE, HOME } from '../../../Constants/ApiRoute';
 import { Font } from '../../../Constants/Font';
 import Video from 'react-native-video';
-import { cleanImageUrl, windowHeight, windowWidth } from '../../../Backend/Utility';
+import { cleanImageUrl, ToastMsg, windowHeight, windowWidth } from '../../../Backend/Utility';
+import CartModal from '../../../Components/CartModal';
 
 const { width } = Dimensions.get('window');
 
@@ -65,7 +67,6 @@ const MainHome = ({ navigation }) => {
   }
   useEffect(() => {
     if (isFocused) {
-      getCart()
       fetchUserProfile();
       FetchHome()
     }
@@ -108,28 +109,9 @@ const MainHome = ({ navigation }) => {
     return `${timeKey} on ${date}`;
   };
 
-  const getCart = () => {
-    GET_WITH_TOKEN(
-      GET_CART,
-      success => {
-        const items = success?.data?.items || [];
-        settotalItemsVal(success?.data)
-        let vendorInfo = null;
 
-        if (items?.length > 0 && items[0]?.service?.user) {
-          vendorInfo = items[0].service.user;
-        }
-        setShopData(vendorInfo)
 
-      },
-      error => {
-        console.log('Cart fetch error:', error);
-      },
-      fail => {
-        console.log('Cart fetch fail:', fail);
-      },
-    );
-  };
+
   useEffect(() => {
     if (isFocused) {
       const backAction = () => {
@@ -326,7 +308,11 @@ const MainHome = ({ navigation }) => {
             );
           }}
         />
-
+        <View style={{ flexDirection: "row", alignItems: "center", alignSelf: "center" }}>
+          <View style={{ borderWidth: 0.1777, width: windowWidth / 2.8 }}> </View>
+          <Typography style={{ marginHorizontal: 10, color: COLOR.primary }}>Explore</Typography>
+          <View style={{ borderWidth: 0.1777, width: windowWidth / 2.8 }}></View>
+        </View>
 
         {/* Bottom Banner (Manual scroll only) */}
         <View style={{ marginVertical: 20, marginBottom: windowHeight * 0.1 }}>
@@ -361,20 +347,7 @@ const MainHome = ({ navigation }) => {
           )}
         </View>
       </ScrollView>
-      {
-        totalItemsVal?.items?.length > 0 &&
-        <View style={{ borderWidth: 1, flexDirection: "row", padding: 10, borderWidth: 1, borderColor: COLOR.primary, borderRadius: 7, alignItems: "center", position: "absolute", bottom: 10, alignSelf: "center", backgroundColor: COLOR.white }}>
-          <View style={{ width: windowWidth / 1.5555 }}>
-            <Typography size={16} font={Font.semibold}>{shopData?.business_name || 'Shop Name'}</Typography>
-            <Typography size={13} color={COLOR.black} font={Font.regular}>{totalItemsVal?.total_items} {totalItemsVal?.total_items == 1 ? "item" : "items"}</Typography>
-          </View>
-          <TouchableOpacity onPress={() =>
-            navigation.navigate('BookingScreen')
-          } style={{ marginVertical: 6, backgroundColor: COLOR.primary, padding: 5, borderRadius: 6, paddingHorizontal: 10 }}>
-            <Typography color={COLOR.white} size={15}>View cart</Typography>
-          </TouchableOpacity>
-        </View>
-      }
+      <CartModal />
     </View>
   );
 };

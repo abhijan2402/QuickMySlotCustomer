@@ -14,6 +14,7 @@ import { useIsFocused } from '@react-navigation/native';
 import { GET_ANALYTICS } from '../../../Constants/ApiRoute';
 import { GET_WITH_TOKEN } from '../../../Backend/Api';
 import { CURRENCY } from '../../../Backend/Utility';
+import CartModal from '../../../Components/CartModal';
 
 const { width } = Dimensions.get('window');
 
@@ -103,6 +104,8 @@ const MyAnalytics = ({ navigation }) => {
           </Typography>
         </View>
       </ScrollView>
+      <CartModal />
+
     </View>
   );
 };

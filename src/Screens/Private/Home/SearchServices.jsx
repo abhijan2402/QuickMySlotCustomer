@@ -20,6 +20,7 @@ import { SERVICES } from '../../../Constants/ApiRoute';
 import { useIsFocused } from '@react-navigation/native';
 import { cleanImageUrl, windowWidth } from '../../../Backend/Utility';
 import { useSelector } from 'react-redux';
+import CartModal from '../../../Components/CartModal';
 
 const SearchServices = ({ navigation, route }) => {
   const ref = useRef();
@@ -37,8 +38,7 @@ const SearchServices = ({ navigation, route }) => {
   const currentLocation = useSelector(state => state.currentLocation);
 
   const buildApiUrl = (page = 1, searchTerm = '') => {
-    let url = `${SERVICES}?service_category=${id}&page=${page}&per_page=${perPage}&lat=${currentLocation?.coords?.latitude}$long=${currentLocation?.coords?.longitude}`;
-    console.log(url, "URLLLLLL");
+    let url = `${SERVICES}?service_category=${id}&page=${page}&per_page=${perPage}&lat=${currentLocation?.coords?.latitude}&long=${currentLocation?.coords?.longitude}`;
 
     if (searchTerm.trim() !== '') {
       url += `&name=${encodeURIComponent(searchTerm.trim())}`;
@@ -52,8 +52,6 @@ const SearchServices = ({ navigation, route }) => {
     GET_WITH_TOKEN(
       buildApiUrl(page, searchTerm),
       success => {
-        console.log(success?.data?.data, 'successsuccesssuccesssuccesserwrewfd');
-
         const responseData = success?.data?.data || [];
         const paginationInfo = success?.data?.last_page || {};
         if (shouldAppend) {
@@ -80,15 +78,15 @@ const SearchServices = ({ navigation, route }) => {
     );
   };
   useEffect(() => {
-    if (isFocused) {
-      setCurrentPage(1);
-      fetchServices(1, '');
-    }
+    // if (isFocused) {
+    setCurrentPage(1);
+    fetchServices(1, '');
+    // }
     if (!id) {
       ref.current.focus();
       // Keyboard.isVisible()
     }
-  }, [isFocused, id]);
+  }, [id]);
 
   useEffect(() => {
     const searchTimeout = setTimeout(() => {
@@ -125,10 +123,8 @@ const SearchServices = ({ navigation, route }) => {
     return (
       <TouchableOpacity
         activeOpacity={0.85}
-        onPress={() => navigation.navigate('ProviderDetails', { id: item?.id })}
-        style={styles.card}>
-        {console.log('Rendering item:', item.image)}
-
+        onPress={() => navigation.navigate('ProviderDetails', { id: item?.id, km: item?.km })}
+        style={styles.card} >
         <View style={styles.imageContainer}>
           {item?.portfolio_images?.length > 0 ? (
             <Image
@@ -209,7 +205,7 @@ const SearchServices = ({ navigation, route }) => {
             </View>
           </View>
         </View>
-      </TouchableOpacity>
+      </TouchableOpacity >
     )
   }
 
@@ -249,6 +245,9 @@ const SearchServices = ({ navigation, route }) => {
           onRightIconPress={() => setSearch('')}
         />
       </View>
+      {/* <CartModal /> */}
+      {/* <CartModal /> */}
+
       {services.length > 0 && (
         <FlatList
           data={services}
@@ -265,7 +264,7 @@ const SearchServices = ({ navigation, route }) => {
         />
       )}
 
-      {loading && services.length === 0 && (
+      {loading && services?.length === 0 && (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLOR.primary} />
           <Typography size={14} color={COLOR.grey} style={{ marginTop: 10 }}>
@@ -273,6 +272,8 @@ const SearchServices = ({ navigation, route }) => {
           </Typography>
         </View>
       )}
+      <View style={{ marginTop: 40 }}></View>
+      <CartModal />
     </View>
   );
 };

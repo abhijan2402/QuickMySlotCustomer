@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,18 +7,19 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import HomeHeader from '../../../Components/HomeHeader';
-import {COLOR} from '../../../Constants/Colors';
-import {useIsFocused, useNavigation} from '@react-navigation/native';
-import {Typography} from '../../../Components/UI/Typography';
+import { COLOR } from '../../../Constants/Colors';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
+import { Typography } from '../../../Components/UI/Typography';
 import Input from '../../../Components/Input';
-import {Font} from '../../../Constants/Font';
-import {GET_WITH_TOKEN} from '../../../Backend/Api';
+import { Font } from '../../../Constants/Font';
+import { GET_WITH_TOKEN } from '../../../Backend/Api';
 import {
   HIGHLIGHTED_PROMO_CODE,
   PROMO_VENDOR,
 } from '../../../Constants/ApiRoute';
+import CartModal from '../../../Components/CartModal';
 
-const OffersScreen = ({navigation, route}) => {
+const OffersScreen = ({ navigation, route }) => {
   const businessId = route?.params?.businessId || null;
   console.log('businessId--->', businessId);
 
@@ -241,8 +242,10 @@ const OffersScreen = ({navigation, route}) => {
             </View>
           ))}
 
-        <View style={{height: 50}} />
+        <View style={{ height: 50 }} />
+
       </ScrollView>
+      <CartModal />
     </View>
   );
 };

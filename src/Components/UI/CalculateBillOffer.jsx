@@ -8,6 +8,7 @@ import {
     TouchableWithoutFeedback,
     TextInput,
     ScrollView,
+    KeyboardAvoidingView,
 } from 'react-native';
 import { COLOR } from '../../Constants/Colors';
 import { Font } from '../../Constants/Font';
@@ -53,7 +54,10 @@ const CalculateBillOfferModal = ({ visible, onClose, sampleAmount, Paymentbreakd
 
     return (
         <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-            <View style={styles.overlay}>
+            <KeyboardAvoidingView
+
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={styles.overlay}>
                 <TouchableWithoutFeedback onPress={onClose}>
                     <View style={StyleSheet.absoluteFillObject} />
                 </TouchableWithoutFeedback>
@@ -130,7 +134,7 @@ const CalculateBillOfferModal = ({ visible, onClose, sampleAmount, Paymentbreakd
                         </ScrollView>
                     )}
                 </View>
-            </View>
+            </KeyboardAvoidingView>
         </Modal>
     );
 };
@@ -170,6 +174,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         paddingVertical: 10,
         fontSize: 14,
+        fontFamily: Font.semibold
     },
     calcBtn: {
         backgroundColor: COLOR.primary,

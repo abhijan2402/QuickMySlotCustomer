@@ -34,8 +34,11 @@ import moment from 'moment';
 import { cleanImageUrl } from '../../../Backend/Utility';
 import Divider from '../../../Components/Divider';
 import CartModal from '../../../Components/CartModal';
+import ImageShowModal from '../../../Components/ImageShowModal';
 
 const ProviderDetails = ({ navigation, route }) => {
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0)
   const [activeTab, setActiveTab] = useState('Services');
   const { width } = Dimensions.get('window');
   const [like, setLike] = useState(false);
@@ -539,8 +542,14 @@ const ProviderDetails = ({ navigation, route }) => {
               keyExtractor={(item, index) => index.toString()}
               numColumns={3}
               showsHorizontalScrollIndicator={false}
-              renderItem={({ item }) => (
-                <Image source={{ uri: item?.image_url }} style={styles.photo} />
+              renderItem={({ item, index }) => (
+                <TouchableOpacity style={{
+                  width: '31.7%',
+                  marginRight: 10,
+                  marginTop: 10,
+                }} onPress={() => { setSelectedIndex(index); setShowImageModal(true) }}>
+                  <Image source={{ uri: item?.image_url }} style={styles.photo} />
+                </TouchableOpacity>
               )}
             />
             <Divider />
@@ -611,8 +620,14 @@ const ProviderDetails = ({ navigation, route }) => {
               keyExtractor={(item, index) => index.toString()}
               numColumns={3}
               showsHorizontalScrollIndicator={false}
-              renderItem={({ item }) => (
-                <Image source={{ uri: item?.image_url }} style={styles.photo} />
+              renderItem={({ item, index }) => (
+                <TouchableOpacity style={{
+                  width: '31.7%',
+                  marginRight: 10,
+                  marginTop: 10,
+                }} onPress={() => { setSelectedIndex(index); setShowImageModal(true) }}>
+                  <Image source={{ uri: item?.image_url }} style={styles.photo} />
+                </TouchableOpacity>
               )}
             />
           </View>
@@ -680,7 +695,12 @@ const ProviderDetails = ({ navigation, route }) => {
           </View>
         )}
 
-
+        <ImageShowModal
+          data={apiData?.portfolio_images}
+          visible={showImageModal}
+          startIndex={selectedIndex}
+          onClose={() => setShowImageModal(false)}
+        />
       </ScrollView>
       <SimpleModal
         visible={isModalVisible}
@@ -845,11 +865,10 @@ const styles = StyleSheet.create({
     color: COLOR.black,
   },
   photo: {
-    width: '31.5%',
+    width: '96%',
     height: 80,
     borderRadius: 8,
-    marginRight: 10,
-    marginTop: 10,
+
   },
   reviewCard: {
     backgroundColor: '#f9f9f9',

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal, TouchableOpacity, Image, View } from 'react-native';
 import ImageViewer from 'react-native-image-zoom-viewer';
+import { windowHeight, windowWidth } from '../Backend/Utility';
 
 const ImageShowModal = ({ visible, onClose, data, startIndex = 0 }) => {
 
@@ -36,6 +37,7 @@ const ImageShowModal = ({ visible, onClose, data, startIndex = 0 }) => {
                 imageUrls={formattedImages}
                 index={startIndex}        // <-- HERE (starts viewer from tapped image)
                 enableSwipeDown
+                // style={{ width: windowWidth, height: windowHeight }}
                 onSwipeDown={onClose}
                 onCancel={onClose}
                 renderIndicator={() => null}

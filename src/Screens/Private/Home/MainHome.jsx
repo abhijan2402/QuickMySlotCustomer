@@ -24,6 +24,7 @@ import { Font } from '../../../Constants/Font';
 import Video from 'react-native-video';
 import { cleanImageUrl, ToastMsg, windowHeight, windowWidth } from '../../../Backend/Utility';
 import CartModal from '../../../Components/CartModal';
+import Chatbot from '../Dashboard/Chatbot';
 
 const { width } = Dimensions.get('window');
 
@@ -347,6 +348,7 @@ const MainHome = ({ navigation }) => {
           )}
         </View>
       </ScrollView>
+      <Chatbot />
       <CartModal />
     </View>
   );

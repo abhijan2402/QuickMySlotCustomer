@@ -284,18 +284,41 @@ const ProviderDetails = ({ navigation, route }) => {
               </TouchableOpacity>
             </View>
           </View>
+          {
+            (category === 5 || category === 7) && (
+              <View
+                style={{
+                  backgroundColor: "#E8F1FF",
+                  borderWidth: 1,
+                  borderColor: "#3B82F6",
+                  padding: 12,
+                  borderRadius: 10,
+                  marginVertical: 5,
+                  shadowColor: "#3B82F6",
+                  shadowOpacity: 0.2,
+                  shadowRadius: 4,
+                  elevation: 3,
+                }}
+              >
+                <Typography style={{ color: "#1E3A8A", fontSize: 14, }} font={Font.medium}>
+                  Final pricing may vary depending on the services you choose.
+                </Typography>
+              </View>
+            )
+          }
+
           <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              marginTop: -10,
+              // marginTop: -10,
             }}>
-            <Typography
+            {/* <Typography
               style={[
                 { fontSize: 14, marginBottom: 2, fontFamily: Font.medium },
               ]}>
               {apiData?.gender || 'Unisex'}
-            </Typography>
+            </Typography> */}
             {/* <View
               style={{
                 width: 1.5,
@@ -460,7 +483,7 @@ const ProviderDetails = ({ navigation, route }) => {
         </View>
         <CouponCarousel title={"Discount Available for you"} promoData={promoData} cashbackPercentage={apiData?.is_cashback} />
 
-        {/* <CouponCarousel title={"Coupons Available for you"} promoData={promoData} cashbackPercentage={apiData?.is_cashback} /> */}
+        {/* <CouponCarousel title={"Promotional Discount for you"} promoData={promoData} cashbackPercentage={apiData?.is_cashback} /> */}
         {/* Tabs */}
         <View style={{ paddingHorizontal: 20 }}>
           <Typography style={styles.title}>Amenities</Typography>

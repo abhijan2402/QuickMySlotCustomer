@@ -32,6 +32,8 @@ export const MEMBERSHIP_VERIFY_PAYMENT = 'subscription/verify-payment';
 export const MEMBERSHIP_CREATE_ORDER = 'subscription/create-order';
 export const HIGHLIGHTED_PROMO_CODE = 'customer/promo-code/highlighted';
 export const BOOKING_VERIFY = 'customer/booking-verify';
+export const CUSTOMER_WISHLIST = 'customer/wishlist';
+
 
 
 

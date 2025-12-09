@@ -5,7 +5,7 @@ import {
   ToastAndroid,
 } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
-import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
+import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import SimpleToast from 'react-native-simple-toast';
 
 export const windowWidth = Dimensions.get('window').width;
@@ -152,7 +152,7 @@ export const Shadow = (elevation = 5) => {
       shadowColor: '#000',
       shadowOpacity: 0.2,
       shadowRadius: elevation,
-      shadowOffset: {width: 0, height: elevation / 2},
+      shadowOffset: { width: 0, height: elevation / 2 },
     },
   });
 };
@@ -227,7 +227,7 @@ export const getCurrentLocation = async () => {
       Geolocation.getCurrentPosition(
         position => resolve(position?.coords),
         error => reject(new Error(error.message || 'Error getting location')),
-        {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
       );
     });
   } catch (error) {
@@ -283,7 +283,7 @@ export const cleanImageUrl = url => {
   // If URL starts with https but we know it might fail, try http
   if (
     cleanedUrl.startsWith('https://') &&
-    url.includes('lemonchiffon-walrus-503913.hostingersite.com')
+    url.includes('https://api.quickmyslot.com/public/')
   ) {
     cleanedUrl = cleanedUrl.replace('https://', 'http://');
   }
@@ -294,16 +294,16 @@ export const cleanImageUrl = url => {
 
 export const isShopOpen = (workingDays, dailyStartTime, dailyEndTime) => {
   const now = new Date();
-  
+
   // Get current day in lowercase (e.g., 'monday')
   const currentDay = now.toLocaleString('en-US', { weekday: 'long' }).toLowerCase();
-  
+
   // Get current time in HH:MM format (24-hour)
   const currentTime = now.toTimeString().slice(0, 5); // HH:MM
-  
+
   // Check if current day is in working days
   const isWorkingDay = workingDays?.includes(currentDay);
-  
+
   if (!isWorkingDay) {
     return {
       isOpen: false,
@@ -311,7 +311,7 @@ export const isShopOpen = (workingDays, dailyStartTime, dailyEndTime) => {
       nextOpening: getNextOpening(workingDays, dailyStartTime)
     };
   }
-  
+
   // Check if current time is within working hours
   if (currentTime < dailyStartTime) {
     return {
@@ -320,7 +320,7 @@ export const isShopOpen = (workingDays, dailyStartTime, dailyEndTime) => {
       nextOpening: `Opens at ${formatTime(dailyStartTime)} today`
     };
   }
-  
+
   if (currentTime > dailyEndTime) {
     return {
       isOpen: false,
@@ -328,7 +328,7 @@ export const isShopOpen = (workingDays, dailyStartTime, dailyEndTime) => {
       nextOpening: getNextOpening(workingDays, dailyStartTime, currentDay)
     };
   }
-  
+
   return {
     isOpen: true,
     reason: 'open',
@@ -340,16 +340,16 @@ const getNextOpening = (workingDays, dailyStartTime, currentDay = null) => {
   const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   const now = new Date();
   const currentDayIndex = currentDay ? daysOfWeek.indexOf(currentDay) : now.getDay();
-  
+
   // Check next 7 days
   for (let i = 1; i <= 7; i++) {
     const nextDayIndex = (currentDayIndex + i) % 7;
     const nextDay = daysOfWeek[nextDayIndex];
-    
+
     if (workingDays?.includes(nextDay)) {
       const nextDate = new Date(now);
       nextDate.setDate(now.getDate() + i);
-      
+
       if (i === 1 && currentDay === nextDay) {
         return `Opens at ${formatTime(dailyStartTime)} tomorrow`;
       } else if (i === 1) {
@@ -360,7 +360,7 @@ const getNextOpening = (workingDays, dailyStartTime, currentDay = null) => {
       }
     }
   }
-  
+
   return 'Closed indefinitely';
 };
 
@@ -378,7 +378,7 @@ export const getShopStatusMessage = (shopStatus) => {
   if (shopStatus.isOpen) {
     return `Open now • ${shopStatus.closingTime}`;
   }
-  
+
   switch (shopStatus.reason) {
     case 'closed_today':
       return `Closed today • ${shopStatus.nextOpening}`;

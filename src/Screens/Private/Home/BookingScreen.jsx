@@ -673,6 +673,7 @@ const BookingScreen = ({ navigation, route }) => {
                     const service = item?.service;
                     const category = service?.category;
                     const provider = service?.user;
+                    console.log(category, "VAHSVHGVS");
 
                     return (
                       <View
@@ -684,14 +685,18 @@ const BookingScreen = ({ navigation, route }) => {
                         }}>
 
                         {/* Left Icon */}
-                        <View style={{ alignItems: 'center' }}>
-                          <Image
-                            source={images.manhair}
-                            style={{ height: 20, width: 20, marginBottom: 5 }}
-                            tintColor={COLOR.primary}
-                          />
-                          <Typography style={{ textTransform: "capitalize" }} size={9}>{service?.gender}</Typography>
-                        </View>
+                        {
+                          category?.id == 1 || category?.id == 2 || category?.id == 3 ?
+                            <View style={{ alignItems: 'center' }}>
+                              <Image
+                                source={images.manhair}
+                                style={{ height: 20, width: 20, marginBottom: 5 }}
+                                tintColor={COLOR.primary}
+                              />
+                              <Typography style={{ textTransform: "capitalize" }} size={9}>{service?.gender}</Typography>
+                            </View>
+                            : ""
+                        }
 
                         {/* Right Content */}
                         <View style={{ flex: 1, marginLeft: 15 }}>
@@ -1021,11 +1026,11 @@ const BookingScreen = ({ navigation, route }) => {
                 marginBottom: 30,
               }}>
               <Button
-                title={loading ? 'Booking...' : 'Pay After Service'}
+                title={loading ? 'Booking...' : 'Book Now'}
                 containerStyle={{
                   marginBottom: 10,
                   marginTop: 10,
-                  width: '58%',
+                  width: '40%',
                   backgroundColor: COLOR.white,
                   borderWidth: 1,
                   borderColor: COLOR.primary,
@@ -1035,8 +1040,8 @@ const BookingScreen = ({ navigation, route }) => {
                 disabled={loading}
               />
               <Button
-                title={loading ? 'Booking...' : 'Pay Now'}
-                containerStyle={{ marginBottom: 10, marginTop: 10, width: '38%' }}
+                title={loading ? 'Booking...' : 'Book and Pay Now'}
+                containerStyle={{ marginBottom: 10, marginTop: 10, width: '58%' }}
                 onPress={() => onBooking('1')}
                 disabled={loading}
               />

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -10,27 +10,28 @@ import {
   ActivityIndicator,
   RefreshControl,
   Linking,
+  Platform,
 } from 'react-native';
 import HomeHeader from '../../../Components/HomeHeader';
-import {COLOR} from '../../../Constants/Colors';
-import {Typography} from '../../../Components/UI/Typography';
+import { COLOR } from '../../../Constants/Colors';
+import { Typography } from '../../../Components/UI/Typography';
 import Button from '../../../Components/UI/Button';
-import {useIsFocused} from '@react-navigation/native';
-import {GET_WITH_TOKEN, POST_FORM_DATA} from '../../../Backend/Api';
-import {SUPPORT} from '../../../Constants/ApiRoute';
-import {validators} from '../../../Backend/Validator';
+import { useIsFocused } from '@react-navigation/native';
+import { GET_WITH_TOKEN, POST_FORM_DATA } from '../../../Backend/Api';
+import { SUPPORT } from '../../../Constants/ApiRoute';
+import { validators } from '../../../Backend/Validator';
 import ImageModal from '../../../Components/UI/ImageModal';
-import {images} from '../../../Components/UI/images';
-import {ErrorBox} from '../../../Components/UI/ErrorBox';
+import { images } from '../../../Components/UI/images';
+import { ErrorBox } from '../../../Components/UI/ErrorBox';
 import Input from '../../../Components/Input';
-import {Font} from '../../../Constants/Font';
+import { Font } from '../../../Constants/Font';
 import ImageUpload from '../../../Components/UI/ImageUpload';
-import {isValidForm} from '../../../Backend/Utility';
+import { isValidForm } from '../../../Backend/Utility';
 
 const Support = () => {
   const [tickets, setTickets] = useState([]);
-  console.log(tickets,'tickets>>>>>');
-  
+  console.log(tickets, 'tickets>>>>>');
+
   const [modalVisible, setModalVisible] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
@@ -80,8 +81,8 @@ const Support = () => {
       title: validators.checkRequire('Title', newTitle),
       description: validators.checkRequire('Description', newDesc),
     };
-    console.log(file,'file>>>>>');
-    
+    console.log(file, 'file>>>>>');
+
     setError(validationErrors);
     if (isValidForm(validationErrors)) {
       setLoading(true);
@@ -141,7 +142,7 @@ const Support = () => {
             /* Implement image preview modal */
           }}>
           <Image
-            source={{uri: fileUrl}}
+            source={{ uri: fileUrl }}
             style={styles.ticketFileImage}
             defaultSource={images.placeholder}
           />
@@ -172,7 +173,7 @@ const Support = () => {
     }
   };
 
-  const renderTicket = ({item, index}) => (
+  const renderTicket = ({ item, index }) => (
     <View
       style={[
         styles.ticketCard,
@@ -247,6 +248,7 @@ const Support = () => {
         )}
 
         <Button
+          containerStyle={{ marginBottom: Platform.OS != "ios" && 50 }}
           title="Raise Ticket"
           onPress={() => setModalVisible(true)}
           style={styles.raiseButton}
@@ -270,7 +272,7 @@ const Support = () => {
                 label="Title"
                 placeholder="Enter ticket title"
                 value={newTitle}
-                style={{borderColor: COLOR.primary}}
+                style={{ borderColor: COLOR.primary }}
                 onChangeText={setNewTitle}
                 error={error.title}
               />
@@ -279,7 +281,7 @@ const Support = () => {
                 label="Description"
                 placeholder="Describe your issue"
                 value={newDesc}
-                style={{borderColor: COLOR.primary}}
+                style={{ borderColor: COLOR.primary }}
                 onChangeText={setNewDesc}
                 error={error.description}
                 multiline={true}
@@ -290,7 +292,7 @@ const Support = () => {
                 size={14}
                 font={Font.semibold}
                 color="#333"
-                style={[styles.label, {marginTop: 20, marginBottom: 5}]}>
+                style={[styles.label, { marginTop: 20, marginBottom: 5 }]}>
                 Attach File (Optional)
               </Typography>
 
@@ -309,7 +311,7 @@ const Support = () => {
                 size={12}
                 color="#777"
                 font={Font.semibold}
-                style={[styles.note, {marginBottom: 0, marginTop: 5}]}>
+                style={[styles.note, { marginBottom: 0, marginTop: 5 }]}>
                 Max file size: 10MB. Images, PDF, DOC allowed.
               </Typography>
 
@@ -319,7 +321,7 @@ const Support = () => {
                 loading={loading}
                 title="Submit Ticket"
                 onPress={handleUpdate}
-                containerStyle={{marginTop: 20}}
+                containerStyle={{ marginTop: 20 }}
               />
               <Button
                 title="Cancel"
@@ -479,6 +481,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   raiseButton: {
+    // bottom: 60,
     marginVertical: 16,
     marginHorizontal: 2,
   },

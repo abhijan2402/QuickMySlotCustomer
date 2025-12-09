@@ -97,7 +97,7 @@ const BookingConfirmation = ({ navigation, route }) => {
               </Typography>
             </View> */}
 
-            {shopStatus && !shopStatus.isOpen && (
+            {/* {shopStatus && !shopStatus.isOpen && (
               <View style={styles.closedBanner}>
                 <Typography style={styles.closedText}>
                   ⚠️ The salon is currently closed
@@ -109,7 +109,7 @@ const BookingConfirmation = ({ navigation, route }) => {
                   {shopStatus.nextOpening}
                 </Typography>
               </View>
-            )}
+            )} */}
 
             {/* Shop Status Info (Always show) */}
             {/* {shopStatus && (
@@ -123,7 +123,24 @@ const BookingConfirmation = ({ navigation, route }) => {
                 </Typography>
               </View>
             )} */}
-
+            <View
+              style={{
+                backgroundColor: "#E8F1FF",
+                borderWidth: 1,
+                borderColor: "#3B82F6",
+                padding: 12,
+                borderRadius: 10,
+                marginVertical: 5,
+                shadowColor: "#3B82F6",
+                shadowOpacity: 0.2,
+                shadowRadius: 4,
+                elevation: 3,
+              }}
+            >
+              <Typography style={{ color: "#1E3A8A", fontSize: 14, }} font={Font.medium}>
+                {data?.businessData?.business_name} will confirm your service request in next 15 minutes.
+              </Typography>
+            </View>
             {/* What To Do Next */}
             <View style={styles.section}>
               <Typography style={styles.sectionTitle}>
@@ -153,7 +170,7 @@ const BookingConfirmation = ({ navigation, route }) => {
 
             {/* Salon Details */}
             <View style={styles.section}>
-              <Typography style={styles.sectionTitle}>Salon Details</Typography>
+              <Typography style={styles.sectionTitle}>Provider Details</Typography>
               <Typography style={styles.salonName}>
                 {data?.businessData?.business_name}
               </Typography>

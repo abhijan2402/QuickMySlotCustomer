@@ -1,4 +1,4 @@
-import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { CLEAR_CART, GET_CART } from '../Constants/ApiRoute';
@@ -84,7 +84,7 @@ const CartModal = ({ onCartCall = () => { } }) => {
         <View>
             {
                 totalItemsVal?.items?.length > 0 &&
-                <View style={{ borderWidth: 1, flexDirection: "row", padding: 8, borderWidth: 1, borderColor: COLOR.primary, borderRadius: 7, alignItems: "center", position: "absolute", bottom: 10, alignSelf: "center", backgroundColor: COLOR.white }}>
+                <View style={{ borderWidth: 1, flexDirection: "row", padding: 8, borderWidth: 1, borderColor: COLOR.primary, borderRadius: 7, alignItems: "center", position: "absolute", bottom: Platform.OS == "ios" ? 10 : 50, alignSelf: "center", backgroundColor: COLOR.white }}>
                     <View style={{ width: windowWidth / 1.7777 }}>
                         <Typography size={15} font={Font.semibold}>{shopData?.business_name || 'Shop Name'}</Typography>
                         <Typography size={13} color={COLOR.black} font={Font.regular}>{totalItemsVal?.total_items} {totalItemsVal?.total_items == 1 ? "item" : "items"}</Typography>

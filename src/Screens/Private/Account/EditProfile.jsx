@@ -185,6 +185,8 @@ const EditProfile = ({ navigation }) => {
         </ScrollView>
         {/* Edit / Update Button */}
         <Button
+          containerStyle={{ marginBottom: Platform.OS != "ios" && 50 }}
+
           title={isEditing ? 'Update' : 'Edit'}
           loading={loading}
           onPress={() => {

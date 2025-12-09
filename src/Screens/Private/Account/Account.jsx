@@ -51,6 +51,12 @@ const Account = ({ navigation }) => {
       navigate: 'Membership',
     },
     {
+      id: 9,
+      title: 'Wishlist',
+      icon: images.wishlist,
+      navigate: 'Wishlist',
+    },
+    {
       id: 7,
       title: 'QuickMySlot Wallet',
       icon: images.wallet,

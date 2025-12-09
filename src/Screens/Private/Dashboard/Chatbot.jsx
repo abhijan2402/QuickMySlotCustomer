@@ -7,11 +7,18 @@ import {
     TextInput,
     ScrollView,
     Image,
-    Linking
+    Linking,
+    Platform,
+    KeyboardAvoidingView,
+    TouchableWithoutFeedback,
+    Keyboard
 } from "react-native";
 import { COLOR } from "../../../Constants/Colors";
+import { windowHeight, windowWidth } from "../../../Backend/Utility";
 
 const Chatbot = () => {
+    const [keyboardHeight, setKeyboardHeight] = useState(0);
+
     const isFocus = useIsFocused()
     const navigation = useNavigation()
     const [isOpen, setIsOpen] = useState(false);
@@ -38,7 +45,20 @@ const Chatbot = () => {
         if (isFocus)
             setUserMsgCount(0)
     }, [isFocus])
+    useEffect(() => {
+        const show = Keyboard.addListener("keyboardDidShow", (e) => {
+            setKeyboardHeight(e.endCoordinates.height);
+        });
 
+        const hide = Keyboard.addListener("keyboardDidHide", () => {
+            setKeyboardHeight(0);
+        });
+
+        return () => {
+            show.remove();
+            hide.remove();
+        };
+    }, []);
     const getBotResponse = (msg) => {
         const lower = msg.toLowerCase();
 
@@ -140,7 +160,7 @@ const Chatbot = () => {
                     onPress={toggleChat}
                     style={{
                         position: "absolute",
-                        bottom: 80,
+                        bottom: Platform.OS == "ios" ? 80 : 120,
                         right: 20,
                         backgroundColor: "#EE5138",
                         padding: 15,
@@ -149,21 +169,19 @@ const Chatbot = () => {
                     }}
                 >
                     <Image
-                        source={{ uri: "https://cdn-icons-png.flaticon.com/128/2769/2769104.png" }}
-                        style={{ width: 30, height: 30, tintColor: COLOR.white }}
+                        source={{ uri: "https://cdn-icons-png.flaticon.com/128/11189/11189317.png" }}
+                        style={{ width: 35, height: 35, tintColor: COLOR.white }}
                     />
                 </TouchableOpacity>
             )}
 
-            {/* Chatbox */}
             {isOpen && (
                 <View
                     style={{
                         position: "absolute",
-                        bottom: 250,
-                        right: 20,
-                        width: 300,
-                        height: 430,
+                        bottom: keyboardHeight / 1.5,   // 👈 MAGIC FIX
+                        width: windowWidth / 1.077,
+                        height: keyboardHeight ? windowHeight * 0.5 : windowHeight * 0.8,
                         backgroundColor: "white",
                         borderRadius: 16,
                         borderColor: "#ddd",
@@ -182,7 +200,9 @@ const Chatbot = () => {
                         }}
                     >
                         <Image
-                            source={{ uri: "https://cdn-icons-png.flaticon.com/512/4712/4712101.png" }}
+                            source={{
+                                uri: "https://cdn-icons-png.flaticon.com/512/4712/4712101.png",
+                            }}
                             style={{ width: 26, height: 26, tintColor: "white" }}
                         />
 
@@ -190,7 +210,12 @@ const Chatbot = () => {
                             QuickMySlot
                         </Text>
 
-                        <TouchableOpacity onPress={() => { setUserMsgCount(0); setMessages([]); toggleChat() }}>
+                        <TouchableOpacity
+                            onPress={() => {
+                                setMessages([]);
+                                toggleChat();
+                            }}
+                        >
                             <Text style={{ color: "white", fontSize: 18 }}>✕</Text>
                         </TouchableOpacity>
                     </View>
@@ -198,12 +223,12 @@ const Chatbot = () => {
                     {/* Messages */}
                     <ScrollView
                         ref={scrollRef}
+                        keyboardShouldPersistTaps="handled"
                         style={{ flex: 1, padding: 10, backgroundColor: "#f5f5f5" }}
                     >
                         {messages.map((msg, idx) => (
-                            <TouchableOpacity
+                            <TouchableOpacity onPress={handleLinkPress}
                                 key={idx}
-                                onPress={() => handleLinkPress(msg.text)}
                                 style={{
                                     alignSelf: msg.sender === "user" ? "flex-end" : "flex-start",
                                     backgroundColor:
@@ -224,19 +249,6 @@ const Chatbot = () => {
                                 </Text>
                             </TouchableOpacity>
                         ))}
-
-                        {isTyping && (
-                            <View
-                                style={{
-                                    backgroundColor: "#ddd",
-                                    padding: 10,
-                                    borderRadius: 14,
-                                    alignSelf: "flex-start",
-                                }}
-                            >
-                                <Text>Typing...</Text>
-                            </View>
-                        )}
                     </ScrollView>
 
                     {/* Input */}
@@ -246,6 +258,7 @@ const Chatbot = () => {
                             padding: 10,
                             borderTopWidth: 1,
                             borderColor: "#ccc",
+                            backgroundColor: "white",
                         }}
                     >
                         <TextInput
@@ -276,6 +289,8 @@ const Chatbot = () => {
                     </View>
                 </View>
             )}
+
+
         </View>
     );
 };

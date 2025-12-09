@@ -49,10 +49,12 @@ const SearchServices = ({ navigation, route }) => {
 
   const fetchServices = (page = 1, searchTerm = '', shouldAppend = false) => {
     setLoading(true);
+
     GET_WITH_TOKEN(
       buildApiUrl(page, searchTerm),
       success => {
         const responseData = success?.data?.data || [];
+
         const paginationInfo = success?.data?.last_page || {};
         if (shouldAppend) {
           setServices(prevServices => [...prevServices, ...responseData]);
@@ -120,6 +122,7 @@ const SearchServices = ({ navigation, route }) => {
   };
 
   const renderCard = ({ item }) => {
+
     return (
       <TouchableOpacity
         activeOpacity={0.85}
@@ -139,10 +142,12 @@ const SearchServices = ({ navigation, route }) => {
             </View>
           )}
         </View>
+
         {
           item?.is_cashback != "0" &&
           <View style={{ backgroundColor: COLOR.blue, paddingVertical: 5, borderBottomLeftRadius: 10, borderBottomRightRadius: 10 }}>
-            <Typography size={14} color={COLOR.white} font={Font.semibold} style={{ textAlign: "center" }}>Get {item?.is_cashback} off via QuickMySlot</Typography>
+            <Typography size={14} color={COLOR.white} font={Font.semibold} style={{ textAlign: "center" }}>Get upto {(parseInt(item?.is_cashback?.replace('%', '')) || 0) + 20}% discount via QuickMySlot
+            </Typography>
           </View>
         }
         <View style={[styles.cardContent]}>
@@ -154,13 +159,18 @@ const SearchServices = ({ navigation, route }) => {
               style={[styles.cardTitle, { width: "70%" }]}>
               {item?.business_name || 'Unknown Business'}
             </Typography>
-            <View style={{ flexDirection: "row" }}>
-              <Typography size={13}
-                font={Font.semibold}
-                color="#666">Unisex | ₹₹</Typography>
-            </View>
+            {
+              item?.service_category == 1 || item?.service_category == 2 || item?.service_category == 3 ?
+                <View style={{ flexDirection: "row" }}>
+                  <Typography size={13}
+                    font={Font.semibold}
+                    color="#666">Unisex | ₹₹</Typography>
+                </View> : ""
+            }
 
           </View>
+          {/* String(category) === "1" || */}
+          {/* String(category) === "2" || */}
           {/* {item?.business_description && (
           <Typography
             numberOfLines={2}

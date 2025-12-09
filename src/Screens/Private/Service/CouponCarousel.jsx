@@ -90,8 +90,8 @@ const CouponCarousel = ({ promoData, cashbackPercentage, title = "Offers availab
               </Text>
             </View>
 
-            {/* <Text style={styles.title}>{coupon.promo_code}</Text> */}
-            {/* <Text style={styles.description}>{coupon?.type}{' '}₹{coupon.amount} + {cashbackPercentage} Cashback</Text> */}
+            {/* <Text style={styles.title}>{coupons.promo_code}</Text> */}
+            {/* <Text style={styles.description}>{coupons?.type}{' '}₹{coupons.amount} + {cashbackPercentage} Cashback</Text> */}
 
             {/* Pagination section */}
             {promoData.length > 1 && <View style={styles.pageInfo}>

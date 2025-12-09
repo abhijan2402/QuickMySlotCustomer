@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -9,8 +9,8 @@ import {
   SectionList,
 } from 'react-native';
 import HomeHeader from '../../../Components/HomeHeader';
-import {COLOR} from '../../../Constants/Colors';
-import {Typography} from '../../../Components/UI/Typography'; // ✅ Import Typography
+import { COLOR } from '../../../Constants/Colors';
+import { Typography } from '../../../Components/UI/Typography'; // ✅ Import Typography
 import { useIsFocused } from '@react-navigation/native';
 import { GET_WITH_TOKEN } from '../../../Backend/Api';
 import { ADD_FAQ } from '../../../Constants/ApiRoute';
@@ -19,7 +19,7 @@ import { images } from '../../../Components/UI/images';
 
 
 const Faq = () => {
-   const isFocus = useIsFocused();
+  const isFocus = useIsFocused();
   const [loading, setLoading] = useState(false);
   const [faq, setFaq] = useState([]);
   const [expandedId, setExpandedId] = useState(null);
@@ -39,7 +39,7 @@ const Faq = () => {
             if (existing) {
               existing.data.push(item);
             } else {
-              acc.push({title: item.category, data: [item]});
+              acc.push({ title: item.category, data: [item] });
             }
             return acc;
           }, []);
@@ -73,18 +73,19 @@ const Faq = () => {
         <ActivityIndicator
           size="large"
           color="#007bff"
-          style={{marginTop: 20}}
+          style={{ marginTop: 20 }}
         />
       ) : (
         <SectionList
+          showsVerticalScrollIndicator={false}
           sections={faq}
           keyExtractor={(item, index) => item.id.toString() + index}
-          renderSectionHeader={({section: {title}}) => (
+          renderSectionHeader={({ section: { title } }) => (
             <Typography style={styles.sectionTitle} size={16} fontWeight="700">
               {title}
             </Typography>
           )}
-          renderItem={({item}) => (
+          renderItem={({ item }) => (
             <View style={styles.faqItem}>
               <TouchableOpacity
                 style={styles.faqHeader}
@@ -100,7 +101,7 @@ const Faq = () => {
                     source={
                       expandedId === item.id ? images.ArrowDown : images.ArrowDown
                     }
-                    style={{width: 16, height: 16, tintColor: '#555',transform:[{rotate: expandedId === item.id ? '180deg' : '0deg'}]}}
+                    style={{ width: 16, height: 16, tintColor: '#555', transform: [{ rotate: expandedId === item.id ? '180deg' : '0deg' }] }}
                     resizeMode="contain"
                   />
                 </TouchableOpacity>
@@ -155,5 +156,5 @@ const styles = StyleSheet.create({
     color: '#555',
     lineHeight: 18,
   },
-  
+
 });

@@ -1,4 +1,4 @@
-package com.quickmyslot
+package com.quickmyslotcustomer
 
 import android.os.Bundle; 
 import com.facebook.react.ReactActivity

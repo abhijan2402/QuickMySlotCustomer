@@ -187,6 +187,7 @@ const Chatbot = () => {
                         borderColor: "#ddd",
                         borderWidth: 1,
                         overflow: "hidden",
+                        zIndex: 1000
                     }}
                 >
                     {/* Header */}

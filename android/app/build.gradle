@@ -77,13 +77,13 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.quickmyslot"
+    namespace "com.quickmyslotcustomer"
     defaultConfig {
-        applicationId "com.quickmyslot"
+        applicationId "com.quickmyslotcustomer"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 8
-        versionName "1.7"
+        versionCode 5
+        versionName "1.4"
         
     }
     signingConfigs {

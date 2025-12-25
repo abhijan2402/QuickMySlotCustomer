@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:218547319777:android:4720c5a337caac87d858a0",
         "android_client_info": {
-          "package_name": "com.quickmyslot"
+          "package_name": "com.quickmyslotcustomer"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "218547319777-4dbc8eridimnd6c8d3m78oqu66m297vj.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.quickmyslot",
+            "package_name": "com.quickmyslotcustomer",
             "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
           }
         },

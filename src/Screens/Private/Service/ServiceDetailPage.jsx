@@ -48,6 +48,7 @@ const ProviderDetails = ({ navigation, route }) => {
   const [promoData, setPromoData] = useState([]);
   const isFocused = useIsFocused();
   const id = route?.params?.id;
+
   const km = route?.params?.km
   const [category, setCategory] = useState(null)
   useEffect(() => {

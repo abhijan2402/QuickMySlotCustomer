@@ -13,7 +13,7 @@ import { Font } from '../../../Constants/Font';
 
 const { width } = Dimensions.get('window');
 
-const CouponCarousel = ({ promoData, cashbackPercentage, title = "Offers available for you" }) => {
+const CouponCarousel = ({ type, promoData, cashbackPercentage, title = "Offers available for you" }) => {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollViewRef = useRef(null);
@@ -54,66 +54,127 @@ const CouponCarousel = ({ promoData, cashbackPercentage, title = "Offers availab
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>{title}</Text>
-      <ScrollView
-        ref={scrollViewRef}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        scrollEnabled={true} // allow manual scrolling
-        onMomentumScrollEnd={event => {
-          const newIndex = Math.round(
-            event.nativeEvent.contentOffset.x / width,
-          );
-          setCurrentIndex(newIndex);
-        }}>
-        {/* {promoData.map((coupon, index) => ( */}
-        <View style={styles.card}>
-          <View style={styles.contentRow}>
-            <Image
-              source={require('../../../assets/Images/discount.png')}
-              style={styles.icon}
-            />
-            <View style={styles.textContainer}>
-              <Text style={styles.title}>
-                Total discount upto{' '}
-                {cashbackPercentage
-                  ? Number(cashbackPercentage.replace('%', '')) + 20
-                  : 20}
-                %
-              </Text>
 
-              <Text style={styles.description}>
-                {cashbackPercentage != "0"
-                  ? `${cashbackPercentage} discount + Cashback upto 20%`
-                  : 'Cashback upto 20%'}
-              </Text>
-            </View>
+      {
+        type == "regular" &&
+        <>
+          <Text style={styles.header}>{title}</Text>
+          <ScrollView
+            ref={scrollViewRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            scrollEnabled={true} // allow manual scrolling
+            onMomentumScrollEnd={event => {
+              const newIndex = Math.round(
+                event.nativeEvent.contentOffset.x / width,
+              );
+              setCurrentIndex(newIndex);
+            }}>
+            {/* {promoData.map((coupon, index) => ( */}
+            <View style={styles.card}>
 
-            {/* <Text style={styles.title}>{coupons.promo_code}</Text> */}
-            {/* <Text style={styles.description}>{coupons?.type}{' '}₹{coupons.amount} + {cashbackPercentage} Cashback</Text> */}
+              <View style={styles.contentRow}>
+                <Image
+                  source={require('../../../assets/Images/discount.png')}
+                  style={styles.icon}
+                />
+                <View style={styles.textContainer}>
+                  <Text style={styles.title}>
+                    Total discount upto{' '}
+                    {cashbackPercentage
+                      ? Number(cashbackPercentage.replace('%', '')) + 20
+                      : 20}
+                    %
+                  </Text>
 
-            {/* Pagination section */}
-            {promoData.length > 1 && <View style={styles.pageInfo}>
-              <Text style={styles.pageText}>
-                {currentIndex + 1}/{promoData.length}
-              </Text>
-              <View style={styles.dots}>
-                {promoData.map((_, dotIndex) => (
-                  <View
-                    key={dotIndex}
-                    style={[
-                      styles.dot,
-                      dotIndex === currentIndex && styles.dotActive,
-                    ]}
-                  />
-                ))}
+                  <Text style={styles.description}>
+                    {cashbackPercentage != "0"
+                      ? `${cashbackPercentage} discount + Cashback upto 20%`
+                      : 'Cashback upto 20%'}
+                  </Text>
+                </View>
+                {
+                  console.log(promoData, "DATATATYAA")
+
+                }
+                {/* <Text style={styles.title}>{coupons.promo_code}</Text> */}
+                {/* <Text style={styles.description}>{coupons?.type}{' '}₹{coupons.amount} + {cashbackPercentage} Cashback</Text> */}
+
+                {/* Pagination section */}
+                {/* {promoData.length > 1 && <View style={styles.pageInfo}>
+                  <Text style={styles.pageText}>
+                    {currentIndex + 1}/{promoData.length}
+                  </Text>
+                  <View style={styles.dots}>
+                    {promoData.map((_, dotIndex) => (
+                      <View
+                        key={dotIndex}
+                        style={[
+                          styles.dot,
+                          dotIndex === currentIndex && styles.dotActive,
+                        ]}
+                      />
+                    ))}
+                  </View>
+                </View>} */}
               </View>
-            </View>}
-          </View>
-        </View>
-        {/* ))} */}
-      </ScrollView>
+            </View>
+            {/* ))} */}
+          </ScrollView>
+        </>
+      }
+      {
+        type == "main" &&
+        <>
+          <Text style={styles.header}>{"Coupon Discount for you"}</Text>
+          <ScrollView
+            ref={scrollViewRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            scrollEnabled={true} // allow manual scrolling
+            onMomentumScrollEnd={event => {
+              const newIndex = Math.round(
+                event.nativeEvent.contentOffset.x / width,
+              );
+              setCurrentIndex(newIndex);
+            }}>
+            {promoData.map((coupon, index) => (
+              <View key={coupon.id} style={styles.card}>
+                <View style={styles.contentRow}>
+                  <Image
+                    source={require('../../../assets/Images/discount.png')}
+                    style={styles.icon}
+                  />
+                  <View style={styles.textContainer}>
+                    <Text style={styles.title}>Use code "{coupon.promo_code}"</Text>
+                    <Text style={styles.description}>to get discount upto ₹{coupon.amount}</Text>
+                  </View>
+
+                  {/* Pagination section */}
+                  {promoData.length > 1 && <View style={styles.pageInfo}>
+                    <Text style={styles.pageText}>
+                      {currentIndex + 1}/{promoData.length}
+                    </Text>
+                    <View style={styles.dots}>
+                      {promoData.map((_, dotIndex) => (
+                        <View
+                          key={dotIndex}
+                          style={[
+                            styles.dot,
+                            dotIndex === currentIndex && styles.dotActive,
+                          ]}
+                        />
+                      ))}
+                    </View>
+                  </View>}
+                </View>
+              </View>
+            ))}
+          </ScrollView>
+        </>
+      }
     </SafeAreaView>
   );
 };

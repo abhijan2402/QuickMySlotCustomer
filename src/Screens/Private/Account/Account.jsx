@@ -45,6 +45,12 @@ const Account = ({ navigation }) => {
       navigate: 'EditProfile',
     },
     {
+      id: 110,
+      title: 'My Appointments',
+      icon: images.tc,
+      navigate: 'Appointment',
+    },
+    {
       id: 2,
       title: 'Membership',
       icon: images.membership,
@@ -56,6 +62,7 @@ const Account = ({ navigation }) => {
       icon: images.wishlist,
       navigate: 'Wishlist',
     },
+
     {
       id: 7,
       title: 'QuickMySlot Wallet',

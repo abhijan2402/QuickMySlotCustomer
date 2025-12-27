@@ -211,7 +211,7 @@ const SearchServices = ({ navigation, route }) => {
               <Image source={{ uri: "https://cdn-icons-png.flaticon.com/128/3334/3334338.png" }} style={{ width: 13, height: 13, marginRight: 2 }} />
               <Typography size={14}
                 color="#666"
-                font={Font.semibold}>3.4</Typography>
+                font={Font.semibold}>{item?.rating || 4.6}</Typography>
             </View>
           </View>
         </View>

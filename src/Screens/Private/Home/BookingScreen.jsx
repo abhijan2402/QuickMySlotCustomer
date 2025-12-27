@@ -48,7 +48,7 @@ const BookingScreen = ({ navigation, route }) => {
   const [calculate, setCalculate] = useState(false);
   const [loading, setLoading] = useState(false);
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
-  const [dateStart, setDateStart] = useState(null);
+  const [dateStart, setDateStart] = useState(moment().format("YYYY-MM-DD"));
   const { isKeyboardVisible } = useKeyboard();
   const [showServices, setShowServices] = useState(true);
   const [selectedOffer, setSelectedOffer] = useState('');
@@ -438,6 +438,27 @@ const BookingScreen = ({ navigation, route }) => {
       },
     );
   };
+  const isToday = dateStart === new Date().toISOString().split('T')[0];
+
+  const getValidTimes = () => {
+    if (!isToday) return times;
+
+    const now = new Date();
+
+    return times.filter(time => {
+      // Convert "08:30 AM" → Date object (today)
+      const [timePart, modifier] = time.split(' ');
+      let [hours, minutes] = timePart.split(':').map(Number);
+
+      if (modifier === 'PM' && hours !== 12) hours += 12;
+      if (modifier === 'AM' && hours === 12) hours = 0;
+
+      const slotTime = new Date();
+      slotTime.setHours(hours, minutes, 0, 0);
+
+      return slotTime > now;
+    });
+  };
   return (
     <View style={styles.container}>
       <View style={{ paddingHorizontal: 15 }}>
@@ -511,7 +532,10 @@ const BookingScreen = ({ navigation, route }) => {
               setSelectedTimes([]);
             }}
           />
+          {
+            console.log(dateStart, "SNJBDJDBJD")
 
+          }
           {/* Time Selector */}
           {times.length > 0 && (
             <View
@@ -550,24 +574,28 @@ const BookingScreen = ({ navigation, route }) => {
               </View>
 
               <View style={styles.timeGrid}>
-                {times.map(time => (
-                  <TouchableOpacity
-                    key={time}
-                    style={[
-                      styles.timeBox,
-                      selectedTimes.includes(time) && styles.selectedTimeBox,
-                    ]}
-                    onPress={() => toggleTimeSelection(time)}>
-                    <Typography
+                {dateStart &&
+                  getValidTimes().map(time => (
+                    <TouchableOpacity
+                      key={time}
                       style={[
-                        styles.timeText,
-                        selectedTimes.includes(time) && styles.selectedTimeText,
-                      ]}>
-                      {time}
-                    </Typography>
-                  </TouchableOpacity>
-                ))}
+                        styles.timeBox,
+                        selectedTimes.includes(time) && styles.selectedTimeBox,
+                      ]}
+                      onPress={() => toggleTimeSelection(time)}
+                    >
+                      <Typography
+                        style={[
+                          styles.timeText,
+                          selectedTimes.includes(time) && styles.selectedTimeText,
+                        ]}
+                      >
+                        {time}
+                      </Typography>
+                    </TouchableOpacity>
+                  ))}
               </View>
+
             </>
           ) : (
             <View style={styles.noSlotsContainer}>
@@ -765,10 +793,7 @@ const BookingScreen = ({ navigation, route }) => {
 
               </View>
             )}
-            {
-              console.log(Paymentbreakdown, "BRESLLALL")
 
-            }
             {/* Offer Applied */}
             {Paymentbreakdown?.promo_discount_amount > 0 && (
               <View style={styles.offerAppliedRow}>

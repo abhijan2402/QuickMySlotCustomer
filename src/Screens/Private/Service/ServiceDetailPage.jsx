@@ -239,7 +239,7 @@ const ProviderDetails = ({ navigation, route }) => {
           <ImageSwiper data={apiData?.portfolio_images} />}
 
         <View style={{ flexDirection: "row", alignItems: "center", position: "absolute", backgroundColor: COLOR.buttonDisabled, padding: 5, borderRadius: 5, right: 10, top: 15, paddingHorizontal: 10 }}>
-          <Typography size={14} style={{ marginRight: 5 }}>3.4</Typography>
+          <Typography size={14} style={{ marginRight: 5 }}>{apiData?.rating || 4.6}</Typography>
           <Image source={{ uri: "https://cdn-icons-png.flaticon.com/128/2107/2107957.png" }} style={{ width: 15, height: 15 }} />
 
         </View>
@@ -296,12 +296,12 @@ const ProviderDetails = ({ navigation, route }) => {
                   borderRadius: 10,
                   marginVertical: 5,
                   shadowColor: "#3B82F6",
-                  shadowOpacity: 0.2,
-                  shadowRadius: 4,
+                  shadowOpacity: 0.1,
+                  shadowRadius: 2,
                   elevation: 3,
                 }}
               >
-                <Typography style={{ color: "#1E3A8A", fontSize: 14, }} font={Font.medium}>
+                <Typography style={{ color: "#0c37abff", fontSize: 14, }} font={Font.medium}>
                   Final pricing may vary depending on the services you choose.
                 </Typography>
               </View>
@@ -482,7 +482,8 @@ const ProviderDetails = ({ navigation, route }) => {
             {apiData?.business_description}
           </Typography>
         </View>
-        <CouponCarousel title={"Discount Available for you"} promoData={promoData} cashbackPercentage={apiData?.is_cashback} />
+        <CouponCarousel type="regular" title={"Discount Available for you"} promoData={promoData} cashbackPercentage={apiData?.is_cashback} />
+        <CouponCarousel type="main" title={"Discount Available for you"} promoData={promoData} cashbackPercentage={apiData?.is_cashback} />
 
         {/* <CouponCarousel title={"Promotional Discount for you"} promoData={promoData} cashbackPercentage={apiData?.is_cashback} /> */}
         {/* Tabs */}

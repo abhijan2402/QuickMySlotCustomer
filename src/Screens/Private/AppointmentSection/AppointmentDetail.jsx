@@ -6,6 +6,7 @@ import {
   ScrollView,
   Image,
   Linking,
+  ActivityIndicator,
 } from 'react-native';
 import HomeHeader from '../../../Components/HomeHeader';
 import { COLOR } from '../../../Constants/Colors';
@@ -19,7 +20,7 @@ import { GET_WITH_TOKEN, POST_WITH_TOKEN } from '../../../Backend/Api';
 import { CANCEL_BOOKING, GET_BOOKING_DETAILS } from '../../../Constants/ApiRoute';
 import { images } from '../../../Components/UI/images';
 import moment from 'moment';
-import { cleanImageUrl } from '../../../Backend/Utility';
+import { cleanImageUrl, windowHeight, windowWidth } from '../../../Backend/Utility';
 
 const AppointmentDetail = ({ route, navigation }) => {
   const [cancelAppointment, setCancelAppointment] = useState(false);
@@ -28,7 +29,9 @@ const AppointmentDetail = ({ route, navigation }) => {
   const [data, setData] = useState(false);
   // console.log(data, 'data--->');
 
-  const id = route?.params?.appointment?.id || '';
+  const id = route?.params?.appointment?.id || route?.params?.id || '';
+  console.log(id, "IDSSSS");
+
   useEffect(() => {
     if (isFocused) {
       getBookingList();
@@ -76,6 +79,9 @@ const AppointmentDetail = ({ route, navigation }) => {
     );
   };
 
+
+
+
   const [time, date] = Object.entries(data?.schedule_time ?? {})[0] || [];
   const dateKeys =
     Object.values(
@@ -83,7 +89,7 @@ const AppointmentDetail = ({ route, navigation }) => {
     )[0]
 
   const timeKeys = Object.keys(
-    data?.schedule_time || route?.params?.appointment?.schedule_time,
+    data?.schedule_time || route?.params?.appointment?.schedule_time || "",
   );
   const amount = Number(data?.amount) || 0;
   const tax = Number(data?.tax) || 0;
@@ -112,6 +118,8 @@ const AppointmentDetail = ({ route, navigation }) => {
     total: 610,
     paymentMethod: 'UPI (Google Pay)',
   };
+  console.log(data, "DATATATAT");
+
   return (
     <View style={styles.container}>
       <HomeHeader
@@ -119,44 +127,78 @@ const AppointmentDetail = ({ route, navigation }) => {
         leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
         leftTint={COLOR.black}
       />
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 5, paddingBottom: 10 }}>
-        {/* Shop Info */}
-        <View style={styles.card}>
-          <Typography style={styles.sectionTitle}>Shop Details</Typography>
-          <Image
+      {
+        loading ?
+          <View style={{ height: windowHeight / 1.4, justifyContent: "center" }}>
+            <ActivityIndicator color={COLOR.primary} size={"large"} />
+
+          </View>
+          :
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 5, paddingBottom: 10 }}>
+            {
+              data?.status == "pending" &&
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  borderWidth: 1,
+                  paddingVertical: 10,
+                  borderRadius: 10,
+                  borderColor: COLOR.primary,
+                }}
+              >
+                <Image
+                  source={{ uri: "https://cdn-icons-png.flaticon.com/128/7256/7256192.png" }}
+                  style={{ width: 25, height: 25, marginLeft: 10 }}
+                />
+                <TouchableOpacity onPress={() => {
+                  navigation.navigate('AppointmentDetail', { appointment: i })
+                }} style={{ marginLeft: 10, width: windowWidth / 1.45 }}>
+                  <Typography size={13}>Pending Appointment</Typography>
+                  <Typography size={11}>
+                    We are waiting for store to confirm
+                  </Typography>
+                </TouchableOpacity>
+              </View>
+            }
+            {/* Shop Info */}
+            <View style={styles.card}>
+              <Typography style={styles.sectionTitle}>Shop Details</Typography>
+              {/* <Image
+            resizeMode="repeat"
             source={{
               uri:
                 cleanImageUrl(data?.vendor?.portfolio_images[0]?.image_url) ||
                 cleanImageUrl(data?.service?.image),
             }}
             style={styles.shopImg}
-          />
-          <Typography style={styles.shopName}>{data?.vendor?.business_name}</Typography>
-          <TouchableOpacity onPress={() => handleOpenMap('')}>
-            <View style={styles.infoRow}>
-              <Image
-                source={images.mark}
-                style={{ height: 16, width: 16, marginTop: 5 }}
-              />
-              <Typography style={styles.details} numberOfLines={2}>
-                {data.vendor?.exact_location || 'Address not available'}
-              </Typography>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleCall('9876367898')}>
-            <View style={styles.infoRow}>
-              <Image
-                source={images.call}
-                style={{ height: 16, width: 16 }}
-              />
-              <Typography style={styles.details} numberOfLines={2}>
-                {data.vendor?.phone_number || 'Address not available'}
-              </Typography>
-            </View>
-          </TouchableOpacity>
-          {/* <TouchableOpacity style={styles.chatBtn}>
+          /> */}
+              <Typography style={styles.shopName}>{data?.vendor?.business_name}</Typography>
+              <TouchableOpacity onPress={() => handleOpenMap('')}>
+                <View style={styles.infoRow}>
+                  <Image
+                    source={images.mark}
+                    style={{ height: 16, width: 16, marginTop: 5 }}
+                  />
+                  <Typography style={styles.details} numberOfLines={2}>
+                    {data.vendor?.exact_location || 'Address not available'}
+                  </Typography>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleCall(data.vendor?.phone_number)}>
+                <View style={styles.infoRow}>
+                  <Image
+                    source={images.call}
+                    style={{ height: 16, width: 16 }}
+                  />
+                  <Typography style={styles.details} numberOfLines={2}>
+                    {data.vendor?.phone_number || 'Phone number not available'}
+                  </Typography>
+                </View>
+              </TouchableOpacity>
+              {/* <TouchableOpacity style={styles.chatBtn}>
             <Typography style={styles.chatBtnText}>💬 Chat</Typography>
           </TouchableOpacity>
           <Button
@@ -171,134 +213,140 @@ const AppointmentDetail = ({ route, navigation }) => {
             }}
             titleColor={COLOR.primary}
           /> */}
-        </View>
+            </View>
 
-        {/* Customer Info */}
-        <View style={styles.card}>
-          <Typography style={styles.sectionTitle}>Customer Details</Typography>
-          <Typography style={styles.text}>👤 {data?.customer?.name}</Typography>
-          <TouchableOpacity onPress={() => handleCall('9876367898')}>
-            <View style={styles.infoRow}>
-              <Image
-                source={images.call}
-                style={{ height: 16, width: 16 }}
-              />
-              <Typography style={styles.details} numberOfLines={2}>
-                {data.vendor?.phone_number || 'Address not available'}
+            {/* Customer Info */}
+            <View style={styles.card}>
+              <Typography style={styles.sectionTitle}>Customer Details</Typography>
+              <Typography style={styles.text}>👤 {data?.customer?.name}</Typography>
+              <TouchableOpacity onPress={() => handleCall(data.customer?.phone_number)}>
+                <View style={styles.infoRow}>
+                  <Image
+                    source={images.call}
+                    style={{ height: 16, width: 16 }}
+                  />
+                  <Typography style={styles.details} numberOfLines={2}>
+                    {data.customer?.phone_number || 'Phone number not available'}
+                  </Typography>
+                </View>
+              </TouchableOpacity>
+
+            </View>
+
+            {/* Service Date/Time */}
+            <View style={styles.card}>
+              <Typography style={styles.sectionTitle}>Service Schedule</Typography>
+              <Typography style={[styles.text, { marginTop: 5 }]}>
+                📅 {moment(dateKeys).format("DD MMM, YYYY")}
+              </Typography>
+              <Typography style={[styles.text, { marginTop: 5 }]}>
+                ⏰{' '}
+                {timeKeys?.map((v, index) => {
+                  return (
+                    moment(v, 'HH:mm:A').format('hh:mm A') +
+                    (index == timeKeys?.length - 1 ? '' : ', ')
+                  );
+                })}
               </Typography>
             </View>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleOpenMap('')}>
-            <View style={styles.infoRow}>
-              <Image
-                source={images.mark}
-                style={{ height: 16, width: 16, marginTop: 5 }}
-              />
-              <Typography style={styles.details} numberOfLines={2}>
-                {data?.customer?.address || 'Address not available'}
-              </Typography>
+
+            {/* Services Breakdown */}
+            <View style={styles.card}>
+              <Typography style={styles.sectionTitle}>Services</Typography>
+
+              {Array.isArray(data?.services) && (
+                data.services.map((service, index) => (
+                  <View key={index} style={styles.serviceRow}>
+                    <Typography style={styles.text}>{service?.name}</Typography>
+                    <Typography style={styles.text}>₹{service?.price}</Typography>
+                  </View>
+                ))
+              )}
+
+              {data?.note ? <Typography style={{ borderTopWidth: 1, borderTopColor: COLOR.primary }}>Note: {data.note}</Typography> : null}
             </View>
-          </TouchableOpacity>
-        </View>
 
-        {/* Service Date/Time */}
-        <View style={styles.card}>
-          <Typography style={styles.sectionTitle}>Service Schedule</Typography>
-          <Typography style={[styles.text, { marginTop: 5 }]}>
-            📅 {moment(dateKeys).format("DD MMM, YYYY")}
-          </Typography>
-          <Typography style={[styles.text, { marginTop: 5 }]}>
-            ⏰{' '}
-            {timeKeys?.map((v, index) => {
-              return (
-                moment(v, 'HH:mm').format('hh:mm A') +
-                (index == timeKeys?.length - 1 ? '' : ', ')
-              );
-            })}
-          </Typography>
-        </View>
 
-        {/* Services Breakdown */}
-        <View style={styles.card}>
-          <Typography style={styles.sectionTitle}>Services</Typography>
-
-          {Array.isArray(data?.services) && (
-            data.services.map((service, index) => (
-              <View key={index} style={styles.serviceRow}>
-                <Typography style={styles.text}>{service?.name}</Typography>
-                <Typography style={styles.text}>₹{service?.price}</Typography>
+            {/* Price Details */}
+            <View style={styles.priceCard}>
+              <Typography style={styles.priceTitle}>Price Details</Typography>
+              <View style={styles.serviceRow}>
+                <Typography style={styles.text}>Sub Total</Typography>
+                <Typography style={styles.text}>₹{data?.calculation_breakdown?.subtotal}</Typography>
               </View>
-            ))
-          )}
 
-          {data?.note ? <Typography style={{ borderTopWidth: 1, borderTopColor: COLOR.primary }}>Note: {data.note}</Typography> : null}
-        </View>
-
-
-        {/* Price Details */}
-        <View style={styles.priceCard}>
-          <Typography style={styles.priceTitle}>Price Details</Typography>
-          <View style={styles.serviceRow}>
-            <Typography style={styles.text}>Sub Total</Typography>
-            <Typography style={styles.text}>₹{data?.calculation_breakdown?.subtotal}</Typography>
-          </View>
-
-          {
-            data?.gst_amount != "0.00" &&
-            <View style={styles.serviceRow}>
-              <Typography style={styles.text}>Taxes (GST)</Typography>
-              <Typography style={styles.text}>₹{data?.tax}</Typography>
+              {
+                data?.gst_amount != "0.00" &&
+                <View style={styles.serviceRow}>
+                  <Typography style={styles.text}>Taxes (GST)</Typography>
+                  <Typography style={styles.text}>₹{data?.tax}</Typography>
+                </View>
+              }
+              <View style={styles.serviceRow}>
+                <Typography style={styles.text}>Convenience fee</Typography>
+                <Typography style={styles.text}>₹{data?.convenience_fee}</Typography>
+              </View>
+              <View style={styles.serviceRow}>
+                <Typography style={styles.text}>Platform Fee</Typography>
+                <Typography style={styles.text}>₹{data?.calculation_breakdown?.platform_fee}</Typography>
+              </View>
+              {
+                data?.calculation_breakdown?.total_discount_amount &&
+                <View style={styles.serviceRow}>
+                  <Typography style={styles.text}>QuickMySlot Discount</Typography>
+                  <Typography style={styles.text}>-₹{data?.calculation_breakdown?.total_discount_amount}</Typography>
+                </View>
+              }
+              {
+                data?.calculation_breakdown?.additional_amount &&
+                <View style={styles.serviceRow}>
+                  <Typography style={styles.text}>Additional Amount</Typography>
+                  <Typography style={styles.text}>₹{data?.calculation_breakdown?.additional_amount}</Typography>
+                </View>
+              }
+              <View style={styles.divider} />
+              <View style={styles.serviceRow}>
+                <Typography style={styles.grandTotal}>Grand Total</Typography>
+                <Typography style={styles.grandTotal}>₹{data?.final_amount}</Typography>
+              </View>
             </View>
-          }
-          <View style={styles.serviceRow}>
-            <Typography style={styles.text}>Convenience fee</Typography>
-            <Typography style={styles.text}>₹{data?.convenience_fee}</Typography>
-          </View>
-          <View style={styles.serviceRow}>
-            <Typography style={styles.text}>Platform Fee</Typography>
-            <Typography style={styles.text}>₹{data?.calculation_breakdown?.platform_fee}</Typography>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.serviceRow}>
-            <Typography style={styles.grandTotal}>Grand Total</Typography>
-            <Typography style={styles.grandTotal}>₹{data?.final_amount}</Typography>
-          </View>
-        </View>
 
-        {/* Payment Method */}
-        {/* <View style={styles.card}>
+            {/* Payment Method */}
+            {/* <View style={styles.card}>
           <Typography style={styles.sectionTitle}>Payment Method</Typography>
           <Typography style={styles.text}>
             💳 {appointment.paymentMethod}
           </Typography>
         </View> */}
 
-        {/* Cancel Button */}
+            {/* Cancel Button */}
 
-        <Button
-          onPress={() => setCancelAppointment(true)}
-          title={'Cancel Appointment'}
-          titleColor={COLOR.red}
-          containerStyle={{
-            borderWidth: 1,
-            borderColor: COLOR.red,
-            backgroundColor: 'white',
-            marginTop: 20,
-          }}
-        />
+            <Button
+              onPress={() => setCancelAppointment(true)}
+              title={'Cancel Appointment'}
+              titleColor={COLOR.red}
+              containerStyle={{
+                borderWidth: 1,
+                borderColor: COLOR.red,
+                backgroundColor: 'white',
+                marginTop: 20,
+              }}
+            />
 
-        <Button
-          onPress={() => Linking.openURL(data?.invoice_pdf)}
-          title={'Download Invoice'}
-          titleColor={COLOR.white}
-          containerStyle={{
-            borderWidth: 1,
-            borderColor: COLOR.red,
-            backgroundColor: COLOR.primary,
-            marginTop: 10,
-          }}
-        />
-      </ScrollView>
+            <Button
+              onPress={() => Linking.openURL(data?.invoice_pdf)}
+              title={'Download Invoice'}
+              titleColor={COLOR.white}
+              containerStyle={{
+                borderWidth: 1,
+                borderColor: COLOR.red,
+                backgroundColor: COLOR.primary,
+                marginTop: 10,
+                marginBottom: 70
+              }}
+            />
+          </ScrollView>
+      }
       <ConfirmModal
         visible={cancelAppointment}
         close={() => setCancelAppointment(false)}

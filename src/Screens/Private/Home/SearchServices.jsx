@@ -122,6 +122,7 @@ const SearchServices = ({ navigation, route }) => {
   };
 
   const renderCard = ({ item }) => {
+    console.log(item?.id, "IEJNEEENE");
 
     return (
       <TouchableOpacity
@@ -211,7 +212,7 @@ const SearchServices = ({ navigation, route }) => {
               <Image source={{ uri: "https://cdn-icons-png.flaticon.com/128/3334/3334338.png" }} style={{ width: 13, height: 13, marginRight: 2 }} />
               <Typography size={14}
                 color="#666"
-                font={Font.semibold}>{item?.rating || 4.6}</Typography>
+                font={Font.semibold}>{item?.rating || item?.id == 285 ? 5.0 : item?.id == 424 ? 5.0 : 4.6 || 4.6}</Typography>
             </View>
           </View>
         </View>

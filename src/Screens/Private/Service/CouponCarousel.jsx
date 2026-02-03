@@ -94,10 +94,7 @@ const CouponCarousel = ({ type, promoData, cashbackPercentage, title = "Offers a
                       : 'Cashback upto 20%'}
                   </Text>
                 </View>
-                {
-                  console.log(promoData, "DATATATYAA")
 
-                }
                 {/* <Text style={styles.title}>{coupons.promo_code}</Text> */}
                 {/* <Text style={styles.description}>{coupons?.type}{' '}₹{coupons.amount} + {cashbackPercentage} Cashback</Text> */}
 

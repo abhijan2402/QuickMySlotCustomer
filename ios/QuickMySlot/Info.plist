@@ -21,26 +21,24 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string></string>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<!-- <string>218547319777-5bgbf2erkqnp0rqvq7kjgstejf0t8qiv.apps.googleusercontent.com</string> -->
-				<string>com.googleusercontent.apps.218547319777-t1ur6iegrrbj563lkc336fr8ogk4tiv1</string>
-			</array>
-		</dict>
-	</array>
-	<key>LSApplicationQueriesSchemes</key>
 <array>
-  <string>google</string>
-  <string>com.googleusercontent.apps.218547319777-t1ur6iegrrbj563lkc336fr8ogk4tiv1</string>
+  <dict>
+    <key>CFBundleTypeRole</key>
+    <string>Editor</string>
+    <key>CFBundleURLSchemes</key>
+    <array>
+      <string>com.googleusercontent.apps.218547319777-t1ur6iegrrbj563lkc336fr8ogk4tiv1</string>
+    </array>
+  </dict>
 </array>
+
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>google</string>
+		<string>com.googleusercontent.apps.218547319777-t1ur6iegrrbj563lkc336fr8ogk4tiv1</string>
+	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -57,7 +55,7 @@
 		</dict>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-<string>QuickMySlot app requires access to your camera to take photos to provide better services.</string>
+	<string>QuickMySlot app requires access to your camera to take photos to provide better services.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>QuickMySlot Wants To Access Your Location For Booking Purposes</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
@@ -84,6 +82,10 @@
 		<string>Montserrat-SemiBoldItalic.ttf</string>
 		<string>Montserrat-Thin.ttf</string>
 		<string>Montserrat-ThinItalic.ttf</string>
+	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

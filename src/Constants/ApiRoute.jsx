@@ -4,19 +4,21 @@ export const RESEND_OTP = 'resend-otp';
 export const GET_PROFILE = 'profile';
 export const UPDATE_PROFILE = 'customer/profile/update';
 export const HOME = 'customer/home';
+export const FCM_UPDATE = 'fmcUpdate';
+
 export const SERVICES = 'customer/vendor/list/Auth';
 export const SUPPORT = 'supports';
 export const VENDOR_DETAIL = 'customer/vendor/';
 export const DELETE_ACCOUNT = 'delete/user';
 export const ADD_WALLET = 'wallet';
-export const CMS = 'cms-page?type=vendor&slug=';
+export const CMS = 'cms-page?type=customer&slug=';
 export const ADD_FAQ = 'faq-support';
 export const ADD_TO_CART = 'customer/cart/add';
 export const REMOVE_TO_CART = 'customer/cart-remove/';
 export const ADD_TO_WISHLIST = 'customer/wishlist-add';
 export const REMOVE_TO_WISHLIST = 'customer/wishlist-remove';
 export const CLEAR_CART = 'customer/clear-cart';
-
+export const GOOGLE_LOGIN = "google"
 
 export const GET_CART = 'customer/cart';
 export const CUSTOMER_BOOKINGS = 'customer/bookings';
@@ -33,6 +35,10 @@ export const MEMBERSHIP_CREATE_ORDER = 'subscription/create-order';
 export const HIGHLIGHTED_PROMO_CODE = 'customer/promo-code/highlighted';
 export const BOOKING_VERIFY = 'customer/booking-verify';
 export const CUSTOMER_WISHLIST = 'customer/wishlist';
+
+
+export const GET_NOTIFICATION = 'notifications/list';
+export const NOTIFICATION_READ = 'read-all?type=is_all_read&id=1';
 
 
 

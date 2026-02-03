@@ -166,81 +166,73 @@ const OffersScreen = ({ navigation, route }) => {
 
         {/* Dynamic Offers List */}
         {!loading &&
-          promoData.map((offer, index) => (
-            <View
-              key={offer.id}
-              style={[
-                styles.card,
-                !isOfferActive(offer) && styles.inactiveCard,
-              ]}>
-              <View style={styles.cardHeader}>
-                <Typography style={styles.code}>{offer.promo_code}</Typography>
-                {isOfferActive(offer) && businessId && (
-                  <TouchableOpacity
-                    onPress={() => {
-                      getSelectedOffer(offer);
-                      navigation.goBack();
-                    }}
-                    style={{
-                      padding: 6,
-                      borderRadius: 6,
-                      borderWidth: 1,
-                      borderColor: isOfferActive(offer)
-                        ? COLOR.primary
-                        : '#ccc',
-                    }}
-                    disabled={!isOfferActive(offer)}>
-                    <Typography
-                      style={[
-                        styles.apply,
-                        !isOfferActive(offer) && styles.disabledApply,
-                      ]}>
-                      {isOfferActive(offer) ? 'APPLY' : 'EXPIRED'}
-                    </Typography>
-                  </TouchableOpacity>
-                )}
-              </View>
-
-              {/* Status Badge */}
-              {!isOfferActive(offer) && (
-                <View style={styles.expiredBadge}>
-                  <Typography style={styles.expiredText}>
-                    Offer Expired
-                  </Typography>
-                </View>
-              )}
-
-              <Typography style={styles.offerTitle}>
-                {getOfferTitle(offer)}
-              </Typography>
-              <Typography style={styles.discount}>
-                {getDiscountDescription(offer)}
-              </Typography>
-              <Typography style={styles.days}>
-                {getValidityText(offer)}
-              </Typography>
-              <Typography style={styles.description}>
-                {offer.description ||
-                  'Special discount offer for our valued customers.'}
-              </Typography>
-
-              {offer.extra_text && (
-                <Typography style={styles.extraText}>
-                  {offer.extra_text}
-                </Typography>
-              )}
-
+          promoData
+            ?.filter(offer => isOfferActive(offer))
+            ?.map((offer, index) => (
               <TouchableOpacity
+                key={offer.id}
                 onPress={() => {
-                  navigation.navigate('Cms', {
-                    title: 'Terms & Conditions',
-                    slug: 'terms-condition',
+                  console.log(offer?.user?.id, "OFFERRR");
+                  navigation.navigate('ProviderDetails', {
+                    id: offer?.user?.id,
+                    km: offer?.id,
                   });
-                }}>
-                <Typography style={styles.tnc}>T&C +</Typography>
+                }}
+                style={styles.card}
+              >
+                <TouchableOpacity style={styles.cardHeader}>
+                  <Typography style={styles.code}>{offer.promo_code}</Typography>
+
+                  {businessId && (
+                    <TouchableOpacity
+                      onPress={() => {
+                        getSelectedOffer(offer);
+                        navigation.goBack();
+                      }}
+                      style={{
+                        padding: 6,
+                        borderRadius: 6,
+                        borderWidth: 1,
+                        borderColor: COLOR.primary,
+                      }}
+                    >
+                      <Typography style={styles.apply}>APPLY</Typography>
+                    </TouchableOpacity>
+                  )}
+                </TouchableOpacity>
+
+                <Typography style={styles.offerTitle}>
+                  {getOfferTitle(offer)}
+                </Typography>
+                <Typography style={styles.discount}>
+                  {getDiscountDescription(offer)}
+                </Typography>
+                <Typography style={styles.days}>
+                  {getValidityText(offer)}
+                </Typography>
+                <Typography style={styles.description}>
+                  {offer.description ||
+                    'Special discount offer for our valued customers.'}
+                </Typography>
+
+                {offer.extra_text && (
+                  <Typography style={styles.extraText}>
+                    {offer.extra_text}
+                  </Typography>
+                )}
+
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate('Cms', {
+                      title: 'Terms & Conditions',
+                      slug: 'terms-condition',
+                    });
+                  }}
+                >
+                  <Typography style={styles.tnc}>T&C +</Typography>
+                </TouchableOpacity>
               </TouchableOpacity>
-            </View>
-          ))}
+            ))}
 
         <View style={{ height: 50 }} />
 

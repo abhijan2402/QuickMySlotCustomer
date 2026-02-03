@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -8,22 +8,22 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import {COLOR} from '../../../Constants/Colors';
-import {Typography} from '../../../Components/UI/Typography';
-import {Font} from '../../../Constants/Font';
+import { COLOR } from '../../../Constants/Colors';
+import { Typography } from '../../../Components/UI/Typography';
+import { Font } from '../../../Constants/Font';
 import HomeHeader from '../../../Components/HomeHeader';
-import {useIsFocused} from '@react-navigation/native';
-import {GET_WITH_TOKEN, POST_FORM_DATA} from '../../../Backend/Api'; // Added POST_FORM_DATA import
+import { useIsFocused } from '@react-navigation/native';
+import { GET_WITH_TOKEN, POST_FORM_DATA } from '../../../Backend/Api'; // Added POST_FORM_DATA import
 import {
   GET_MEMBERSHIP_LIST,
   MEMBERSHIP_CREATE_ORDER,
   MEMBERSHIP_VERIFY_PAYMENT,
 } from '../../../Constants/ApiRoute';
-import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 import RazorpayCheckout from 'react-native-razorpay';
-import {ToastMsg} from '../../../Backend/Utility'; // Added ToastMsg import
+import { ToastMsg } from '../../../Backend/Utility'; // Added ToastMsg import
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const Membership = () => {
   const [selectedPlan, setSelectedPlan] = useState(null);
@@ -36,7 +36,7 @@ const Membership = () => {
 
   // Razorpay configuration
   const razorpayConfig = {
-    key_id: 'rzp_test_RL1gmdHRZxYSlx',
+    key_id: 'rzp_live_Rtp1NvclC2UEPp',
     currency: 'INR',
     name: 'QuickMySlot',
     description: 'Membership Subscription',
@@ -166,7 +166,7 @@ const Membership = () => {
           contact: userdata?.phone_number || '9999999999',
           name: userdata?.name || 'User',
         },
-        theme: {color: COLOR.primary},
+        theme: { color: COLOR.primary },
       };
 
       console.log('Razorpay options:', options);
@@ -275,7 +275,7 @@ const Membership = () => {
     }
   };
 
-  const PlanCard = ({plan, index}) => {
+  const PlanCard = ({ plan, index }) => {
     const features = parseFeatures(plan);
     const isPopular = index === 1; // Mark second plan as popular, adjust as needed
     const isSelected = selectedPlan === plan.id;
@@ -355,7 +355,7 @@ const Membership = () => {
         />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLOR.primary} />
-          <Typography size={16} color="#666" style={{marginTop: 10}}>
+          <Typography size={16} color="#666" style={{ marginTop: 10 }}>
             Loading plans...
           </Typography>
         </View>
@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
   },
   popularPlan: {
     borderColor: COLOR.primary,
-    transform: [{scale: 1.02}],
+    transform: [{ scale: 1.02 }],
   },
   selectedPlan: {
     borderColor: COLOR.primary,

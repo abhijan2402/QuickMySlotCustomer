@@ -18,7 +18,7 @@ import { COLOR } from '../../../Constants/Colors';
 import { images } from '../../../Components/UI/images';
 import { Typography } from '../../../Components/UI/Typography';
 import { Font } from '../../../Constants/Font';
-import { GOOGLE_API } from '../../../Backend/Utility';
+import { GOOGLE_API, windowWidth } from '../../../Backend/Utility';
 import { useDispatch, useSelector } from 'react-redux';
 import { currentLocation } from '../../../Redux/action';
 import SimpleModal from '../../../Components/UI/SimpleModal';
@@ -97,6 +97,56 @@ const MainHomeHeader = () => {
     }
   };
 
+  const extractAreaAndCity = (address) => {
+    if (!address || typeof address !== "string") {
+      return "Location unavailable";
+    }
+
+    const parts = address
+      .split(",")
+      .map(p => p.trim())
+      .filter(Boolean);
+
+    // Remove plus codes
+    const cleaned = parts.filter(
+      part => !/^[A-Z0-9]+\+[A-Z0-9]+$/i.test(part)
+    );
+
+    // Remove country
+    const withoutCountry = cleaned.filter(
+      part => !/india|usa|uk|canada|australia|uae/i.test(part)
+    );
+
+    // --- Detect city ---
+    let city = "";
+    for (let i = withoutCountry.length - 1; i >= 0; i--) {
+      if (!/\d{4,}/.test(withoutCountry[i])) {
+        city = withoutCountry[i];
+        break;
+      }
+    }
+
+    // --- Detect sector ---
+    const sectorRegex = /\b(sec|sector)[-\s]?\d+[a-z]?\b/i;
+    let sector = withoutCountry.find(part => sectorRegex.test(part));
+
+    // --- Detect area fallback ---
+    let area = "";
+    if (!sector) {
+      for (let part of withoutCountry) {
+        if (part === city) break;
+        if (!/\d/.test(part)) {
+          area = part;
+          break;
+        }
+      }
+    }
+
+    return [sector || area, city].filter(Boolean).join(", ");
+  };
+
+
+
   const fetchLocation = async () => {
     try {
       setIsLoading(true);
@@ -106,8 +156,12 @@ const MainHomeHeader = () => {
         locationData.coords.latitude,
         locationData.coords.longitude,
       );
-      setLocation(address);
+      console.log(address, "ADRESSSSSS");
+      // const areaCity = getAreaAndCity(address);
+      const areaCity = extractAreaAndCity(address);
+      console.log(areaCity, "SATFSTDS");
 
+      setLocation(areaCity || address);
       // Set initial map region to current location
       setMapRegion({
         latitude: locationData.coords.latitude,
@@ -122,7 +176,7 @@ const MainHomeHeader = () => {
       });
 
       dispatch(
-        currentLocation({ address: address, coords: locationData.coords }),
+        currentLocation({ address: areaCity, coords: locationData.coords }),
       );
     } catch (error) {
       console.log(error, 'error----->>');
@@ -194,6 +248,7 @@ const MainHomeHeader = () => {
   const updateAddressFromCoordinates = async (lat, lng) => {
     try {
       const address = await getAddressFromCoordinates(lat, lng);
+
       setSearchQuery(address);
     } catch (error) {
       console.error('Error updating address:', error);
@@ -206,10 +261,11 @@ const MainHomeHeader = () => {
         selectedLocation.latitude,
         selectedLocation.longitude,
       );
-      setLocation(address);
+      const areaCity = extractAreaAndCity(address);
+      setLocation(areaCity || address);
       dispatch(
         currentLocation({
-          address: address,
+          address: areaCity,
           coords: {
             latitude: selectedLocation.latitude,
             longitude: selectedLocation.longitude,
@@ -223,6 +279,7 @@ const MainHomeHeader = () => {
     if (!storedLocation?.address) {
       fetchLocation();
     } else {
+
       setLocation(storedLocation?.address);
       setSearchQuery(storedLocation?.address);
       setMapRegion({
@@ -272,7 +329,7 @@ const MainHomeHeader = () => {
               Loading...
             </Text>
           ) : (
-            <Text style={styles.locationAddress} numberOfLines={1}>
+            <Text style={styles.locationAddress}>
               {location}
             </Text>
           )}
@@ -421,17 +478,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 12,
     paddingHorizontal: 6,
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.5,
+    // backgroundColor: '#fff',
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 1 },
+    // shadowOpacity: 0.2,
+    // shadowRadius: 1.5,
   },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
-    marginRight: 16,
+    marginRight: 10,
   },
   locationTextContainer: {
     marginLeft: 8,
@@ -446,6 +503,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Font.medium,
     color: COLOR.primary,
+    width: windowWidth / 2.7,
   },
   iconsContainer: {
     flexDirection: 'row',

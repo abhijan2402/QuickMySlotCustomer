@@ -1,53 +1,60 @@
-import React from 'react';
-import {View, StyleSheet, Image, ScrollView} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, Image, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import HomeHeader from '../../../Components/HomeHeader';
-import {COLOR} from '../../../Constants/Colors';
-import {Typography} from '../../../Components/UI/Typography';
-import {Font} from '../../../Constants/Font';
+import { COLOR } from '../../../Constants/Colors';
+import { Typography } from '../../../Components/UI/Typography';
+import { Font } from '../../../Constants/Font';
+import { GET_NOTIFICATION, NOTIFICATION_READ } from '../../../Constants/ApiRoute';
+import { GET_WITH_TOKEN } from '../../../Backend/Api';
+import { useIsFocused } from '@react-navigation/native';
+import moment from 'moment';
+import { windowHeight } from '../../../Backend/Utility';
 
-const notifications = [
-  {
-    id: 1,
-    icon: 'https://cdn-icons-png.flaticon.com/128/6834/6834351.png',
-    title: 'Booking Confirmed',
-    message:
-      'Your appointment with Dr. Emily Davis on Oct 26th at 2:00 PM is confirmed.',
-    time: '2 hours ago',
-    status: 'Read',
-    statusColor: 'green',
-  },
-  {
-    id: 2,
-    icon: 'https://cdn-icons-png.flaticon.com/128/2529/2529521.png',
-    title: 'Upcoming Appointment',
-    message:
-      'Reminder: Your appointment with John Doe is tomorrow at 10:00 AM.',
-    time: 'Yesterday',
-    status: 'Unread',
-    statusColor: 'gray',
-  },
-  {
-    id: 3,
-    icon: 'https://cdn-icons-png.flaticon.com/128/2529/2529521.png',
-    title: 'New Message Received',
-    message: 'You have a new message from Provider Jane Smith.',
-    time: '1 day ago',
-    status: 'New',
-    statusColor: 'blue',
-  },
-  {
-    id: 4,
-    icon: 'https://cdn-icons-png.flaticon.com/128/6834/6834351.png',
-    title: 'Booking Pending',
-    message:
-      'Your booking request for service "Haircut" with Stylist Mark is pending confirmation.',
-    time: '2 days ago',
-    status: 'Pending',
-    statusColor: 'orange',
-  },
-];
+const NotificationsScreen = ({ navigation }) => {
+  const [notifications, setNotification] = useState([]);
+  const isFocus = useIsFocused();
+  const [loading, setLoading] = useState(false);
 
-const NotificationsScreen = () => {
+  useEffect(() => {
+    if (isFocus) {
+      setLoading(true);
+      GET_WITH_TOKEN(
+        GET_NOTIFICATION,
+        success => {
+          // console.log(success?.data, "HIHI");
+
+          setNotification(success?.data)
+          setLoading(false);
+        },
+        error => {
+          console.log(error, 'errorerrorerror>>');
+          setLoading(false);
+        },
+        fail => {
+          console.log(fail, 'errorerrorerror>>');
+
+          setLoading(false);
+        },
+      );
+      GET_WITH_TOKEN(
+        NOTIFICATION_READ,
+        success => {
+          console.log(success, 'successsuccesssuccess-->>>');
+          setLoading(false);
+        },
+        error => {
+          console.log(error, 'errorerrorerror>>');
+          setLoading(false);
+        },
+        fail => {
+          console.log(fail, 'errorerrorerror>>');
+
+          setLoading(false);
+        },
+      );
+    }
+  }, [isFocus]);
+
   return (
     <View style={styles.container}>
       <HomeHeader
@@ -55,38 +62,48 @@ const NotificationsScreen = () => {
         leftIcon="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
         leftTint={COLOR.black}
       />
+      <View style={{ height: windowHeight / 1.2 }}>
+        {
+          loading ?
+            <View style={{ height: windowHeight / 1.4, justifyContent: "center" }}>
+              <ActivityIndicator color={COLOR.primary} size={"large"} />
+            </View> :
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingVertical: 10, paddingHorizontal: 5 }}>
+              {notifications?.length == 0 ?
+                <View style={{ flex: 1, justifyContent: "center", alignItems: "center", height: windowHeight / 1.3 }}>
+                  <Typography size={17} color={COLOR.primary}>No Notification to show!</Typography>
 
+                </View>
+                : notifications.map(item => (
+                  <TouchableOpacity onPress={() => {
+                    navigation.navigate('AppointmentDetail', { id: item?.booking_id })
+                  }} key={item.id} style={styles.card}>
+                    <View style={styles.cardRight}>
+                      <View style={styles.cardHeader}>
+                        <Typography size={14} font={Font.semibold} color={COLOR.black}>
+                          {item.title}
+                        </Typography>
+                      </View>
+                      <Typography
+                        size={12}
+                        font={Font.medium}
+                        color="#555"
+                        style={{ marginVertical: 4 }}>
+                        {item.message}
+                      </Typography>
+                      <Typography size={11} font={Font.regular} color="#888">
+                        {moment(item.created_at).format("DD MMM YYYY, hh:MM A")}
+                      </Typography>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+            </ScrollView>
+        }
+
+      </View>
       {/* Notifications List */}
-      <ScrollView
-        contentContainerStyle={{paddingVertical: 10, paddingHorizontal: 5}}>
-        {notifications.map(item => (
-          <View key={item.id} style={styles.card}>
-            <View style={styles.cardLeft}>
-              <Image source={{uri: item.icon}} style={styles.icon} />
-            </View>
-            <View style={styles.cardRight}>
-              <View style={styles.cardHeader}>
-                <Typography size={14} font={Font.semibold} color={COLOR.black}>
-                  {item.title}
-                </Typography>
-                {/* <Typography size={12} fontWeight="600" color={item.statusColor}>
-                  {item.status}
-                </Typography> */}
-              </View>
-              <Typography
-                size={12}
-                font={Font.medium}
-                color="#555"
-                style={{marginVertical: 4}}>
-                {item.message}
-              </Typography>
-              <Typography size={11} font={Font.regular} color="#888">
-                {item.time}
-              </Typography>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
     </View>
   );
 };
@@ -108,7 +125,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     shadowColor: '#000',
     shadowOpacity: 0.05,
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowRadius: 5,
     elevation: 1,
     borderWidth: 1,

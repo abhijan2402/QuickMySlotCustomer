@@ -22,7 +22,6 @@
 		65F8118FD1274D50A142468C /* Montserrat-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9F657EFDDB844CDAA1DF9D11 /* Montserrat-ExtraBold.ttf */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		913BE5972E995AA2009968D0 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 913BE5962E995AA2009968D0 /* GoogleService-Info.plist */; };
 		92039E57770B4E4AA256E643 /* Montserrat-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BA7868781A2847C6864FA576 /* Montserrat-SemiBoldItalic.ttf */; };
 		921786D64E71455491EBAC3C /* Montserrat-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 66EA659B26484458A2D08343 /* Montserrat-ExtraBoldItalic.ttf */; };
 		9D17BEBA75074799A14F2267 /* Montserrat-ThinItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5896089A4DD2477B9B4918EA /* Montserrat-ThinItalic.ttf */; };
@@ -31,6 +30,8 @@
 		C19C58F266FC440D9F722846 /* Montserrat-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E0B536743138491F89099D05 /* Montserrat-Italic.ttf */; };
 		C4A6E068A3DC48E9A32347FD /* Montserrat-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C8245CC8212E41909C96ADF2 /* Montserrat-Medium.ttf */; };
 		C5C76610D8F15867B134A057 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
+		FE29A08C2EFF978B0077D1F5 /* Temp.c in Sources */ = {isa = PBXBuildFile; fileRef = FE29A08B2EFF978B0077D1F5 /* Temp.c */; };
+		FE8C45342F094958005901ED /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FE8C45332F094958005901ED /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,7 +53,6 @@
 		7CCB23A0D2884B6C9B791E3D /* Montserrat-BoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-BoldItalic.ttf"; path = "../src/assets/fonts/Montserrat-BoldItalic.ttf"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = QuickMySlot/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8B6478C6F432445A8A2B629A /* Montserrat-ExtraLightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-ExtraLightItalic.ttf"; path = "../src/assets/fonts/Montserrat-ExtraLightItalic.ttf"; sourceTree = "<group>"; };
-		913BE5962E995AA2009968D0 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		9F657EFDDB844CDAA1DF9D11 /* Montserrat-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-ExtraBold.ttf"; path = "../src/assets/fonts/Montserrat-ExtraBold.ttf"; sourceTree = "<group>"; };
 		BA7868781A2847C6864FA576 /* Montserrat-SemiBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-SemiBoldItalic.ttf"; path = "../src/assets/fonts/Montserrat-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
 		BAE4EFCAAFC440D8AE54D5FC /* Montserrat-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Black.ttf"; path = "../src/assets/fonts/Montserrat-Black.ttf"; sourceTree = "<group>"; };
@@ -63,6 +63,11 @@
 		E0B536743138491F89099D05 /* Montserrat-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Italic.ttf"; path = "../src/assets/fonts/Montserrat-Italic.ttf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F2A3339C64A7D2C2E323BA0F /* Pods_QuickMySlot.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_QuickMySlot.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FE29A0892EFF978B0077D1F5 /* QuickMySlot-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "QuickMySlot-Bridging-Header.h"; sourceTree = "<group>"; };
+		FE29A08A2EFF978B0077D1F5 /* Temp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Temp.h; sourceTree = "<group>"; };
+		FE29A08B2EFF978B0077D1F5 /* Temp.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Temp.c; sourceTree = "<group>"; };
+		FE8C452E2F094668005901ED /* QuickMySlot.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = QuickMySlot.entitlements; path = QuickMySlot/QuickMySlot.entitlements; sourceTree = "<group>"; };
+		FE8C45332F094958005901ED /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,12 +85,16 @@
 		13B07FAE1A68108700A75B9A /* QuickMySlot */ = {
 			isa = PBXGroup;
 			children = (
-				913BE5962E995AA2009968D0 /* GoogleService-Info.plist */,
+				FE8C452E2F094668005901ED /* QuickMySlot.entitlements */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
+				FE29A08A2EFF978B0077D1F5 /* Temp.h */,
+				FE29A08B2EFF978B0077D1F5 /* Temp.c */,
+				FE29A0892EFF978B0077D1F5 /* QuickMySlot-Bridging-Header.h */,
+				FE8C45332F094958005901ED /* GoogleService-Info.plist */,
 			);
 			name = QuickMySlot;
 			sourceTree = "<group>";
@@ -197,7 +206,7 @@
 				LastUpgradeCheck = 1210;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
-						LastSwiftMigration = 1120;
+						LastSwiftMigration = 2600;
 					};
 				};
 			};
@@ -246,7 +255,7 @@
 				05D81879CEF44A799EB12680 /* Montserrat-SemiBold.ttf in Resources */,
 				92039E57770B4E4AA256E643 /* Montserrat-SemiBoldItalic.ttf in Resources */,
 				44A6A3E67FF74719ADFB34A0 /* Montserrat-Thin.ttf in Resources */,
-				913BE5972E995AA2009968D0 /* GoogleService-Info.plist in Resources */,
+				FE8C45342F094958005901ED /* GoogleService-Info.plist in Resources */,
 				9D17BEBA75074799A14F2267 /* Montserrat-ThinItalic.ttf in Resources */,
 				C5C76610D8F15867B134A057 /* PrivacyInfo.xcprivacy in Resources */,
 			);
@@ -358,6 +367,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
+				FE29A08C2EFF978B0077D1F5 /* Temp.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -370,6 +380,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = QuickMySlot/QuickMySlot.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -377,13 +388,13 @@
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = QuickMySlot/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Quick my slot";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 3.5;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -396,6 +407,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "QuickMySlot-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -409,19 +421,20 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = QuickMySlot/QuickMySlot.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 8SC959BG3A;
 				INFOPLIST_FILE = QuickMySlot/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Quick my slot";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 3.5;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -434,6 +447,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "QuickMySlot-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 				VERSIONING_SYSTEM = "apple-generic";

@@ -24,10 +24,10 @@ import { CURRENCY, ToastMsg } from '../../../Backend/Utility';
 import { GET_WITH_TOKEN, POST_FORM_DATA } from '../../../Backend/Api';
 import { BOOKING_VERIFY, CUSTOMER_BOOKINGS, GET_CART, REMOVE_TO_CART } from '../../../Constants/ApiRoute';
 import { useSelector } from 'react-redux';
-import RazorpayCheckout from 'react-native-razorpay';
 import AvailOfferModal from '../../../Components/UI/AvailOfferModal';
 import CalculateBillOffer from '../../../Components/UI/CalculateBillOffer';
 import { useIsFocused } from '@react-navigation/native';
+import RazorpayCheckout from 'react-native-razorpay';
 
 const BookingScreen = ({ navigation, route }) => {
   const isFocus = useIsFocused()
@@ -38,6 +38,8 @@ const BookingScreen = ({ navigation, route }) => {
   // const cartItems = route?.params?.cartItems || [];
   // const totalPrice = route?.params?.totalPrice || 0;
   const userDetail = useSelector(state => state.userDetails);
+  console.log(userDetail, "USERRR____DETAIL");
+
   const [selectedServices, setSelectedServices] = useState([]);
   const userdata = useSelector(store => store.userDetails);
   const [selectedDate, setSelectedDate] = useState(27);
@@ -120,6 +122,11 @@ const BookingScreen = ({ navigation, route }) => {
     if (selectedTimes.length === 0) {
       ToastMsg('Please select at least one time slot.');
       return;
+    }
+    if (userDetail?.email == null || userDetail?.name == null) {
+      navigation.navigate("EditProfile")
+      ToastMsg('Please provide your name and email to continue.');
+      return
     }
     if (is_paid_key) {
       initiateRazorpayPayment(is_paid_key);
@@ -226,25 +233,36 @@ const BookingScreen = ({ navigation, route }) => {
   };
 
   // Razorpay configuration (Remove key_secret from frontend!)
+  // rzp_test_RL1gmdHRZxYSlx
+
   const razorpayConfig = {
-    key_id: 'rzp_test_RL1gmdHRZxYSlx', // Only key_id should be in frontend
+    key_id: 'rzp_live_Rtp1NvclC2UEPp',
     currency: 'INR',
     name: 'QuickMySlot',
     description: 'Add Amount to Wallet',
   };
 
   const initiateRazorpayPayment = async is_paid_key => {
+    console.log("S1");
+
     const amount = Paymentbreakdown?.final_amount;
     if (!amount || amount <= 0) {
       ToastMsg('Please enter a valid amount');
       return;
     }
     setLoading(true);
+    console.log("S2");
+
     try {
       // Step 1: Create Razorpay order on your backend
+      console.log("S3");
+
       const orderData = await handleSubmit(is_paid_key);
+      console.log("S4");
+
       const orderId = orderData?.order_id || orderData?.data?.razorpay_order_id;
       const bookingID = orderData?.data?.booking?.id
+      console.log("S5");
 
       if (!orderId) {
         // // console.log('Order data received:', orderData);
@@ -269,12 +287,17 @@ const BookingScreen = ({ navigation, route }) => {
         },
         theme: { color: COLOR.primary },
       };
+      console.log("S6");
 
       // console.log('Razorpay options:', options);
 
       // Step 3: Open Razorpay checkout
+      console.log("S7");
+
       RazorpayCheckout.open(options)
         .then(data => {
+          console.log("S8");
+
           // Step 4: Verify payment on your backend
           verifyPayment({
             bookingId: bookingID,
@@ -282,8 +305,12 @@ const BookingScreen = ({ navigation, route }) => {
             razorpay_order_id: data.razorpay_order_id,
             razorpay_signature: data.razorpay_signature,
           });
+          console.log("S9");
+
         })
         .catch(error => {
+          console.log("S10");
+
           setLoading(false);
           if (error.code === 2) {
             ToastMsg('Payment was cancelled');
@@ -701,7 +728,6 @@ const BookingScreen = ({ navigation, route }) => {
                     const service = item?.service;
                     const category = service?.category;
                     const provider = service?.user;
-                    console.log(category, "VAHSVHGVS");
 
                     return (
                       <View

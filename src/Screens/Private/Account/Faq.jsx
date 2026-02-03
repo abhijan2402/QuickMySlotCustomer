@@ -28,9 +28,8 @@ const Faq = () => {
     if (isFocus) {
       setLoading(true);
       GET_WITH_TOKEN(
-        ADD_FAQ,
+        `${ADD_FAQ}?role=customer`,
         success => {
-          console.log(success);
           setLoading(false);
           const grouped = success?.data?.reduce((acc, item) => {
             console.log(acc);
@@ -80,11 +79,11 @@ const Faq = () => {
           showsVerticalScrollIndicator={false}
           sections={faq}
           keyExtractor={(item, index) => item.id.toString() + index}
-          renderSectionHeader={({ section: { title } }) => (
-            <Typography style={styles.sectionTitle} size={16} fontWeight="700">
-              {title}
-            </Typography>
-          )}
+          // renderSectionHeader={({ section: { title } }) => (
+          //   <Typography style={styles.sectionTitle} size={16} fontWeight="700">
+          //     {title}
+          //   </Typography>
+          // )}
           renderItem={({ item }) => (
             <View style={styles.faqItem}>
               <TouchableOpacity

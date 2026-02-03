@@ -48,6 +48,65 @@ const ProviderDetails = ({ navigation, route }) => {
   const [promoData, setPromoData] = useState([]);
   const isFocused = useIsFocused();
   const id = route?.params?.id;
+  const dummyReviews = [
+    {
+      id: 2,
+      name: "Rahul Verma",
+      date: "6 Jan, 2026",
+      rating: 4,
+      review: "Good experience overall. Clean place and polite staff."
+    },
+    {
+      id: 8,
+      name: "Vikas Yadav",
+      date: "6 Jan, 2026",
+      rating: 4,
+      review: "Nice experience overall. Pricing is reasonable too."
+    },
+    {
+      id: 9,
+      name: "Anjali Nair",
+      date: "5 Jan, 2026",
+      rating: 5,
+      review: "Wonderful place! The spa session was super soothing."
+    },
+    {
+      id: 6,
+      name: "Karan Mehta",
+      date: "4 Jan, 2026",
+      rating: 5,
+      review: "Excellent service! The stylist really understood what I wanted."
+    },
+    {
+      id: 3,
+      name: "Sneha Kapoor",
+      date: "3 Jan, 2026",
+      rating: 5,
+      review: "Loved the ambience and the service quality!"
+    },
+    {
+      id: 1,
+      name: "Priya Sharma",
+      date: "2 Jan, 2026",
+      rating: 5,
+      review: "Amazing service and very friendly staff! Highly recommend this salon."
+    },
+    {
+      id: 7,
+      name: "Riya Gupta",
+      date: "29 Dec, 2025",
+      rating: 5,
+      review: "Friendly staff and relaxing environment. Highly recommended."
+    },
+    {
+      id: 10,
+      name: "Rohit Mishra",
+      date: "29 Dec, 2025",
+      rating: 3,
+      review: "Service was average, but staff was polite."
+    }
+
+  ];
 
   const km = route?.params?.km
   const [category, setCategory] = useState(null)
@@ -160,15 +219,27 @@ const ProviderDetails = ({ navigation, route }) => {
   ];
   const ShopFetch = () => {
     setLoading(true);
+    console.log(` VENDOR_DETAIL + ${id}`, "ALLLLLL");
+
     GET_WITH_TOKEN(
       VENDOR_DETAIL + `${id}`,
       success => {
+        // console.log(success, "SUCESSS");
+
         setCategory(success?.data?.service_category)
         setApiData(success?.data);
         setLoading(false);
       },
-      error => setLoading(false),
-      fail => setLoading(false)``,
+      error => {
+        console.log(error, "ERROORO");
+
+        setLoading(false)
+      },
+      fail => {
+        console.log(fail, "FAILLLL");
+
+        setLoading(false)
+      },
     );
   }
   useEffect(() => {
@@ -239,7 +310,7 @@ const ProviderDetails = ({ navigation, route }) => {
           <ImageSwiper data={apiData?.portfolio_images} />}
 
         <View style={{ flexDirection: "row", alignItems: "center", position: "absolute", backgroundColor: COLOR.buttonDisabled, padding: 5, borderRadius: 5, right: 10, top: 15, paddingHorizontal: 10 }}>
-          <Typography size={14} style={{ marginRight: 5 }}>{apiData?.rating || 4.6}</Typography>
+          <Typography size={14} style={{ marginRight: 5 }}>{apiData?.rating || apiData?.id == 285 ? 5.0 : apiData?.id == 424 ? 5.0 : 4.6 || 4.6}</Typography>
           <Image source={{ uri: "https://cdn-icons-png.flaticon.com/128/2107/2107957.png" }} style={{ width: 15, height: 15 }} />
 
         </View>
@@ -276,8 +347,25 @@ const ProviderDetails = ({ navigation, route }) => {
                   style={{ height: 24, width: 26, marginRight: 20 }}
                 />
               </TouchableOpacity>
+
               <TouchableOpacity
-                onPress={() => onShare(apiData?.exact_location)}>
+                onPress={() => {
+                  let message = `🛍️ *${apiData?.business_name || "Shop"}*
+
+📍 Address: ${apiData?.FullAddress || apiData?.exact_location || "Not available"}
+📞 Contact: ${apiData?.phone_number || "Not available"}
+
+✨ Services by ${apiData?.business_name || "our vendor"}
+
+`;
+
+                  // If lat/long exist → add Maps link
+                  if (apiData?.lat && apiData?.long) {
+                    message += `🗺️ Google Maps: https://www.google.com/maps?q=${apiData.lat},${apiData.long}\n`;
+                  }
+
+                  onShare(message)
+                }}>
                 <Image
                   source={require('../../../assets/Images/share.png')}
                   style={{ height: 24, width: 24 }}
@@ -587,48 +675,43 @@ const ProviderDetails = ({ navigation, route }) => {
 
             <Text style={styles.sectionTitle}>Customer Reviews</Text>
             <FlatList
-              data={[1, 2]}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={() => (
+              data={dummyReviews}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
                 <View style={styles.reviewCard}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+
+                  {/* Name + Date row */}
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+
+                    <View style={{ flexDirection: "row", alignItems: "center" }}>
                       <Image
-                        source={require('../../../assets/Images/userprofile.png')}
+                        source={require("../../../assets/Images/userprofile.png")}
                         style={{ height: 14, width: 14 }}
                       />
                       <Text style={[styles.reviewUser, { marginLeft: 5 }]}>
-                        Priya Sharma
+                        {item.name}
                       </Text>
                     </View>
-                    <View>
-                      <Text style={[styles.sectionText]}>17th Sep, 2025</Text>
-                    </View>
+
+                    <Text style={styles.sectionText}>{item.date}</Text>
                   </View>
+
+                  {/* Stars */}
                   <FlatList
-                    data={[1, 2, 3, 4, 5]}
-                    keyExtractor={(item, index) => index.toString()}
+                    data={Array(item.rating).fill(0)}
                     horizontal
+                    keyExtractor={(_, index) => index.toString()}
                     renderItem={() => (
                       <Image
-                        source={require('../../../assets/Images/star.png')}
-                        style={{
-                          height: 14,
-                          width: 14,
-                          marginTop: 5,
-                          marginRight: 5,
-                        }}
+                        source={require("../../../assets/Images/star.png")}
+                        style={{ height: 14, width: 14, marginTop: 5, marginRight: 5 }}
                       />
                     )}
                   />
+
+                  {/* Review text */}
                   <Typography style={styles.reviewText}>
-                    Amazing service and very friendly staff! Highly recommend
-                    this salon.
+                    {item.review}
                   </Typography>
                 </View>
               )}
@@ -671,52 +754,48 @@ const ProviderDetails = ({ navigation, route }) => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Customer Reviews</Text>
             <FlatList
-              data={[1, 2]}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={() => (
+              data={dummyReviews}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
                 <View style={styles.reviewCard}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+
+                  {/* Name + Date row */}
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+
+                    <View style={{ flexDirection: "row", alignItems: "center" }}>
                       <Image
-                        source={require('../../../assets/Images/userprofile.png')}
+                        source={require("../../../assets/Images/userprofile.png")}
                         style={{ height: 14, width: 14 }}
                       />
                       <Text style={[styles.reviewUser, { marginLeft: 5 }]}>
-                        Priya Sharma
+                        {item.name}
                       </Text>
                     </View>
-                    <View>
-                      <Text style={[styles.sectionText]}>17th Sep, 2025</Text>
-                    </View>
+
+                    <Text style={styles.sectionText}>{item.date}</Text>
                   </View>
+
+                  {/* Stars */}
                   <FlatList
-                    data={[1, 2, 3, 4, 5]}
-                    keyExtractor={(item, index) => index.toString()}
+                    data={Array(item.rating).fill(0)}
                     horizontal
+                    keyExtractor={(_, index) => index.toString()}
                     renderItem={() => (
                       <Image
-                        source={require('../../../assets/Images/star.png')}
-                        style={{
-                          height: 14,
-                          width: 14,
-                          marginTop: 5,
-                          marginRight: 5,
-                        }}
+                        source={require("../../../assets/Images/star.png")}
+                        style={{ height: 14, width: 14, marginTop: 5, marginRight: 5 }}
                       />
                     )}
                   />
+
+                  {/* Review text */}
                   <Typography style={styles.reviewText}>
-                    Amazing service and very friendly staff! Highly recommend
-                    this salon.
+                    {item.review}
                   </Typography>
                 </View>
               )}
             />
+
           </View>
         )}
 

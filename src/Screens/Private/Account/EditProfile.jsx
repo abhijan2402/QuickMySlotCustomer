@@ -35,7 +35,6 @@ const EditProfile = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [profileImage, setProfileImage] = useState({});
-  console.log(profileImage, 'profileImageprofileImageprofileImage');
 
   const [isEditing, setIsEditing] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -178,7 +177,7 @@ const EditProfile = ({ navigation }) => {
             value={phone}
             onChangeText={setPhone}
             keyboardType="phone-pad"
-            editable={false}
+            // editable={false}
             error={error?.phone}
             inputContainer={{ marginBottom: 20 }}
           />

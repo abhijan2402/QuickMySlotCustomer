@@ -15,38 +15,37 @@ import { Font } from '../../Constants/Font';
 const GoogleAuthButton = ({ onLoginSuccess }) => {
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId:
-        '218547319777-5bgbf2erkqnp0rqvq7kjgstejf0t8qiv.apps.googleusercontent.com',
-      offlineAccess: false,
-      scopes: ['profile', 'email'],
+      webClientId: '218547319777-5bgbf2erkqnp0rqvq7kjgstejf0t8qiv.apps.googleusercontent.com',
     });
   }, []);
 
   const handleGoogleLogin = async () => {
     try {
-      // ✅ Check if user already signed in
-      // const currentUser = await GoogleSignin.getCurrentUser();
-      // if (currentUser) {
-      //   await GoogleSignin.signOut();
-      //   await auth().signOut();
-      //   console.log('Signed out from previous Google session.');
-      // }
+      await GoogleSignin.signOut(); // ensure clean state
 
-      // ✅ Start Google Sign-In flow
-      const { idToken } = await GoogleSignin.signIn();
-      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-      const userSignIn = await auth().signInWithCredential(googleCredential);
+      const userInfo = await GoogleSignin.signIn();
 
-      console.log('User signed in:', userSignIn.user);
-
-      if (onLoginSuccess) {
-        onLoginSuccess(userSignIn.user);
+      console.log('Google response:', userInfo?.data);
+      onLoginSuccess(userInfo?.data)
+      if (!userInfo.data?.idToken) {
+        throw new Error('Google idToken missing');
       }
+
+      // const googleCredential =
+      //   auth.GoogleAuthProvider.credential(userInfo?.data?.idToken);
+
+      // const result =
+      //   await auth().signInWithCredential(googleCredential);
+
+      // console.log('Firebase user:', result.user);
+
+      // onLoginSuccess?.(result.user);
     } catch (error) {
-      console.error('Google Sign-In Error:', error);
-      // Alert.alert('Login Failed', error.message);
+      console.log('Google Sign-In Error:', error);
     }
   };
+
+
 
   return (
     <TouchableOpacity

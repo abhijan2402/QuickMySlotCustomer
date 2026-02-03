@@ -212,6 +212,8 @@ export const POST_WITH_TOKEN = async (
   },
 ) => {
   const tokenVal = store.getState().Token;
+  console.log(`${API}${route}`, "URLROLRL");
+
   try {
     await axios({
       method: 'post',

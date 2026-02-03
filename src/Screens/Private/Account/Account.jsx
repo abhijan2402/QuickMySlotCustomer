@@ -29,12 +29,10 @@ const Account = ({ navigation }) => {
   const userdata = useSelector(store => store.userDetails);
   const [loading, setLoading] = useState(false);
   const token = useSelector(store => store.Token);
-  console.log(token);
 
   const profileImage = userdata?.image
     ? userdata?.image
     : 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
-  console.log(userdata, 'profileImageprofileImage-->>');
 
   const arrowIcon = 'https://cdn-icons-png.flaticon.com/512/271/271228.png'; // right arrow icon
   const tabs = [
@@ -50,12 +48,12 @@ const Account = ({ navigation }) => {
       icon: images.tc,
       navigate: 'Appointment',
     },
-    {
-      id: 2,
-      title: 'Membership',
-      icon: images.membership,
-      navigate: 'Membership',
-    },
+    // {
+    //   id: 2,
+    //   title: 'Membership',
+    //   icon: images.membership,
+    //   navigate: 'Membership',
+    // },
     {
       id: 9,
       title: 'Wishlist',

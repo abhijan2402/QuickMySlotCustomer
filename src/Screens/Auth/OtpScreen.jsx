@@ -1,4 +1,4 @@
-import React, {useContext, useRef, useState, useEffect} from 'react';
+import React, { useContext, useRef, useState, useEffect } from 'react';
 import {
   Image,
   SafeAreaView,
@@ -9,25 +9,25 @@ import {
   Touchable,
   TouchableWithoutFeedback,
 } from 'react-native';
-import {COLOR} from '../../Constants/Colors';
+import { COLOR } from '../../Constants/Colors';
 import CustomButton from '../../Components/CustomButton';
-import {windowHeight} from '../../Constants/Dimensions';
+import { windowHeight } from '../../Constants/Dimensions';
 import HomeHeader from '../../Components/HomeHeader';
-import {AuthContext} from '../../Backend/AuthContent';
-import {Typography} from '../../Components/UI/Typography';
+import { AuthContext } from '../../Backend/AuthContent';
+import { Typography } from '../../Components/UI/Typography';
 import Button from '../../Components/UI/Button';
-import {POST, useApi} from '../../Backend/Api';
-import {RESEND_OTP, VERIFY_OTP} from '../../Constants/ApiRoute';
-import {isValidForm, ToastMsg} from '../../Backend/Utility';
-import {validators} from '../../Backend/Validator';
-import {ErrorBox} from '../../Components/UI/ErrorBox';
-import {isAuth, Token, userDetails} from '../../Redux/action';
-import {useDispatch} from 'react-redux';
-import {Font} from '../../Constants/Font';
+import { POST, useApi } from '../../Backend/Api';
+import { RESEND_OTP, VERIFY_OTP } from '../../Constants/ApiRoute';
+import { isValidForm, ToastMsg } from '../../Backend/Utility';
+import { validators } from '../../Backend/Validator';
+import { ErrorBox } from '../../Components/UI/ErrorBox';
+import { isAuth, Token, userDetails } from '../../Redux/action';
+import { useDispatch } from 'react-redux';
+import { Font } from '../../Constants/Font';
 import Header from '../../Components/FeedHeader';
-import {images} from '../../Components/UI/images';
+import { images } from '../../Components/UI/images';
 
-const OtpScreen = ({navigation, route}) => {
+const OtpScreen = ({ navigation, route }) => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const inputs = useRef([]);
   const user_id = route?.params?.userId;
@@ -61,7 +61,7 @@ const OtpScreen = ({navigation, route}) => {
     }
   };
 
-  const handleKeyPress = ({nativeEvent}, index) => {
+  const handleKeyPress = ({ nativeEvent }, index) => {
     if (nativeEvent.key === 'Backspace' && otp[index] === '' && index > 0) {
       inputs.current[index - 1].focus();
     }
@@ -86,7 +86,7 @@ const OtpScreen = ({navigation, route}) => {
     // setLoading(true);
     const otpCode = otp.join('');
 
-    const body = {user_id: user_id, otp: otpCode};
+    const body = { user_id: user_id, otp: otpCode };
     POST(
       VERIFY_OTP,
       body,
@@ -96,13 +96,13 @@ const OtpScreen = ({navigation, route}) => {
         ToastMsg(success?.message);
         dispatch(Token(success?.token));
         dispatch(isAuth(true));
-        const d = {...success?.user};
+        const d = { ...success?.user };
         dispatch(userDetails(d));
       },
       error => {
         console.log(error, 'errorerrorerror>>');
         setLoading(false);
-        setError({otp: error?.error});
+        setError({ otp: error?.error });
         // ToastMsg(error?.message);
       },
       fail => {
@@ -113,7 +113,7 @@ const OtpScreen = ({navigation, route}) => {
   };
 
   const resend = async () => {
-    const form = {phone_number: phone};
+    const form = { phone_number: phone };
     POST(
       RESEND_OTP,
       form,
@@ -133,91 +133,95 @@ const OtpScreen = ({navigation, route}) => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View style={styles.container} >
-      <Header
-        title="OTP Verification"
-        showBack="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
-        leftTint={COLOR.black}
-        onBackPress={() => navigation.goBack()}
-      />
-
-      <Image source={images.logo} style={styles.logo} />
-
-      <View style={{padding: 20, alignItems: 'center'}}>
-        <Typography
-          size={18}
-          font={Font.semibold}
-          color={COLOR.black}
-          lineHeight={20}>
-          OTP Verification
-        </Typography>
-
-        <Typography
-          font={Font.medium}
-          size={14}
-          color={COLOR.black}
-          textAlign="center"
-          lineHeight={20}
-          style={{marginTop: 10}}>
-          We have sent a 6-digit verification code to your registered mobile
-          number ending in **** {phone?.slice(-4)}. Please enter it below.
-        </Typography>
-      </View>
-
-      {/* OTP Input Fields */}
-      <View style={styles.otpContainer}>
-        {otp.map((digit, index) => (
-          <TextInput
-            key={index}
-            ref={ref => (inputs.current[index] = ref)}
-            style={styles.otpInput}
-            keyboardType="number-pad"
-            maxLength={1}
-            value={digit}
-            onChangeText={text => handleChange(text, index)}
-            onKeyPress={e => handleKeyPress(e, index)}
-          />
-        ))}
-      </View>
-      {error?.otp && (
-        <ErrorBox
-          style={{marginTop: 0, marginBottom: 10, marginHorizontal: 20}}
-          error={error?.otp}
+      <View style={styles.container} >
+        <Header
+          title="OTP Verification"
+          showBack="https://cdn-icons-png.flaticon.com/128/2722/2722991.png"
+          leftTint={COLOR.black}
+          onBackPress={() => navigation.goBack()}
         />
-      )}
-      <View style={{padding: 20}}>
-        <Button
-          title={'Verify'}
-          onPress={verifyOtp}
-          containerStyle={{
-            marginTop: windowHeight * 0.06,
-          }}
-          loading={loading}
-        />
-      </View>
 
-      <View
-        style={{marginTop: 20, flexDirection: 'row', justifyContent: 'center'}}>
-        <Typography size={14} color={COLOR.black}>
-          Didn't receive the code?{' '}
-        </Typography>
-        {timer > 0 ? (
-          <Typography font={Font.medium} size={14} color={COLOR.gray}>
-            Resend in {timer}s
-          </Typography>
-        ) : (
+        <Image source={images.logo} style={styles.logo} />
+
+        <View style={{ padding: 20, alignItems: 'center' }}>
           <Typography
-            size={14}
-            color={COLOR.primary}
+            size={18}
             font={Font.semibold}
-            disabled={false}
-            onPress={resend}>
-            Resend OTP
+            color={COLOR.black}
+            lineHeight={20}>
+            OTP Verification
           </Typography>
+
+          <Typography
+            font={Font.medium}
+            size={14}
+            color={COLOR.black}
+            textAlign="center"
+            lineHeight={20}
+            style={{ marginTop: 10 }}>
+            We have sent a 6-digit verification code to your registered mobile
+            number ending in **** {phone?.slice(-4)}. Please enter it below.
+          </Typography>
+        </View>
+
+        {/* OTP Input Fields */}
+        <View style={styles.otpContainer}>
+          {otp.map((digit, index) => (
+            <TextInput
+
+              key={index}
+              ref={ref => (inputs.current[index] = ref)}
+              style={styles.otpInput}
+              keyboardType="number-pad"
+              maxLength={1}
+              value={digit}
+              onChangeText={text => handleChange(text, index)}
+              onKeyPress={e => handleKeyPress(e, index)}
+              textContentType="oneTimeCode"     // iOS
+              autoComplete="sms-otp"             // Android
+              importantForAutofill="yes"
+            />
+          ))}
+        </View>
+        {error?.otp && (
+          <ErrorBox
+            style={{ marginTop: 0, marginBottom: 10, marginHorizontal: 20 }}
+            error={error?.otp}
+          />
         )}
+        <View style={{ padding: 20 }}>
+          <Button
+            title={'Verify'}
+            onPress={verifyOtp}
+            containerStyle={{
+              marginTop: windowHeight * 0.06,
+            }}
+            loading={loading}
+          />
+        </View>
+
+        <View
+          style={{ marginTop: 20, flexDirection: 'row', justifyContent: 'center' }}>
+          <Typography size={14} color={COLOR.black}>
+            Didn't receive the code?{' '}
+          </Typography>
+          {timer > 0 ? (
+            <Typography font={Font.medium} size={14} color={COLOR.gray}>
+              Resend in {timer}s
+            </Typography>
+          ) : (
+            <Typography
+              size={14}
+              color={COLOR.primary}
+              font={Font.semibold}
+              disabled={false}
+              onPress={resend}>
+              Resend OTP
+            </Typography>
+          )}
+        </View>
       </View>
-    </View>
-      </TouchableWithoutFeedback>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -259,6 +263,6 @@ const styles = StyleSheet.create({
     marginTop: windowHeight * 0.05,
     resizeMode: 'contain',
     alignSelf: 'center',
-    marginBottom:10
+    marginBottom: 10
   },
 });

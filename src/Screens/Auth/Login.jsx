@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Image,
   KeyboardAvoidingView,
@@ -17,30 +17,39 @@ import { ScrollView } from 'react-native';
 import Input from '../../Components/Input';
 import { Typography } from '../../Components/UI/Typography';
 import { validators } from '../../Backend/Validator';
-import { SIGN_UP } from '../../Constants/ApiRoute';
-import { API, POST, useApi } from '../../Backend/Api';
+import { GOOGLE_LOGIN, SIGN_UP } from '../../Constants/ApiRoute';
+import { API, POST, POST_FORM_DATA, useApi } from '../../Backend/Api';
 import useKeyboard from '../../Constants/Utility';
 import { images } from '../../Components/UI/images';
 import { isAuth, Token, userDetails } from '../../Redux/action';
 import { Font } from '../../Constants/Font';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fcmService } from '../../Notification/FMCService';
+
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { useDispatch } from 'react-redux';
 
 const Login = ({ navigation }) => {
   const [number, setNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { isKeyboardVisible } = useKeyboard();
+  const dispatch = useDispatch();
+
   console.log('lllll');
 
   const onSubmit = () => {
     let error = {
-      mobile: validators.checkNumber('Mobile Number', number),
+      mobile: validators.checkPhoneNumberWithFixLength('Mobile Number', 10, number),
     };
     setError(error);
     if (isValidForm(error)) {
       handleSignup();
     }
   };
+
+
 
   const handleSignup = async () => {
     setLoading(true);
@@ -70,11 +79,48 @@ const Login = ({ navigation }) => {
     );
   };
 
-  const handleLoginSuccess = user => {
-    console.log(user, "USERRRRR");
+  const handleLoginSuccess = async googleData => {
+    setLoading(true);
 
-    // https://api.quickmyslot.com/public/api/google
+    const formData = new FormData();
+
+    formData.append('provider', 'google');
+    formData.append('role', '2');
+
+    formData.append('data[id]', googleData.user.id);
+    formData.append('data[email]', googleData.user.email);
+    formData.append('data[name]', googleData.user.name);
+    formData.append('data[image]', googleData.user.photo);
+    console.log(formData, "FORMMMMM");
+
+    POST_FORM_DATA(
+      GOOGLE_LOGIN,
+      formData,
+      success => {
+        setLoading(false);
+        console.log(success, "SUCESSS___LO");
+        if (success?.status == "error") {
+          ToastMsg(success?.msg)
+        } else {
+          dispatch(Token(success?.token));
+          dispatch(isAuth(true));
+          const d = { ...success?.data };
+          dispatch(userDetails(d));
+          console.log(success, "FINALLL");
+        }
+
+      },
+      error => {
+        console.log('API Error:', error);
+        setLoading(false);
+      },
+      fail => {
+        console.log('API Error:', fail);
+        setLoading(false);
+      },
+    );
   };
+
 
   return (
     <KeyboardAvoidingView
@@ -116,11 +162,15 @@ const Login = ({ navigation }) => {
             keyboardType="numeric"
             placeholder="Enter Mobile Number"
             value={number}
-            onChangeText={text => setNumber(text)}
+            onChangeText={text => {
+              const cleaned = text?.replace(/[^0-9]/g, ''); // remove non-digits
+              setNumber(cleaned.slice(0, 10)); // limit to 10 digits
+            }}
             error={error.mobile}
             leftIcon={true}
             text={'+ 91'}
           />
+
 
           {/* Continue Button */}
           <Button
@@ -131,16 +181,16 @@ const Login = ({ navigation }) => {
           />
 
           {/* Divider with text */}
-          {/* <View style={styles.dividerContainer}>
+          <View style={styles.dividerContainer}>
             <View style={styles.divider} />
             <Typography font={Font.semibold} size={14} color="#888" style={{ paddingHorizontal: 15 }}>
               Or
             </Typography>
             <View style={styles.divider} />
-          </View> */}
+          </View>
 
           {/* Google Login Button */}
-          {/* <GoogleAuthButton onLoginSuccess={handleLoginSuccess} /> */}
+          <GoogleAuthButton onLoginSuccess={handleLoginSuccess} />
         </LinearGradient>
       </ScrollView>
     </KeyboardAvoidingView>

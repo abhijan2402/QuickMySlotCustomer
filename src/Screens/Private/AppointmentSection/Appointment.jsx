@@ -149,7 +149,7 @@ const Appointment = ({ navigation }) => {
           <Typography style={styles.dateText}>
             {timeKeys?.map((v, index) => {
               return (
-                moment(v, 'HH:mm').format('hh:mm A') +
+                moment(v, 'HH:mm:A').format('hh:mm A') +
                 (index == timeKeys?.length - 1 ? '' : ', ')
               );
             })}

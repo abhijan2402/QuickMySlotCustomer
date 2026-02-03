@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   TouchableOpacity,
@@ -9,27 +9,37 @@ import {
   ActivityIndicator,
   RefreshControl,
   Dimensions,
+  Text,
+  TextInput
 } from 'react-native';
 import HomeHeader from '../../../Components/HomeHeader';
 import CustomButton from '../../../Components/CustomButton';
-import {COLOR} from '../../../Constants/Colors';
-import {Typography} from '../../../Components/UI/Typography';
-import {Font} from '../../../Constants/Font';
-import {useIsFocused} from '@react-navigation/native';
-import {GET_WITH_TOKEN} from '../../../Backend/Api';
-import {GET_BOOKING_LIST} from '../../../Constants/ApiRoute';
+import { COLOR } from '../../../Constants/Colors';
+import { Typography } from '../../../Components/UI/Typography';
+import { Font } from '../../../Constants/Font';
+import { useIsFocused } from '@react-navigation/native';
+import { GET_WITH_TOKEN, POST_FORM_DATA, POST_WITH_TOKEN } from '../../../Backend/Api';
+import { BOOKING_VERIFY, GET_BOOKING_LIST } from '../../../Constants/ApiRoute';
 import moment from 'moment';
+import RazorpayCheckout from 'react-native-razorpay';
+import { ToastMsg, windowHeight, windowWidth } from '../../../Backend/Utility';
+import { useSelector } from 'react-redux';
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const PayBill = () => {
   const isFocused = useIsFocused();
-
+  const [updatedCalculation, setupdatedCalculation] = useState(null)
+  const [updatedOrderId, setupdatedOrderId] = useState(null)
+  const [showExtraPayInput, setShowExtraPayInput] = useState(false);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
+  const [extraPayAmount, setExtraPayAmount] = useState("");
   const [appointments, setAppointments] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [loader, setLoader] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const userdata = useSelector(store => store.userDetails);
 
   // Calculate totals based on API data
   const calculateTotals = appointment => {
@@ -38,18 +48,18 @@ const PayBill = () => {
     const platformFee = parseFloat(appointment?.platform_fee) || 0;
     const total = subtotal + tax + platformFee;
 
-    return {subtotal, tax, platformFee, total};
+    return { subtotal, tax, platformFee, total };
   };
 
   // Format date and time from schedule_time object
   const formatDateTime = scheduleTime => {
-    if (!scheduleTime) return {date: 'N/A', time: 'N/A'};
+    if (!scheduleTime) return { date: 'N/A', time: 'N/A' };
 
     try {
       const timeKeys = Object.keys(scheduleTime).filter(key =>
         key.includes(':'),
       );
-      if (timeKeys.length === 0) return {date: 'N/A', time: 'N/A'};
+      if (timeKeys.length === 0) return { date: 'N/A', time: 'N/A' };
 
       // Get the first time slot
       const time = timeKeys[0];
@@ -67,9 +77,9 @@ const PayBill = () => {
         formattedDate = 'Invalid Date';
       }
 
-      return {date: formattedDate, time};
+      return { date: formattedDate, time };
     } catch (error) {
-      return {date: 'N/A', time: 'N/A'};
+      return { date: 'N/A', time: 'N/A' };
     }
   };
 
@@ -146,141 +156,395 @@ const PayBill = () => {
 
   const getBookingList = () => {
     setLoader(true);
-    GET_WITH_TOKEN(
-      GET_BOOKING_LIST +
-        `?status=pending&date=${moment(new Date()).format(
+    GET_BOOKING_LIST +
+      // `?status=pending&date=2026-01-21`,
+      //    GET_BOOKING_LIST +
+      // `?status=accepted&date=${moment(new Date()).format(
+      //   'YYYY-MM-DD',
+      // )}`,
+      GET_WITH_TOKEN(
+        GET_BOOKING_LIST +
+        `?status=accepted&date=${moment(new Date()).format(
           'YYYY-MM-DD',
-        )}&is_has_order_id=1`,
+        )}`,
+        success => {
+
+          setAppointments(success?.data || []);
+          setLoader(false);
+        },
+        error => {
+          setLoader(false);
+          console.log('Error in booking list:', error);
+        },
+        fail => {
+          setLoader(false);
+          console.log('Failed to get booking list:', fail);
+        },
+      );
+  };
+
+  const bookPay = (id, amount = 0, subtotalVal = 0) => {
+    const formData = new FormData()
+    console.log(amount, subtotalVal, "AMOUBDBDB", Number(amount) - Number(subtotalVal));
+    if (Number(amount) - Number(subtotalVal) < 0) {
+      ToastMsg("Amount must be greater than total amount");
+      return
+    }
+    const updatedAmount = Number(amount) - Number(subtotalVal)
+    console.log(updatedAmount, "UPDARATATAT");
+
+    formData.append("additional_amount", updatedAmount)
+
+    // setLoading(true);
+    // return
+    POST_FORM_DATA(
+      'customer/booking-create/' + id,
+      formData,
       success => {
-        setAppointments(success?.data || []);
-        setLoader(false);
+        console.log(success?.data?.calculation_breakdown, 'PAYYYYYY____', success?.data?.order_id,);
+        setupdatedCalculation(success?.data?.calculation_breakdown)
+        setupdatedOrderId(success?.data?.booking?.order_id || success?.data?.order_id)
+        setSelectedAppointmentId(null)
+        getBookingList()
+        if (updatedAmount == 0) {
+          initiateRazorpayPayment(success?.data?.booking?.order_id || success?.data?.order_id, id)
+        }
+        setExtraPayAmount(null)
       },
       error => {
-        setLoader(false);
-        console.log('Error in booking list:', error);
+        console.log(error, "ERRRR");
+        ToastMsg(error?.message);
+
+        // setLoading(false);
+        // console.log(success);
       },
       fail => {
-        setLoader(false);
-        console.log('Failed to get booking list:', fail);
+        console.log(fail, "FDAIIAI");
+        ToastMsg(fail?.message);
+
+        // setLoading(false);
+        console.log(fail);
       },
     );
   };
 
-  const renderAppointmentCard = appointment => {
-    const {total} = calculateTotals(appointment);
-    const {date, time} = formatDateTime(appointment.schedule_time);
-    const timeSlots = getAllTimeSlots(appointment.schedule_time);
+
+  // renderAppointmentCard
+  const renderAppointmentCard = (appointment) => {
+    const isSelected = selectedAppointmentId === appointment.id;
 
     return (
-      <View key={appointment.id} style={styles.bookingCard}>
-        {/* Top Image with Overlay */}
-        <ImageBackground
-          source={{uri: getServiceImage(appointment)}}
-          style={styles.salonImage}
-          imageStyle={styles.salonImageStyle}>
-          {/* Image Overlay */}
-          <View style={styles.imageOverlay} />
+      <View
+        style={{
+          backgroundColor: "#fff",
+          padding: 14,
+          borderRadius: 12,
+          marginBottom: 12,
+          elevation: 3,
+          borderWidth: 1,
+          borderColor: COLOR.primary
+        }}
+      >
+        {/* Shop Name */}
+        <Text style={{ fontSize: 18, fontFamily: Font.semibold }}>
+          {appointment?.vendor?.business_name ||
+            appointment?.vendor?.name ||
+            "Shop name"}
+        </Text>
 
-          {/* Status Badge */}
-          <View
-            style={[styles.statusBadge, getStatusStyle(appointment.status)]}>
-            <Typography style={styles.statusText}>
-              {appointment.status?.toUpperCase()}
-            </Typography>
-          </View>
+        {/* Address */}
+        <Text style={{ color: "#555", marginTop: 2, fontFamily: Font.medium }}>
+          {appointment?.vendor?.FullAddress ||
+            appointment?.vendor?.city ||
+            "Address not available"}
+        </Text>
 
-          {/* Floating Total Badge */}
-          <View style={styles.amountBadge}>
-            <Typography style={styles.amountBadgeText}>
-              {formatCurrency(total)}
-            </Typography>
-          </View>
+        {/* Service Name */}
+        <Text style={{ marginTop: 6, fontWeight: "600" }}>
+          Service: {appointment?.services?.[0]?.name || "-"}
+        </Text>
 
-          {/* Service Info Overlay */}
-          <View style={styles.imageInfo}>
-            <Typography style={styles.serviceNameOverlay}>
-              {getServiceName(appointment)}
-            </Typography>
-            <Typography style={styles.vendorNameOverlay}>
-              {getVendorName(appointment)}
-            </Typography>
-          </View>
-        </ImageBackground>
+        {/* Date */}
+        <Text style={{ marginTop: 4 }}>
+          Date: {Object.values(appointment?.schedule_time || {})?.[0] || "-"}
+        </Text>
 
-        {/* Details Section */}
-        <View style={styles.detailsSection}>
-          {/* Basic Info Row */}
-          <View style={styles.infoRow}>
-            <View style={styles.infoItem}>
-              <Typography style={styles.infoLabel}>Order ID</Typography>
-              <Typography style={styles.infoValue} numberOfLines={1}>
-                {appointment.order_id}
-              </Typography>
-            </View>
-            <View style={styles.infoItem}>
-              <Typography style={styles.infoLabel}>Appointment</Typography>
-              <Typography style={styles.infoValue}>{date}</Typography>
-            </View>
-          </View>
-
-          {/* Time Slots */}
-          {timeSlots.length > 0 && (
-            <View style={styles.timeSlotsContainer}>
-              <Typography style={styles.timeSlotsLabel}>Time Slots:</Typography>
-              <View style={styles.timeSlots}>
-                {timeSlots.slice(0, 3).map((slot, index) => (
-                  <View key={index} style={styles.timeChip}>
-                    <Typography style={styles.timeChipText}>
-                      {slot.time}
-                    </Typography>
-                  </View>
-                ))}
-                {timeSlots.length > 3 && (
-                  <View style={styles.moreTimeChip}>
-                    <Typography style={styles.moreTimeText}>
-                      +{timeSlots.length - 3}
-                    </Typography>
-                  </View>
-                )}
-              </View>
-            </View>
-          )}
-
-          {/* Service Details */}
-          <View style={styles.serviceDetails}>
-            <View style={styles.serviceDetailRow}>
-              <Typography style={styles.detailLabel}>Service:</Typography>
-              <Typography style={styles.detailValue}>
-                {getServiceName(appointment)}
-              </Typography>
-            </View>
-            {appointment.note && (
+        {/* Time Slots */}
+        <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 6 }}>
+          {appointment?.schedule_time &&
+            Object.keys(appointment.schedule_time).map((time, index) => (
               <View
-                style={[styles.serviceDetailRow, {alignItems: 'flex-start'}]}>
-                <Typography style={styles.detailLabel}>Note:</Typography>
-                <Typography style={styles.noteText}>
-                  {appointment.note}
+                key={index}
+                style={{
+                  paddingHorizontal: 10,
+                  paddingVertical: 4,
+                  backgroundColor: COLOR.backgroundLight,
+                  borderRadius: 20,
+                  marginRight: 6,
+                  marginTop: 4,
+                }}
+              >
+                <Text>{time}</Text>
+              </View>
+            ))}
+        </View>
+
+        {/* Amounts */}
+        <Text style={{ marginTop: 10, fontWeight: "600" }}>
+          Subtotal: ₹ {appointment?.subtotal || "-"}
+        </Text>
+
+        <Text style={{ marginTop: 4, fontWeight: "700", fontSize: 16 }}>
+          Final Amount: ₹ {appointment?.final_amount}
+        </Text>
+        {
+          updatedCalculation?.subtotal &&
+          <View style={styles.priceCard}>
+            <Typography style={styles.priceTitle}>Price Details</Typography>
+            <View style={styles.serviceRow}>
+              <Typography style={styles.text}>Sub Total</Typography>
+              <Typography style={styles.text}>
+                ₹{Number(updatedCalculation?.subtotal || 0).toFixed(2)}
+              </Typography>
+            </View>
+
+            {
+              updatedCalculation?.gst_amount != "0.00" &&
+              <View style={styles.serviceRow}>
+                <Typography style={styles.text}>Taxes (GST)</Typography>
+                <Typography style={styles.text}>₹{updatedCalculation?.tax}</Typography>
+              </View>
+            }
+            <View style={styles.serviceRow}>
+              <Typography style={styles.text}>Convenience fee</Typography>
+              <Typography style={styles.text}>₹{Number(updatedCalculation?.convenience_fee || 0)?.toFixed(2)}
+              </Typography>
+            </View>
+            <View style={styles.serviceRow}>
+              <Typography style={styles.text}>Platform Fee</Typography>
+              <Typography style={styles.text}>₹{updatedCalculation?.platform_fee}</Typography>
+            </View>
+            {updatedCalculation?.total_discount_amount > 0 && (
+              <View style={styles.serviceRow}>
+                <Typography style={styles.offerAppliedText}>Discount</Typography>
+                <Typography style={[styles.offerCode, { color: 'green' }]}>
+                  -₹{updatedCalculation?.total_discount_amount && updatedCalculation?.total_discount_amount?.toFixed(2)}
                 </Typography>
               </View>
             )}
+            {
+              updatedCalculation?.cashback_amount &&
+              <Typography style={[styles.offerAppliedText, { marginTop: 10, color: COLOR.green }]}>You will get a cashback of ₹{updatedCalculation?.cashback_amount}</Typography>
+
+            }
+            <View style={styles.divider} />
+            <View style={styles.serviceRow}>
+              <Typography style={styles.grandTotal}>Grand Total</Typography>
+              <Typography style={styles.grandTotal}>₹{Number(updatedCalculation?.final_amount || 0)?.toFixed(2)}</Typography>
+            </View>
           </View>
 
-          {/* Action Buttons */}
-          <View style={styles.actionButtons}>
-            <TouchableOpacity
-              style={styles.payButton}
-              onPress={() => {
-                setSelectedAppointment(appointment);
-                setModalVisible(true);
-              }}>
-              <Typography style={styles.payButtonText}>Pay Now</Typography>
-            </TouchableOpacity>
-            {/* <TouchableOpacity style={styles.detailsButton}>
-              <Typography style={styles.detailsButtonText}>Details</Typography>
-            </TouchableOpacity> */}
-          </View>
+        }
+
+
+        {/* -------- Add Another Payment -------- */}
+        {/* ---- Pay Now button ---- */}
+
+
+        {/* -------- Amount Input -------- */}
+        {/* {isSelected && ( */}
+        <View style={{ marginTop: 12 }}>
+          <TextInput
+            placeholder="Enter amount to pay"
+            keyboardType="numeric"
+            value={extraPayAmount}
+            onChangeText={setExtraPayAmount}
+            style={{ borderWidth: 1, borderColor: "#ccc", borderRadius: 8, padding: 10 }}
+          />
+
+          <TouchableOpacity
+            style={{ backgroundColor: COLOR.primary, marginTop: 10, padding: 12, borderRadius: 8 }}
+            onPress={() => {
+              console.log("Pay Amount:", appointment?.order_id, extraPayAmount);
+              if (appointment?.order_id) {
+
+                bookPay(appointment.id, extraPayAmount, appointment?.final_amount)
+              }
+              else {
+                console.log(appointment?.final_amount, "FINAL2");
+
+                bookPay(appointment.id, extraPayAmount, appointment?.final_amount)
+              }
+              // setSelectedAppointmentId(null); // optional: close after pay
+            }}
+          >
+            <Text style={{ color: "#fff", textAlign: "center", fontWeight: "700" }}>
+              Update Amount
+            </Text>
+          </TouchableOpacity>
         </View>
+        <Text style={{ textAlign: "center", marginTop: 10 }}>
+          Or
+        </Text>
+        {!isSelected && (
+          <>
+            <View style={{ flexDirection: "row" }}>
+              {/* <TouchableOpacity
+                onPress={() => setSelectedAppointmentId(appointment.id)}
+                style={{ marginTop: 14, backgroundColor: "#f0f0f0", padding: 10, borderRadius: 8 }}
+              >
+                <Text style={{ textAlign: "center", fontWeight: "600" }}>
+                  Update Amount
+                </Text>
+              </TouchableOpacity> */}
+
+              <TouchableOpacity
+                onPress={() => bookPay(appointment.id, 0)}
+                style={{ marginTop: 14, backgroundColor: COLOR.primary, padding: 10, borderRadius: 8, width: windowWidth / 1.19 }}
+              >
+                <Text style={{ color: COLOR.white, textAlign: "center", fontWeight: "600" }}>
+                  Pay Now
+                </Text>
+              </TouchableOpacity>
+
+            </View>
+          </>
+        )}
+        {/* )} */}
       </View>
+    );
+  };
+
+  const razorpayConfig = {
+    key_id: 'rzp_live_Rtp1NvclC2UEPp', // Only key_id should be in frontend
+    currency: 'INR',
+    name: 'QuickMySlot',
+    description: 'Add Amount to Wallet',
+  };
+
+  const initiateRazorpayPayment = async (orderId, bookingID, amount) => {
+    // const amount = Paymentbreakdown?.final_amount;
+    // if (!amount || amount <= 0) {
+    //   ToastMsg('Please enter a valid amount');
+    //   return;
+    // }
+    // setLoading(true);
+    console.log("JOOOO", orderId, bookingID, amount);
+
+    try {
+      // Step 1: Create Razorpay order on your backend
+      // const orderData = await handleSubmit(is_paid_key);
+      // const orderId = orderData?.order_id || orderData?.data?.razorpay_order_id;
+      // const bookingID = orderData?.data?.booking?.id
+
+      if (!orderId) {
+        // // console.log('Order data received:', orderData);
+        throw new Error(
+          'Failed to create payment order - no order ID received',
+        );
+      }
+
+      // Step 2: Initialize Razorpay checkout
+      const options = {
+        description: 'Booking Payment',
+        image: 'https://your-app-logo.png', // Your app logo
+        currency: razorpayConfig.currency,
+        key: razorpayConfig.key_id,
+        // amount: amount * 100, // Convert to paise
+        name: razorpayConfig.name,
+        order_id: orderId, // Use the extracted order ID
+        prefill: {
+          email: userdata?.email || 'user@example.com',
+          contact: userdata?.phone_number || '9999999999',
+          name: userdata?.name || 'User',
+        },
+        theme: { color: COLOR.primary },
+      };
+
+      console.log('Razorpay options:', options);
+
+      // Step 3: Open Razorpay checkout
+      RazorpayCheckout.open(options)
+        .then(data => {
+          // Step 4: Verify payment on your backend
+          verifyPayment({
+            bookingId: bookingID,
+            razorpay_payment_id: data.razorpay_payment_id,
+            razorpay_order_id: data.razorpay_order_id,
+            razorpay_signature: data.razorpay_signature,
+          });
+        })
+        .catch(error => {
+          console.log(error, "EEEEEEE");
+
+          // setLoading(false);
+          if (error.code === 2) {
+            ToastMsg('Payment was cancelled');
+          } else if (error.code === 0) {
+            // Network error
+
+            ToastMsg(error?.description || 'Network error. Please check your connection.');
+          } else {
+            // Other errors
+            ToastMsg(error.description || 'Payment failed. Please try again.');
+          }
+        });
+    } catch (error) {
+      console.log(error, "EOJEOJ");
+
+      setLoading(false);
+      ToastMsg(
+        error.message || 'Failed to initialize payment. Please try again.',
+      );
+    }
+  };
+
+  const verifyPayment = paymentData => {
+    const formData = new FormData();
+    formData.append('booking_id', paymentData.bookingId);
+    formData.append('razorpay_signature', paymentData.razorpay_signature);
+    formData.append('razorpay_order_id', paymentData.razorpay_order_id);
+    formData.append('razorpay_payment_id', paymentData.razorpay_payment_id);
+
+    POST_FORM_DATA(
+      BOOKING_VERIFY, // This should be your payment verification endpoint
+      formData,
+      success => {
+        // console.log(success, 'successsuccesssuccess');
+        setLoading(false);
+        ToastMsg(success?.message);
+        navigation.pop();
+        // navigation.navigate('BookingConfirmation', {
+        //   data: {
+        //     selectedServices: cartItems,
+        //     total: total,
+        //     note,
+        //     selectedTimes,
+        //     bookingData: success,
+        //     businessData,
+        //   },
+        // });
+        // navigation.navigate('BookingConfirmation', {
+        //   data: {
+        //     selectedServices: cartValue,
+        //     total: Paymentbreakdown?.final_amount,
+        //     note,
+        //     selectedTimes,
+        //     bookingData: success,
+        //     businessData: shopData,
+        //   },
+        // });
+        getBookingList()
+      },
+      error => {
+        console.log(error, 'errorerrorerrorerror');
+        setLoading(false);
+        ToastMsg(error?.data?.message);
+      },
+      fail => {
+        setLoading(false);
+        ToastMsg('Network error. Please try again.');
+      },
     );
   };
 
@@ -294,65 +558,49 @@ const PayBill = () => {
       />
 
       {/* Content */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        style={styles.scrollView}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={[COLOR.primary]}
-            tintColor={COLOR.primary}
-          />
-        }>
-        {/* Summary Card */}
-        {appointments.length > 0 && (
-          <View style={styles.summaryCard}>
-            <Typography style={styles.summaryTitle}>Payment Summary</Typography>
-            <View style={styles.summaryRow}>
-              <Typography style={styles.summaryText}>
-                Total Pending: {appointments.length} appointment(s)
+      <View style={styles.appointmentsList}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          style={styles.scrollView}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[COLOR.primary]}
+              tintColor={COLOR.primary}
+            />
+          }>
+
+          {/* Appointments List */}
+          <View >
+            {appointments.map(renderAppointmentCard)}
+          </View>
+
+          {/* Empty State */}
+          {appointments.length === 0 && !loader && (
+            <View style={styles.emptyState}>
+              <Typography style={styles.emptyStateIcon}>💳</Typography>
+              <Typography style={styles.emptyStateTitle}>
+                No Pending Payments
               </Typography>
-              <Typography style={styles.summaryAmount}>
-                {formatCurrency(
-                  appointments.reduce(
-                    (total, apt) => total + calculateTotals(apt).total,
-                    0,
-                  ),
-                )}
+              <Typography style={styles.emptyStateText}>
+                You don't have any pending payments at the moment.
               </Typography>
             </View>
-          </View>
-        )}
+          )}
 
-        {/* Appointments List */}
-        <View style={styles.appointmentsList}>
-          {appointments.map(renderAppointmentCard)}
-        </View>
+          {/* Loading State */}
+          {loader && (
+            <View style={styles.loadingState}>
+              <ActivityIndicator size="large" color={COLOR.primary} />
+              <Typography style={styles.loadingText}>
+                Loading appointments...
+              </Typography>
+            </View>
+          )}
+        </ScrollView>
 
-        {/* Empty State */}
-        {appointments.length === 0 && !loader && (
-          <View style={styles.emptyState}>
-            <Typography style={styles.emptyStateIcon}>💳</Typography>
-            <Typography style={styles.emptyStateTitle}>
-              No Pending Payments
-            </Typography>
-            <Typography style={styles.emptyStateText}>
-              You don't have any pending payments at the moment.
-            </Typography>
-          </View>
-        )}
-
-        {/* Loading State */}
-        {loader && (
-          <View style={styles.loadingState}>
-            <ActivityIndicator size="large" color={COLOR.primary} />
-            <Typography style={styles.loadingText}>
-              Loading appointments...
-            </Typography>
-          </View>
-        )}
-      </ScrollView>
+      </View>
 
       {/* Payment Modal */}
       <Modal visible={modalVisible} animationType="slide" transparent>
@@ -376,7 +624,7 @@ const PayBill = () => {
                   {/* Appointment Overview */}
                   <View style={styles.modalOverview}>
                     <ImageBackground
-                      source={{uri: getServiceImage(selectedAppointment)}}
+                      source={{ uri: getServiceImage(selectedAppointment) }}
                       style={styles.modalImage}
                       imageStyle={styles.modalImageStyle}>
                       <View style={styles.modalImageOverlay} />
@@ -468,7 +716,7 @@ const PayBill = () => {
                     </Typography>
                     <View style={styles.paymentBreakdown}>
                       {(() => {
-                        const {subtotal, tax, platformFee, total} =
+                        const { subtotal, tax, platformFee, total } =
                           calculateTotals(selectedAppointment);
                         return (
                           <>
@@ -573,7 +821,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
@@ -606,7 +854,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 4,
@@ -1023,6 +1271,42 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     color: COLOR.textSecondary,
+    fontFamily: Font.medium,
+  },
+  appointmentsList: {
+    // borderWidth: 1,
+    height: windowHeight / 1.2
+  }
+  ,
+
+  serviceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 3,
+  },
+  divider: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#DDD',
+    marginVertical: 6,
+  },
+  priceCard: {
+    backgroundColor: 'rgba(121, 111, 195, 0.08)',
+    borderRadius: 12,
+    padding: 15,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(121, 111, 195, 0.3)',
+  },
+
+  priceTitle: {
+    fontSize: 15,
+    marginBottom: 8,
+    color: COLOR.primary,
+    fontFamily: Font.medium,
+  },
+  grandTotal: {
+    fontSize: 15,
+    color: COLOR.primary,
     fontFamily: Font.medium,
   },
 });

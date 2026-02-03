@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useContext } from 'react';
 import {
   Image,
   StyleSheet,
@@ -11,24 +11,33 @@ import {
   StatusBar,
   BackHandler,
   Alert,
+  Platform,
+  Animated,
 } from 'react-native';
 import { COLOR } from '../../../Constants/Colors';
+import messaging from '@react-native-firebase/messaging';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Typography } from '../../../Components/UI/Typography';
 import MainHomeHeader from './MainHomeHeader';
 import { images } from '../../../Components/UI/images';
 import Input from '../../../Components/Input';
 import { useIsFocused } from '@react-navigation/native';
-import { GET, GET_WITH_TOKEN } from '../../../Backend/Api';
-import { CLEAR_CART, GET_CART, GET_PROFILE, HOME } from '../../../Constants/ApiRoute';
+import { GET, GET_WITH_TOKEN, POST_FORM_DATA, POST_WITH_TOKEN } from '../../../Backend/Api';
+import { CLEAR_CART, FCM_UPDATE, GET_BOOKING_LIST, GET_CART, GET_PROFILE, HOME } from '../../../Constants/ApiRoute';
 import { Font } from '../../../Constants/Font';
 import Video from 'react-native-video';
 import { cleanImageUrl, ToastMsg, windowHeight, windowWidth } from '../../../Backend/Utility';
 import CartModal from '../../../Components/CartModal';
 import Chatbot from '../Dashboard/Chatbot';
+import { useSelector } from 'react-redux';
+import { fcmService } from '../../../Notification/FMCService';
 
 const { width } = Dimensions.get('window');
 
 const MainHome = ({ navigation }) => {
+  const userdata = useSelector(store => store.userDetails);
+  const [tokenShow, settokenShow] = useState(null)
   const [search, setSearch] = useState('');
   const isFocused = useIsFocused();
   const [loading, setLoading] = useState(false);
@@ -40,24 +49,48 @@ const MainHome = ({ navigation }) => {
   const [myBookings, setMyBookings] = useState([]);
   const [categories, setCategories] = useState([]);
   const [currentTopIndex, setCurrentTopIndex] = useState(0);
+  const [appointments, setAppointments] = useState([]); // State to store API data
 
   const topBannerRef = useRef(null);
+
+
+  const getBookingList = () => {
+    setLoading(true);
+    GET_WITH_TOKEN(
+      `${GET_BOOKING_LIST}?status=pending`,
+      success => {
+        console.log(success?.data[0]?.vendor?.business_name, 'GET_BOOKING_LIST-->>>');
+
+        setAppointments(success?.data || []); // Set the API data
+        setLoading(false);
+      },
+      error => {
+        setLoading(false);
+        console.log(error, 'Error in booking list');
+      },
+      fail => {
+        setLoading(false);
+        console.log(fail, 'Failed to get booking list');
+      },
+    );
+  };
+
   const FetchHome = () => {
     setLoading(true);
     GET(
       HOME,
       success => {
-        console.log(success?.data, 'home--->>>');
         const allBanners = success?.data?.banners || [];
-        setBottomBanners(allBanners.filter(b => b.position === 'bottom'));
-        setTopBanners(allBanners.filter(b => b.position === 'top'));
+        // console.log(success?.data, "BOOOOKINGSGGSGG");
+
+        setBottomBanners(allBanners.filter(b => b.position === 'bottom' && b?.type == "user"));
+        setTopBanners(allBanners.filter(b => b.position === 'top' && b?.type == "user"));
         setMyBookings(success?.data?.self_bookings || []);
         setCategories(success?.data?.categories || []);
         setLoading(false);
       },
       error => {
         console.log(error, "ERROR__HOME");
-
         setLoading(false)
       },
       fail => {
@@ -66,10 +99,68 @@ const MainHome = ({ navigation }) => {
       },
     );
   }
+  const UpdateFCM = async () => {
+    try {
+      fcmService.register();
+      messaging()
+        .getToken()
+        .then(fcmToken => {
+          console.log(fcmToken, 'MAINHOME__TOKEN====>');
+          if (fcmToken) {
+            AsyncStorage.setItem('fcm_token', fcmToken);
+            // res(fcmToken);
+          } else {
+            console.log(fcmToken, "ROOTOTOT");
+
+          }
+        })
+        .catch(error => {
+          console.log(error, "ROOTOTOT");
+        });
+      // 1️⃣ get saved FCM token
+      const token = await AsyncStorage.getItem('fcm_token');
+      settokenShow(token, "BJJB")
+      // optional safety
+      if (!token) {
+        console.log('No FCM token stored');
+        return;
+      }
+
+      // 2️⃣ get device id
+
+      // 3️⃣ build form-data
+      let formData = new FormData();
+      formData.append('device_type', Platform.OS);
+      formData.append('device_id', "ABC");
+      formData.append('token', token);
+      console.log(formData, "FROMMMMM");
+
+      // 4️⃣ send to API
+      POST_FORM_DATA(
+        `${FCM_UPDATE}/${userdata?.id}`,
+        formData,   // ← YOU MISSED THIS EARLIER ✅
+        success => {
+          console.log(success, 'SUCCESS_FCM_UPDATE');
+        },
+        error => {
+          console.log(error, 'ERROR__HOME');
+          setLoading(false);
+        },
+        fail => {
+          console.log(fail, 'ERROR__FAIL');
+          setLoading(false);
+        },
+      );
+    } catch (e) {
+      console.log('FCM UPDATE ERROR', e);
+    }
+  };
   useEffect(() => {
     if (isFocused) {
       fetchUserProfile();
+      getBookingList()
       FetchHome()
+      UpdateFCM()
     }
   }, [isFocused]);
 
@@ -94,7 +185,6 @@ const MainHome = ({ navigation }) => {
     GET_WITH_TOKEN(
       GET_PROFILE,
       success => {
-        console.log(success, 'successsuccesssuccess-->>>');
       },
       error => {
         console.log(error, 'errorerrorerror>>');
@@ -110,8 +200,28 @@ const MainHome = ({ navigation }) => {
     return `${timeKey} on ${date}`;
   };
 
+  const bgAnim = useRef(new Animated.Value(0)).current;
 
-
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(bgAnim, {
+          toValue: 1,
+          duration: 1200,
+          useNativeDriver: false,
+        }),
+        Animated.timing(bgAnim, {
+          toValue: 0,
+          duration: 1200,
+          useNativeDriver: false,
+        }),
+      ])
+    ).start();
+  }, []);
+  const backgroundColor = bgAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["#faf9f9ff", "#fbd19fff"], // normal → highlight
+  });
 
   useEffect(() => {
     if (isFocused) {
@@ -126,6 +236,26 @@ const MainHome = ({ navigation }) => {
       return () => backHandler.remove();
     }
   }, [isFocused]);
+
+  useEffect(() => {
+    if (!topBanners?.length) return;
+
+    const interval = setInterval(() => {
+      const nextIndex =
+        currentTopIndex === topBanners.length - 1
+          ? 0
+          : currentTopIndex + 1;
+
+      topBannerRef.current?.scrollToIndex({
+        index: nextIndex,
+        animated: true,
+      });
+
+      setCurrentTopIndex(nextIndex);
+    }, 3000); // ⏱️ change time (ms) as needed
+
+    return () => clearInterval(interval);
+  }, [currentTopIndex, topBanners.length]);
 
   return (
     <View style={[styles.container, {}]}>
@@ -152,7 +282,45 @@ const MainHome = ({ navigation }) => {
             onRightIconPress={() => setSearch('')}
           />
         </TouchableOpacity>
+        {/* <Typography size={18} color='red'>{tokenShow || "JOOO"}</Typography> */}
         {/* My Bookings */}
+        {
+          appointments?.length > 0 &&
+          appointments?.map((i, index) => (
+            <Animated.View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                borderWidth: 1,
+                paddingVertical: 10,
+                borderRadius: 10,
+                borderColor: COLOR.primary,
+                backgroundColor,
+                marginTop: 10
+              }}
+            >
+              <Image
+                source={{ uri: "https://cdn-icons-png.flaticon.com/128/7256/7256192.png" }}
+                style={{ width: 25, height: 25, marginLeft: 10 }}
+              />
+
+              <TouchableOpacity onPress={() => {
+                navigation.navigate('AppointmentDetail', { appointment: i })
+              }} style={{ marginLeft: 10, width: windowWidth / 1.45 }}>
+                <Typography size={13}>Appointment for {i?.vendor?.business_name}</Typography>
+                <Typography size={11}>
+                  Booking : Waiting for store confirmation
+                </Typography>
+              </TouchableOpacity>
+
+              <Image
+                source={{ uri: "https://cdn-icons-png.flaticon.com/128/11519/11519985.png" }}
+                style={{ width: 25, height: 25, marginLeft: 10 }}
+              />
+            </Animated.View>
+
+          ))
+        }
         {myBookings.length > 0 && (
           <View>
             <Typography
@@ -227,38 +395,55 @@ const MainHome = ({ navigation }) => {
         {/* Top Banner (Manual scroll only) */}
         <View style={{ marginVertical: 20 }}>
           {topBanners.length > 0 && (
-            <FlatList
-              ref={topBannerRef}
-              data={topBanners}
-              horizontal
-              pagingEnabled
-              onScroll={handleTopScroll}
-              scrollEventThrottle={16}
-              showsHorizontalScrollIndicator={false}
-              keyExtractor={item => item.id.toString()}
-              renderItem={({ item, index }) => (
-                <View style={{ width: width - 30 }}>
-                  {item.extensions === 'video' ? (
-                    <Video
-                      source={{ uri: item.image }}
-                      style={styles.bannerImage}
-                      resizeMode="cover"
-                      repeat={false}
-                      paused={index != currentTopIndex}
-                      muted={false}
-                      onEnd={() => handleVideoEnd(index)}
-                    />
-                  ) : (
-                    <Image
-                      source={{ uri: cleanImageUrl(item.image) }}
-                      style={styles.bannerImage}
-                    />
-                  )}
-                </View>
-              )}
-            />
+            <>
+              <FlatList
+                ref={topBannerRef}
+                data={topBanners}
+                horizontal
+                pagingEnabled
+                onScroll={handleTopScroll}
+                scrollEventThrottle={16}
+                showsHorizontalScrollIndicator={false}
+                keyExtractor={item => item.id.toString()}
+                renderItem={({ item, index }) => (
+                  <View style={{ width: width - 30 }}>
+                    {item.extensions === 'video' ? (
+                      <Video
+                        source={{ uri: item.image }}
+                        style={styles.bannerImage}
+                        resizeMode="cover"
+                        repeat={false}
+                        paused={index != currentTopIndex}
+                        muted={false}
+                        onEnd={() => handleVideoEnd(index)}
+                      />
+                    ) : (
+                      <Image
+                        source={{ uri: cleanImageUrl(item.image) }}
+                        style={styles.bannerImage}
+                        resizeMode="stretch"
+                      />
+                    )}
+                  </View>
+                )}
+              />
+
+              {/* DOTS */}
+              <View style={styles.dotsContainer}>
+                {topBanners.map((_, index) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.dot,
+                      index === currentTopIndex && styles.activeDot,
+                    ]}
+                  />
+                ))}
+              </View>
+            </>
           )}
         </View>
+
 
         {/* Service Categories */}
         <Typography
@@ -316,37 +501,12 @@ const MainHome = ({ navigation }) => {
         </View>
 
         {/* Bottom Banner (Manual scroll only) */}
-        <View style={{ marginVertical: 20, marginBottom: windowHeight * 0.1 }}>
-          {bottomBanners.length > 0 && (
-            <FlatList
-              data={bottomBanners}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              keyExtractor={item => item.id.toString()}
-              renderItem={({ item }) => (
-                <View style={{ width: width - 30 }}>
-                  {item.extensions === 'video' ? (
-                    <Video
-                      source={{ uri: item.image }}
-                      style={styles.bannerImage}
-                      resizeMode="cover"
-                      repeat={false}
-                      paused={index != currentTopIndex}
-                      muted={false}
-                      onEnd={() => handleVideoEnd(index)}
-                    />
-                  ) : (
-                    <Image
-                      source={{ uri: item.image }}
-                      style={styles.bannerImage}
-                    />
-                  )}
-                </View>
-              )}
-            />
-          )}
-        </View>
+        <TouchableOpacity onPress={() => navigation.navigate("Invite")} style={{ marginVertical: 20, marginBottom: windowHeight * 0.1 }}>
+          <Image source={require('../../../assets/Images/banner.jpeg')} style={{ width: windowWidth / 1.1, height: 190, borderRadius: 10, borderWidth: 1, borderRadius: 15, alignSelf: "center", borderColor: COLOR.primary }} resizeMode="stretch" />
+          <View style={{ position: "absolute", left: 20, bottom: 20, backgroundColor: COLOR.primary, padding: 8, borderRadius: 10 }}>
+            <Typography color={COLOR.white}>Share Invite Code</Typography>
+          </View>
+        </TouchableOpacity>
       </ScrollView>
       <Chatbot />
       <CartModal />
@@ -392,7 +552,7 @@ const styles = StyleSheet.create({
   // Banner
   bannerImage: {
     width: '100%',
-    height: 150,
+    height: 200,
     borderRadius: 20,
     overflow: 'hidden',
     backgroundColor: '#e0e0e0',
@@ -423,4 +583,26 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   categoryText: { textAlign: 'center' },
+  dotsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 10,
+  },
+
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#ccc",
+    marginHorizontal: 4,
+  },
+
+  activeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#000",
+  },
+
 });

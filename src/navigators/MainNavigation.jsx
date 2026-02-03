@@ -1,4 +1,4 @@
-import React, {useContext, useRef} from 'react';
+import React, { useContext, useRef } from 'react';
 import {
   View,
   ActivityIndicator,
@@ -7,11 +7,11 @@ import {
   Platform,
   StyleSheet,
 } from 'react-native';
-import {AuthContext} from '../Backend/AuthContent';
+import { AuthContext } from '../Backend/AuthContent';
 import RootNavigation from './RootNavigation';
 import AuthStack from './AuthNavigation';
-import {ToastProvider} from '../Constants/ToastContext';
-import {useSelector} from 'react-redux';
+import { ToastProvider } from '../Constants/ToastContext';
+import { useSelector } from 'react-redux';
 
 // export const navigationRef=useRef(null)
 // Custom hook for status bar height
@@ -30,7 +30,7 @@ const MainNavigation = () => {
   const statusBarHeight = useStatusBarHeight();
 
   return (
-    <View style={[styles.container, {paddingTop: statusBarHeight}]}>
+    <View style={[styles.container, { paddingTop: statusBarHeight }]}>
       <StatusBar
         backgroundColor="transparent"
         translucent

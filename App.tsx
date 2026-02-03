@@ -1,5 +1,5 @@
-import React, {useEffect} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
+import React, { useEffect } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
 import {
   PermissionsAndroid,
   Platform,
@@ -10,25 +10,32 @@ import {
   View,
 } from 'react-native';
 import MainNavigation from './src/navigators/MainNavigation';
-import {AuthProvider} from './src/Backend/AuthContent';
+import { AuthProvider } from './src/Backend/AuthContent';
 import NoInternetAlert from './src/Components/UI/NoInternetAlert';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
-import {Provider} from 'react-redux';
-import {store} from './src/Redux/store';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Provider } from 'react-redux';
+import { store } from './src/Redux/store';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
-import {fcmService} from './src/Notification/FMCService';
-import {localNotificationService} from './src/Notification/LocalNotificationService';
+import { fcmService } from './src/Notification/FMCService';
+import { localNotificationService } from './src/Notification/LocalNotificationService';
 import messaging from '@react-native-firebase/messaging';
 import SplashScreen from 'react-native-splash-screen';
+import { navigationRef } from './src/Notification/notificationAction';
 const App = () => {
   useEffect(() => {
     setTimeout(() => {
       SplashScreen.hide();
-    }, 2000);
+    }, 1500);
   }, []);
+
+
   const requestNotificationPermissions = async () => {
     if (Platform.OS === 'ios') {
-      PushNotificationIOS.requestPermissions();
+      PushNotificationIOS.requestPermissions({
+        alert: true,
+        badge: true,
+        sound: true,
+      });
     } else {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
@@ -65,7 +72,7 @@ const App = () => {
         <View style={styles.safeArea}>
           <AuthProvider>
             <StatusBar barStyle="dark-content" backgroundColor={'#fff'} />
-            <NavigationContainer>
+            <NavigationContainer ref={navigationRef}>
               <MainNavigation />
               <NoInternetAlert />
             </NavigationContainer>

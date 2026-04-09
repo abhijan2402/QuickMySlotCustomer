@@ -8,6 +8,7 @@ import {
   Keyboard,
   Touchable,
   TouchableWithoutFeedback,
+  Text,
 } from 'react-native';
 import { COLOR } from '../../Constants/Colors';
 import CustomButton from '../../Components/CustomButton';
@@ -26,12 +27,21 @@ import { useDispatch } from 'react-redux';
 import { Font } from '../../Constants/Font';
 import Header from '../../Components/FeedHeader';
 import { images } from '../../Components/UI/images';
+import { CodeField, Cursor, useBlurOnFulfill, useClearByFocusCell } from 'react-native-confirmation-code-field';
 
 const OtpScreen = ({ navigation, route }) => {
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(null);
   const inputs = useRef([]);
   const user_id = route?.params?.userId;
+  const [value, setValue] = useState('');
+  const CELL_COUNT = 6;
 
+  const ref = useBlurOnFulfill({ value, cellCount: CELL_COUNT });
+  const [props, getCellOnLayoutHandler] =
+    useClearByFocusCell({
+      value,
+      setValue,
+    });
   const phone = route?.params?.phone;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -68,9 +78,11 @@ const OtpScreen = ({ navigation, route }) => {
   };
 
   const verifyOtp = () => {
-    const otpCode = otp.join('');
+    // const otpCode = otp.join('');
+    console.log(otp, "OOOPPPP", typeof (otp));
+
     let error = {
-      otp: validators.checkRequire('OTP', otpCode?.length == 6),
+      otp: validators.checkRequire('OTP', otp?.length == 6),
     };
     console.log(error, 'Error---->>');
     setError(error);
@@ -84,9 +96,11 @@ const OtpScreen = ({ navigation, route }) => {
     // dispatch(isAuth(true));
     // return;
     // setLoading(true);
-    const otpCode = otp.join('');
+    // const otpCode = otp.join('');
 
-    const body = { user_id: user_id, otp: otpCode };
+    const body = { user_id: user_id, otp: otp };
+    console.log(body, "NODIDI");
+
     POST(
       VERIFY_OTP,
       body,
@@ -130,6 +144,11 @@ const OtpScreen = ({ navigation, route }) => {
       },
     );
   };
+  useEffect(() => {
+    if (otp?.length === 6) {
+      verifyOtp();
+    }
+  }, [otp]);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -164,24 +183,37 @@ const OtpScreen = ({ navigation, route }) => {
           </Typography>
         </View>
 
-        {/* OTP Input Fields */}
-        <View style={styles.otpContainer}>
-          {otp.map((digit, index) => (
-            <TextInput
+        <View style={{}}>
+          <CodeField
+            ref={ref}
+            {...props}
+            value={otp}
+            onChangeText={setOtp}
+            cellCount={CELL_COUNT}
+            rootStyle={styles.codeFieldRoot}
+            keyboardType="number-pad"
+            textContentType="oneTimeCode" // iOS auto-read
+            autoComplete="sms-otp"        // Android auto-read
+            // autoComplete='one-time-code'
+            autoFocus={true}
+            onSubmitEditing={() => {
+              verifyOtp()
+            }}
+            dataDetectorTypes={'all'}
+            renderCell={({ index, symbol, isFocused }) => (
+              <Text
+                key={index}
+                style={[
+                  styles.cell,
+                  isFocused && styles.focusCell,
+                ]}
+                onLayout={getCellOnLayoutHandler(index)}
+              >
+                {symbol || (isFocused ? <Cursor /> : null)}
+              </Text>
+            )}
+          />
 
-              key={index}
-              ref={ref => (inputs.current[index] = ref)}
-              style={styles.otpInput}
-              keyboardType="number-pad"
-              maxLength={1}
-              value={digit}
-              onChangeText={text => handleChange(text, index)}
-              onKeyPress={e => handleKeyPress(e, index)}
-              textContentType="oneTimeCode"     // iOS
-              autoComplete="sms-otp"             // Android
-              importantForAutofill="yes"
-            />
-          ))}
         </View>
         {error?.otp && (
           <ErrorBox
@@ -264,5 +296,27 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     alignSelf: 'center',
     marginBottom: 10
+  },
+  otpContainer: {
+    marginVertical: 20,
+    alignItems: 'center',
+  },
+  codeFieldRoot: {
+    marginTop: 0,
+    marginHorizontal: 15
+  },
+  cell: {
+    width: 45,
+    height: 55,
+    lineHeight: 55,
+    fontSize: 24,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    textAlign: 'center',
+    marginHorizontal: 5,
+    borderRadius: 8,
+  },
+  focusCell: {
+    borderColor: '#000',
   },
 });

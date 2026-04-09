@@ -33,7 +33,7 @@ const PayBill = () => {
   const [updatedOrderId, setupdatedOrderId] = useState(null)
   const [showExtraPayInput, setShowExtraPayInput] = useState(false);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
-  const [extraPayAmount, setExtraPayAmount] = useState("");
+  const [extraPayAmount, setExtraPayAmount] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -156,40 +156,41 @@ const PayBill = () => {
 
   const getBookingList = () => {
     setLoader(true);
-    GET_BOOKING_LIST +
-      // `?status=pending&date=2026-01-21`,
-      //    GET_BOOKING_LIST +
-      // `?status=accepted&date=${moment(new Date()).format(
-      //   'YYYY-MM-DD',
-      // )}`,
-      GET_WITH_TOKEN(
-        GET_BOOKING_LIST +
-        `?status=accepted&date=${moment(new Date()).format(
-          'YYYY-MM-DD',
-        )}`,
-        success => {
+    // GET_BOOKING_LIST +
+    // `?status=pending&date=2026-01-21`,
+    //    GET_BOOKING_LIST +
+    // `?status=accepted&date=${moment(new Date()).format(
+    //   'YYYY-MM-DD',
+    // )}`,
+    GET_WITH_TOKEN(
+      // GET_BOOKING_LIST,
+      GET_BOOKING_LIST +
+      `?status=accepted&date=${moment(new Date()).format(
+        'YYYY-MM-DD',
+      )}`,
+      success => {
 
-          setAppointments(success?.data || []);
-          setLoader(false);
-        },
-        error => {
-          setLoader(false);
-          console.log('Error in booking list:', error);
-        },
-        fail => {
-          setLoader(false);
-          console.log('Failed to get booking list:', fail);
-        },
-      );
+        setAppointments(success?.data || []);
+        setLoader(false);
+      },
+      error => {
+        setLoader(false);
+        console.log('Error in booking list:', error);
+      },
+      fail => {
+        setLoader(false);
+        console.log('Failed to get booking list:', fail);
+      },
+    );
   };
 
   const bookPay = (id, amount = 0, subtotalVal = 0) => {
     const formData = new FormData()
     console.log(amount, subtotalVal, "AMOUBDBDB", Number(amount) - Number(subtotalVal));
-    if (Number(amount) - Number(subtotalVal) < 0) {
-      ToastMsg("Amount must be greater than total amount");
-      return
-    }
+    // if (Number(amount) - Number(subtotalVal) < 0) {
+    //   ToastMsg("Amount must be greater than total amount");
+    //   return
+    // }
     const updatedAmount = Number(amount) - Number(subtotalVal)
     console.log(updatedAmount, "UPDARATATAT");
 
@@ -207,8 +208,11 @@ const PayBill = () => {
         setSelectedAppointmentId(null)
         getBookingList()
         if (updatedAmount == 0) {
-          initiateRazorpayPayment(success?.data?.booking?.order_id || success?.data?.order_id, id)
         }
+        setTimeout(() => {
+          ToastMsg("Taking to payment page...")
+          initiateRazorpayPayment(success?.data?.booking?.order_id || success?.data?.order_id, id)
+        }, 3000);
         setExtraPayAmount(null)
       },
       error => {
@@ -365,39 +369,39 @@ const PayBill = () => {
           <TouchableOpacity
             style={{ backgroundColor: COLOR.primary, marginTop: 10, padding: 12, borderRadius: 8 }}
             onPress={() => {
-              console.log("Pay Amount:", appointment?.order_id, extraPayAmount);
+              console.log("Pay Amount:", JSON.parse(appointment?.calculation_breakdown)?.subtotal);
+              if (extraPayAmount == null) {
+                bookPay(appointment.id, 0)
+
+              }
+              if (extraPayAmount < appointment?.final_amount) {
+                ToastMsg("Please enter a valid amount")
+                return
+              }
+              // return
               if (appointment?.order_id) {
 
-                bookPay(appointment.id, extraPayAmount, appointment?.final_amount)
+                bookPay(appointment.id, extraPayAmount, JSON.parse(appointment?.calculation_breakdown)?.subtotal)
               }
               else {
-                console.log(appointment?.final_amount, "FINAL2");
+                console.log(JSON.parse(appointment?.calculation_breakdown)?.subtotal, "FINAL2");
 
-                bookPay(appointment.id, extraPayAmount, appointment?.final_amount)
+                bookPay(appointment.id, extraPayAmount, JSON.parse(appointment?.calculation_breakdown)?.subtotal)
               }
               // setSelectedAppointmentId(null); // optional: close after pay
             }}
           >
             <Text style={{ color: "#fff", textAlign: "center", fontWeight: "700" }}>
-              Update Amount
+              Pay Now
             </Text>
           </TouchableOpacity>
         </View>
-        <Text style={{ textAlign: "center", marginTop: 10 }}>
+        {/* <Text style={{ textAlign: "center", marginTop: 10 }}>
           Or
         </Text>
         {!isSelected && (
           <>
             <View style={{ flexDirection: "row" }}>
-              {/* <TouchableOpacity
-                onPress={() => setSelectedAppointmentId(appointment.id)}
-                style={{ marginTop: 14, backgroundColor: "#f0f0f0", padding: 10, borderRadius: 8 }}
-              >
-                <Text style={{ textAlign: "center", fontWeight: "600" }}>
-                  Update Amount
-                </Text>
-              </TouchableOpacity> */}
-
               <TouchableOpacity
                 onPress={() => bookPay(appointment.id, 0)}
                 style={{ marginTop: 14, backgroundColor: COLOR.primary, padding: 10, borderRadius: 8, width: windowWidth / 1.19 }}
@@ -409,7 +413,7 @@ const PayBill = () => {
 
             </View>
           </>
-        )}
+        )} */}
         {/* )} */}
       </View>
     );

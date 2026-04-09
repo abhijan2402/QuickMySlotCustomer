@@ -121,6 +121,8 @@ const Account = ({ navigation }) => {
       error => {
         console.log(error, 'errorerrorerror>>');
         setLoading(false);
+        handleLogout();
+        setLoading(false);
       },
       fail => {
         console.log(fail, 'errorerrorerror>>');

@@ -329,7 +329,7 @@ const MainHomeHeader = () => {
               Loading...
             </Text>
           ) : (
-            <Text style={styles.locationAddress}>
+            <Text style={styles.locationAddress} numberOfLines={1}>
               {location}
             </Text>
           )}
@@ -349,14 +349,14 @@ const MainHomeHeader = () => {
               backgroundColor: COLOR.extraLightGrey,
               padding: 5,
               borderRadius: 15,
-              paddingHorizontal: 10,
+              paddingHorizontal: 7,
               elevation: 2,
             }}>
             <Image
               source={images.offer}
               style={[styles.icon, { marginRight: 10 }]}
             />
-            <Typography>Offers</Typography>
+            <Typography size={13}>Offers</Typography>
           </View>
         </TouchableOpacity>
         <TouchableOpacity
@@ -367,7 +367,7 @@ const MainHomeHeader = () => {
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/2529/2529521.png',
             }}
-            style={[styles.icon, { marginRight: 10, tintColor: COLOR.primary }]}
+            style={[styles.icon, { marginRight: 7, tintColor: COLOR.primary }]}
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('EditProfile')}>
@@ -491,7 +491,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   locationTextContainer: {
-    marginLeft: 8,
+    marginLeft: 3,
     flex: 1,
   },
   locationTitle: {
@@ -504,10 +504,12 @@ const styles = StyleSheet.create({
     fontFamily: Font.medium,
     color: COLOR.primary,
     width: windowWidth / 2.7,
+    // borderWidth: 1
   },
   iconsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    // borderWidth: 1
   },
   icon: {
     width: 24,

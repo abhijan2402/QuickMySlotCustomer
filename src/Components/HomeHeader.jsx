@@ -8,9 +8,9 @@ import {
   StatusBar,
   TouchableOpacity,
 } from 'react-native';
-import {COLOR} from '../Constants/Colors';
-import {useNavigation} from '@react-navigation/native';
-import {Font} from '../Constants/Font';
+import { COLOR } from '../Constants/Colors';
+import { useNavigation } from '@react-navigation/native';
+import { Font } from '../Constants/Font';
 
 const HomeHeader = ({
   title,
@@ -29,20 +29,20 @@ const HomeHeader = ({
       <View style={styles.header}>
         {/* Left Icon */}
         <TouchableOpacity
-          style={{width: '20%'}}
+          style={{ width: '20%' }}
           onPress={() => {
             navigation.goBack();
           }}>
           {leftIcon && (
             <Image
-              source={{uri: leftIcon}}
-              style={[styles.icon, leftTint && {tintColor: leftTint}]}
+              source={{ uri: leftIcon }}
+              style={[styles.icon, leftTint && { tintColor: leftTint }]}
             />
           )}
         </TouchableOpacity>
 
         {/* Title */}
-        <View style={{flex: 1, alignItems: 'center'}}>
+        <View style={{ flex: 1, alignItems: 'center' }}>
           <Text style={styles.title}>{title}</Text>
         </View>
 
@@ -51,15 +51,15 @@ const HomeHeader = ({
           {rightIconTwo && (
             <TouchableOpacity onPress={onPressRightIconTwo}>
               <Image
-                source={{uri: rightIconTwo}}
-                style={[styles.icon, {marginRight: 5}, rightIconTwoStyle]}
+                source={{ uri: rightIconTwo }}
+                style={[styles.icon, { marginRight: 5 }, rightIconTwoStyle]}
               />
             </TouchableOpacity>
           )}
           {rightIcon && (
             <Image
-              source={{uri: rightIcon}}
-              style={[styles.icon, {tintColor: rightTint, marginRight: 10}]}
+              source={{ uri: rightIcon }}
+              style={[styles.icon, { tintColor: rightTint, marginRight: 10 }]}
             />
           )}
         </View>

@@ -169,7 +169,7 @@ const PayBill = () => {
         'YYYY-MM-DD',
       )}`,
       success => {
-
+// console.log(success?.data,"nnNNN")
         setAppointments(success?.data || []);
         setLoader(false);
       },
@@ -195,6 +195,7 @@ const PayBill = () => {
     console.log(updatedAmount, "UPDARATATAT");
 
     formData.append("additional_amount", updatedAmount)
+console.log(formData,"DDKDKDK");
 
     // setLoading(true);
     // return
@@ -217,7 +218,7 @@ const PayBill = () => {
       },
       error => {
         console.log(error, "ERRRR");
-        ToastMsg(error?.message);
+        ToastMsg(error?.data?.message||error?.message||"Something went wrong");
 
         // setLoading(false);
         // console.log(success);
@@ -381,12 +382,12 @@ const PayBill = () => {
               // return
               if (appointment?.order_id) {
 
-                bookPay(appointment.id, extraPayAmount, JSON.parse(appointment?.calculation_breakdown)?.subtotal)
+                bookPay(appointment.id, extraPayAmount, JSON.parse(appointment?.calculation_breakdown)?.final_amount)
               }
               else {
-                console.log(JSON.parse(appointment?.calculation_breakdown)?.subtotal, "FINAL2");
+                console.log(JSON.parse(appointment?.calculation_breakdown), "FINAL2");
 
-                bookPay(appointment.id, extraPayAmount, JSON.parse(appointment?.calculation_breakdown)?.subtotal)
+                bookPay(appointment.id, extraPayAmount, JSON.parse(appointment?.calculation_breakdown)?.final_amount)
               }
               // setSelectedAppointmentId(null); // optional: close after pay
             }}

@@ -32,5 +32,21 @@ target 'QuickMySlot' do
       config[:reactNativePath],
       :mac_catalyst_enabled => false,
     )
+
+    # fmt 11.0.2's consteval path does not compile with Apple Clang from
+    # Xcode 26.4+. React Native upgrades fmt in newer releases, so this can be
+    # removed once the app no longer resolves fmt 11.0.2.
+    fmt_base_header = File.join(installer.sandbox.root, 'fmt', 'include', 'fmt', 'base.h')
+    if File.exist?(fmt_base_header)
+      fmt_contents = File.read(fmt_base_header)
+      fmt_patched_contents = fmt_contents.sub(
+        "#elif defined(__cpp_consteval)\n#  define FMT_USE_CONSTEVAL 1",
+        "#elif defined(__cpp_consteval)\n#  define FMT_USE_CONSTEVAL 0"
+      )
+      if fmt_patched_contents != fmt_contents
+        File.chmod(0644, fmt_base_header)
+        File.write(fmt_base_header, fmt_patched_contents)
+      end
+    end
   end
 end

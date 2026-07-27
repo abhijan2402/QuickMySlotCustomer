@@ -54,17 +54,9 @@ const ImageModal = ({
     if (Platform.OS === 'android') {
       try {
         if (Platform.Version >= 33) {
-          const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
-            {
-              title: 'Gallery Permission',
-              message: 'App needs access to your gallery to select images.',
-              buttonNeutral: 'Ask Me Later',
-              buttonNegative: 'Cancel',
-              buttonPositive: 'OK',
-            },
-          );
-          return granted === PermissionsAndroid.RESULTS.GRANTED;
+          // On Android 13+ (API 33+) prefer the system photo picker; no runtime
+          // READ_MEDIA_IMAGES permission is required. Proceed without requesting it here.
+          return true;
         } else {
           const granted = await PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
